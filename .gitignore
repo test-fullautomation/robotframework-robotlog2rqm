@@ -1,0 +1,5 @@
+#put ignore rules here...
+__pycache__/
+build/
+dist/
+*.egg-info

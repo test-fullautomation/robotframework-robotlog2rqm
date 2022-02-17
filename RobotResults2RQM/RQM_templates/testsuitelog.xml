@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:testsuitelog xmlns:ns2="http://jazz.net/xmlns/alm/qm/v0.1/" 
+  xmlns:ns1="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+  xmlns:ns3="http://schema.ibm.com/vega/2008/" 
+  xmlns:ns4="http://purl.org/dc/elements/1.1/" 
+  xmlns:ns5="http://jazz.net/xmlns/prod/jazz/process/0.6/"
+  xmlns:ns6="http://jazz.net/xmlns/alm/v0.1/" 
+  xmlns:ns7="http://purl.org/dc/terms/" 
+  xmlns:ns8="http://jazz.net/xmlns/alm/qm/v0.1/testscript/v0.1/" 
+  xmlns:ns9="http://jazz.net/xmlns/alm/qm/v0.1/executionworkitem/v0.1" 
+  xmlns:ns10="http://open-services.net/ns/core#"
+  xmlns:ns11="http://open-services.net/ns/qm#" 
+  xmlns:ns12="http://jazz.net/xmlns/prod/jazz/rqm/process/1.0/" 
+  xmlns:ns13="http://www.w3.org/2002/07/owl#" 
+  xmlns:ns14="http://jazz.net/xmlns/alm/qm/qmadapter/v0.1" 
+  xmlns:ns15="http://jazz.net/xmlns/alm/qm/qmadapter/task/v0.1"
+  xmlns:ns16="http://jazz.net/xmlns/alm/qm/v0.1/executionresult/v0.1" 
+  xmlns:ns17="http://jazz.net/xmlns/alm/qm/v0.1/catalog/v0.1" 
+  xmlns:ns18="http://jazz.net/xmlns/alm/qm/v0.1/tsl/v0.1/" 
+  xmlns:ns20="http://jazz.net/xmlns/alm/qm/styleinfo/v0.1/" 
+  xmlns:ns21="http://www.w3.org/1999/XSL/Transform">
+  <ns4:title></ns4:title>
+  <ns6:state></ns6:state>
+  <ns6:owner ns1:resource=""></ns6:owner>
+  <ns2:locked></ns2:locked>
+  <ns2:rollupResult></ns2:rollupResult>
+  <ns2:variables/>
+  <ns2:sequentialExecution></ns2:sequentialExecution>
+  <ns2:passVariables></ns2:passVariables>
+  <ns2:haltOnFailure></ns2:haltOnFailure>
+  <ns18:weight>100</ns18:weight>
+  <ns18:starttime></ns18:starttime>
+  <ns18:endtime></ns18:endtime>
+  <ns18:totalRunTime></ns18:totalRunTime>
+  <ns18:actualRunTime></ns18:actualRunTime>
+  <ns18:suiteelements/>
+  <ns18:isCurrent></ns18:isCurrent>
+  <ns18:isCurrentForBuild></ns18:isCurrentForBuild>
+  <ns2:stateid></ns2:stateid>
+  <ns2:suiteexecutionrecord href="" />
+  <ns2:testsuite href="" />
+</ns2:testsuitelog>

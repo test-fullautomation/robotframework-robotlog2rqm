@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:configuration xmlns:ns2="http://jazz.net/xmlns/alm/qm/v0.1/" xmlns:ns1="http://schema.ibm.com/vega/2008/" xmlns:ns3="http://purl.org/dc/elements/1.1/" xmlns:ns4="http://jazz.net/xmlns/prod/jazz/process/0.6/" xmlns:ns5="http://jazz.net/xmlns/alm/v0.1/"
+   xmlns:ns6="http://purl.org/dc/terms/" xmlns:ns7="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:ns8="http://jazz.net/xmlns/alm/qm/v0.1/testscript/v0.1/" xmlns:ns9="http://jazz.net/xmlns/alm/qm/v0.1/executionworkitem/v0.1" xmlns:ns10="http://open-services.net/ns/core#"
+   xmlns:ns11="http://open-services.net/ns/qm#" xmlns:ns12="http://jazz.net/xmlns/prod/jazz/rqm/process/1.0/" xmlns:ns13="http://www.w3.org/2002/07/owl#" xmlns:ns14="http://jazz.net/xmlns/alm/qm/qmadapter/v0.1" xmlns:ns15="http://jazz.net/xmlns/alm/qm/qmadapter/task/v0.1"
+   xmlns:ns16="http://jazz.net/xmlns/alm/qm/v0.1/executionresult/v0.1" xmlns:ns17="http://jazz.net/xmlns/alm/qm/v0.1/catalog/v0.1" xmlns:ns18="http://jazz.net/xmlns/alm/qm/v0.1/tsl/v0.1/" xmlns:ns20="http://jazz.net/xmlns/alm/qm/styleinfo/v0.1/" xmlns:ns21="http://www.w3.org/1999/XSL/Transform">
+   <ns3:identifier></ns3:identifier>
+   <ns3:title></ns3:title>
+   <ns2:name></ns2:name>
+   <ns5:updated></ns5:updated>
+   <ns2:summary/>
+   <description xmlns="http://jazz.net/xmlns/alm/qm/v0.1/">
+   </description>
+</ns2:configuration>
