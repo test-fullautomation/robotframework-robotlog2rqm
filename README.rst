@@ -1,20 +1,6 @@
-.. Copyright 2020-2022 Robert Bosch Car Multimedia GmbH
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
 RobotResults2RQM
 ==============================
-|License: Apache v2| |License: BIOSL v4|
+|License: Apache v2|
 
 Table of Contents
 -----------------
@@ -46,18 +32,18 @@ How to install
 ~~~~~~~~~~~~~~
 RobotResults2RQM is not available on PyPI_ now.
 
-But you can install this package directly from the BIOS repository as below:
+But you can install this package directly from Github repository as below:
 
 ::
 
-   pip install git+ssh://git@sourcecode.socialcoding.bosch.com:7999/robfw/robotframework-testresult2rqmtool.git
+   pip install git+https://github.com/test-fullautomation/robotframework-testresult2rqmtool.git
 
 Or you can clone sourcecode to your local directory then install this package 
 with below steps:
 
 ::
 
-   git clone ssh://git@sourcecode.socialcoding.bosch.com:7999/robfw/robotframework-testresult2rqmtool.git
+   git clone https://github.com/test-fullautomation/robotframework-testresult2rqmtool.git
    cd robotframework-testresult2rqmtool
    python setup.py install
 
@@ -164,9 +150,8 @@ RobotResults2RQM_ tool.
 Sourcecode Documentation
 ------------------------
 To understand more detail about the tool's features and how resources are mapped
-between Robot results and RQM, please refer to **RobotResults2RQM tool’s Documentation**
-(``%PYTHONPATH%/Lib/site-packages/RobotResults2RQM_doc/index.html``) which is 
-generated when installing this package.
+between Robot results and RQM, please refer to 
+`RobotResults2RQM tool’s Documentation`_.
 
 
 Feedback
@@ -175,9 +160,7 @@ Please feel free to give any feedback to us via
 
 Email to: `Robot Framework Support Group`_
 
-Community: `RobotFramework AIO community`_
-
-Issue tracking: `RobotFramework JIRA`_
+Issue tracking: `RobotResults2RQM Issues`_
 
 About
 -----
@@ -201,25 +184,20 @@ Contributors
 
 License
 ~~~~~~~
-|License: Apache v2| |License: BIOSL v4|
+|License: Apache v2|
 
 
 .. |License: Apache v2| image:: https://img.shields.io/pypi/l/robotframework.svg
    :target: http://www.apache.org/licenses/LICENSE-2.0.html
 .. _IBM® Rational® Quality Manager: https://www.ibm.com/support/knowledgecenter/SSYMRC_6.0.2/com.ibm.rational.test.qm.doc/topics/c_qm_overview.html
 .. _PyPI: https://pypi.org/
-.. _Robot Framework Support Group: RobotFrameworkSupportGroup@bcn.bosch.com
-.. _Thomas Pollerspöck: Thomas.Pollerspoeck@de.bosch.com
-.. _Tran Duy Ngoan: Ngoan.TranDuy@vn.bosch.com
-.. _Nguyen Huynh Tri Cuong: Cuong.NguyenHuynhTri@vn.bosch.com
-.. _Mai Dinh Nam Son: Son.MaiDinhNam@vn.bosch.com
-.. _Tran Hoang Nguyen: Nguyen.TranHoang@vn.bosch.com
-.. _Holger Queckenstedt: Holger.Queckenstedt@de.bosch.com
-
-.. Consider to change below links when publicing this package on github:
-
-.. _RobotResults2RQM: https://sourcecode.socialcoding.bosch.com/projects/ROBFW/repos/robotframework-testresultwebapptool/browse
-.. _RobotFramework AIO community: https://connect.bosch.com/communities/community/ROBFW
-.. _RobotFramework JIRA: https://rb-tracker.bosch.com/tracker01/projects/ROBFW/summary
-.. |License: BIOSL v4| image:: http://bios.intranet.bosch.com/bioslv4-badge.svg
-   :target: http://bios.intranet.bosch.com/bioslv4.txt
+.. _Robot Framework Support Group: mailto:RobotFrameworkSupportGroup@bcn.bosch.com
+.. _Thomas Pollerspöck: mailto:Thomas.Pollerspoeck@de.bosch.com
+.. _Tran Duy Ngoan: mailto:Ngoan.TranDuy@vn.bosch.com
+.. _Nguyen Huynh Tri Cuong: mailto:Cuong.NguyenHuynhTri@vn.bosch.com
+.. _Mai Dinh Nam Son: mailto:Son.MaiDinhNam@vn.bosch.com
+.. _Tran Hoang Nguyen: mailto:Nguyen.TranHoang@vn.bosch.com
+.. _Holger Queckenstedt: mailto:Holger.Queckenstedt@de.bosch.com
+.. _RobotResults2RQM: https://github.com/test-fullautomation/robotframework-testresult2rqmtool
+.. _RobotResults2RQM Issues: https://github.com/test-fullautomation/robotframework-testresult2rqmtool/issues
+.. _RobotResults2RQM tool’s Documentation: https://github.com/test-fullautomation/robotframework-testresult2rqmtool/blob/develop/doc/_build/latex/RobotResults2RQM.pdf

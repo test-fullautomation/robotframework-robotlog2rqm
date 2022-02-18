@@ -2,8 +2,6 @@
 
 [![License: Apache
 v2](https://img.shields.io/pypi/l/robotframework.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
-[![License: BIOSL
-v4](http://bios.intranet.bosch.com/bioslv4-badge.svg)](http://bios.intranet.bosch.com/bioslv4.txt)
 
 ## Table of Contents
 
@@ -21,28 +19,28 @@ v4](http://bios.intranet.bosch.com/bioslv4-badge.svg)](http://bios.intranet.bosc
 
 ## Getting Started
 
-[RobotResults2RQM](https://sourcecode.socialcoding.bosch.com/projects/ROBFW/repos/robotframework-testresultwebapptool/browse)
+[RobotResults2RQM](https://github.com/test-fullautomation/robotframework-testresult2rqmtool)
 is the tool that helps to import Robot Framework results (**\*.xml**
 format) to [IBM® Rational® Quality
 Manager](https://www.ibm.com/support/knowledgecenter/SSYMRC_6.0.2/com.ibm.rational.test.qm.doc/topics/c_qm_overview.html)
 - RQM.
 
-[RobotResults2RQM](https://sourcecode.socialcoding.bosch.com/projects/ROBFW/repos/robotframework-testresultwebapptool/browse)
+[RobotResults2RQM](https://github.com/test-fullautomation/robotframework-testresult2rqmtool)
 tool is operating system independent and only works with Python 3.
 
 ### How to install
 
 RobotResults2RQM is not available on [PyPI](https://pypi.org/) now.
 
-But you can install this package directly from the BIOS repository as
+But you can install this package directly from Github repository as
 below:
 
-    pip install git+ssh://git@sourcecode.socialcoding.bosch.com:7999/robfw/robotframework-testresult2rqmtool.git
+    pip install git+https://github.com/test-fullautomation/robotframework-testresult2rqmtool.git
 
 Or you can clone sourcecode to your local directory then install this
 package with below steps:
 
-    git clone ssh://git@sourcecode.socialcoding.bosch.com:7999/robfw/robotframework-testresult2rqmtool.git
+    git clone https://github.com/test-fullautomation/robotframework-testresult2rqmtool.git
     cd robotframework-testresult2rqmtool
     python setup.py install
 
@@ -55,7 +53,7 @@ you can run it directly as operation system\'s command.
 
 ## Usage
 
-[RobotResults2RQM](https://sourcecode.socialcoding.bosch.com/projects/ROBFW/repos/robotframework-testresultwebapptool/browse)
+[RobotResults2RQM](https://github.com/test-fullautomation/robotframework-testresult2rqmtool)
 tool requires the robot `output.xml` result file(s) which will be
 imported, RQM information(e.g. host url, project, \...) and user
 credential(user name and password) to interact with RQM resources.
@@ -140,51 +138,45 @@ testplan ID.
 
 We are always searching support and you are cordially invited to help to
 improve
-[RobotResults2RQM](https://sourcecode.socialcoding.bosch.com/projects/ROBFW/repos/robotframework-testresultwebapptool/browse)
+[RobotResults2RQM](https://github.com/test-fullautomation/robotframework-testresult2rqmtool)
 tool.
 
 ## Sourcecode Documentation
 
 To understand more detail about the tool\'s features and how resources
 are mapped between Robot results and RQM, please refer to
-**RobotResults2RQM tool's Documentation**
-(`%PYTHONPATH%/Lib/site-packages/RobotResults2RQM_doc/index.html`) which
-is generated when installing this package.
+[RobotResults2RQM tool's
+Documentation](https://github.com/test-fullautomation/robotframework-testresult2rqmtool/blob/develop/doc/_build/latex/RobotResults2RQM.pdf).
 
 ## Feedback
 
 Please feel free to give any feedback to us via
 
 Email to: [Robot Framework Support
-Group](RobotFrameworkSupportGroup@bcn.bosch.com)
+Group](mailto:RobotFrameworkSupportGroup@bcn.bosch.com)
 
-Community: [RobotFramework AIO
-community](https://connect.bosch.com/communities/community/ROBFW)
-
-Issue tracking: [RobotFramework
-JIRA](https://rb-tracker.bosch.com/tracker01/projects/ROBFW/summary)
+Issue tracking: [RobotResults2RQM
+Issues](https://github.com/test-fullautomation/robotframework-testresult2rqmtool/issues)
 
 ## About
 
 ### Maintainers
 
-[Thomas Pollerspöck](Thomas.Pollerspoeck@de.bosch.com)
+[Thomas Pollerspöck](mailto:Thomas.Pollerspoeck@de.bosch.com)
 
-[Tran Duy Ngoan](Ngoan.TranDuy@vn.bosch.com)
+[Tran Duy Ngoan](mailto:Ngoan.TranDuy@vn.bosch.com)
 
 ### Contributors
 
-[Nguyen Huynh Tri Cuong](Cuong.NguyenHuynhTri@vn.bosch.com)
+[Nguyen Huynh Tri Cuong](mailto:Cuong.NguyenHuynhTri@vn.bosch.com)
 
-[Mai Dinh Nam Son](Son.MaiDinhNam@vn.bosch.com)
+[Mai Dinh Nam Son](mailto:Son.MaiDinhNam@vn.bosch.com)
 
-[Tran Hoang Nguyen](Nguyen.TranHoang@vn.bosch.com)
+[Tran Hoang Nguyen](mailto:Nguyen.TranHoang@vn.bosch.com)
 
-[Holger Queckenstedt](Holger.Queckenstedt@de.bosch.com)
+[Holger Queckenstedt](mailto:Holger.Queckenstedt@de.bosch.com)
 
 ### License
 
 [![License: Apache
 v2](https://img.shields.io/pypi/l/robotframework.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
-[![License: BIOSL
-v4](http://bios.intranet.bosch.com/bioslv4-badge.svg)](http://bios.intranet.bosch.com/bioslv4.txt)
