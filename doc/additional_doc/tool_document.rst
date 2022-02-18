@@ -143,7 +143,5 @@ on RQM, please refer be mapping table:
 +----------------------------+----------------------------+-----------------------------------------------------------------------+-------------------------------------------+
 
 .. _RqmAPI: https://jazz.net/wiki/bin/view/Main/RqmApi
-.. _RQM_templates: ../../../RobotResults2RQM/RQM_templates/
-
-.. Consider to change below link when publicing package on github
-.. _RobotResults2RQM: https://sourcecode.socialcoding.bosch.com/projects/ROBFW/repos/robotframework-testresultwebapptool/browse
+.. _RQM_templates: https://github.com/test-fullautomation/robotframework-testresult2rqmtool/tree/develop/RobotResults2RQM/RQM_templates
+.. _RobotResults2RQM: https://github.com/test-fullautomation/robotframework-testresult2rqmtool
