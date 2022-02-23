@@ -17,20 +17,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. include:: ./additional_doc/tool_document.rst
-
 RobotResults2RQM's API!
-========================
+-----------------------
 
 .. toctree::
    :maxdepth: 4
    :caption: Contents:
 
-   RobotResults2RQM
+   ./additional_doc/tool_document.rst
+   ./RobotResults2RQM.rst
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
