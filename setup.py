@@ -81,7 +81,6 @@ from config.CConfig import CConfig # providing repository and environment specif
 from config.CExtendedSetup import CExtendedSetup # providing functions to support the extended setup process
 
 import colorama as col
-from RobotResults2RQM import VERSION
 
 col.init(autoreset=True)
 
@@ -204,7 +203,7 @@ if ( ('install' in listCmdArgs) or ('build' in listCmdArgs) or ('sdist' in listC
 # And therefore all variables and objects must exist (even in case of the values are not used).
 setuptools.setup(
     name         = str(oRepositoryConfig.Get('sPackageName')),
-    version      = VERSION, # get updated version from source file
+    version      = str(oRepositoryConfig.Get('sVersion')),
     author       = str(oRepositoryConfig.Get('sAuthor')),
     author_email = str(oRepositoryConfig.Get('sAuthorEMail')),
     description  = str(oRepositoryConfig.Get('sDescription')),

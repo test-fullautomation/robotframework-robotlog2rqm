@@ -60,6 +60,7 @@
 import os, sys, platform, shlex, subprocess
 import colorama as col
 import pypandoc
+from RobotResults2RQM import VERSION
 
 col.init(autoreset=True)
 COLBR = col.Style.BRIGHT + col.Fore.RED
@@ -86,7 +87,7 @@ class CConfig():
 
         # 1. basic setup stuff
         self.__dictConfig['sPackageName']                = "RobotResults2RQM"
-        self.__dictConfig['sVersion']                    = "1.0.0"
+        self.__dictConfig['sVersion']                    = VERSION
         self.__dictConfig['sAuthor']                     = "Tran Duy Ngoan"
         self.__dictConfig['sAuthorEMail']                = "Ngoan.TranDuy@vn.bosch.com"
         self.__dictConfig['sDescription']                = "Package for importing robot result(s) to IBM Rational Quality Manager (RQM)"
