@@ -411,7 +411,7 @@ def process_test(RQMClient, test):
    _tc_tcer_id = res['id'] 
    if res['success']:
       Logger.log('Created TCER with id %s successfully.'%_tc_tcer_id)
-   elif res['status_code'] == 303 and res['id'] != '':
+   elif (res['status_code'] == 303 or res['status_code'] == 200) and res['id'] != '':
       Logger.log_warning('TCER for testcase %s and testplan %s is existing. ID: %s'%
                         (_tc_id, _tc_testplan_id, _tc_tcer_id))
    else:

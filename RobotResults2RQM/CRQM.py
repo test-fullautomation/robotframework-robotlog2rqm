@@ -315,7 +315,7 @@ class CRQMClient():
             integrationURL += "/urn:com.ibm.rqm:" + resourceType + ':' + str(id)  
       return integrationURL
 
-   def webIDfromResponse(self, response):
+   def webIDfromResponse(self, response, tagID='rqm:resultId'):
       '''
       Get internal ID (number) from response of POST method.
 
@@ -325,6 +325,8 @@ class CRQMClient():
       Args:
          response : the response from POST method.
 
+         tagID : tag name which contains ID information.
+
       Returns:
          resultId : internal ID (as number).
       '''
@@ -332,7 +334,7 @@ class CRQMClient():
       try:
          oResponse = get_xml_tree(BytesIO(str(response).encode()),
                                           bdtd_validation=False)
-         oResultId = oResponse.find('rqm:resultId', oResponse.getroot().nsmap)
+         oResultId = oResponse.find(tagID, oResponse.getroot().nsmap)
          resultId = oResultId.text
       except Exception as error:
          raise Exception("Cannot get ID from response. Reason: %s"%str(error))
@@ -1018,6 +1020,16 @@ class CRQMClient():
             ### remove itergrationURL in case status_code=303
             sRemove = self.integrationURL(resourceType, '', forceinternalID=True)
             returnObj['id'] = res.headers['Content-Location'].replace(sRemove, '')
+
+         # On IBM Engineering Test Management Version: 7.0.2
+         # When trying to create new TCER but it is existing for testcase and testplan, 
+         # the response is 200 instead of 303 as previous RQM version 6.x.x
+         # Below step is trying to get existing TCER ID from response <200>
+         elif res.status_code == 200 and res.text:
+            try:
+               returnObj['id'] = self.webIDfromResponse(res.text, tagID='ns2:webId')
+            except Exception as error:
+               returnObj['message'] = "Extract ID information from response failed. Reason: %s" % str(error)
       else:
          ### Get new creation ID from response
          try: 
