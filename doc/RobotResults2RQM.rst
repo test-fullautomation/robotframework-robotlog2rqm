@@ -1,4 +1,4 @@
-.. Copyright 2020-2022 Robert Bosch Car Multimedia GmbH
+.. Copyright 2020-2022 Robert Bosch GmbH
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ RobotResults2RQM package
 
 Module contents
 ---------------
-.. automodule:: CRQM
+.. automodule:: RobotResults2RQM.CRQM
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: robot2rqm
+.. automodule:: RobotResults2RQM.robot2rqm
    :members:
    :undoc-members:
    :show-inheritance:
