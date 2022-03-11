@@ -38,6 +38,9 @@
 #
 # --------------------------------------------------------------------------------------------------------------
 #
+# 11.03.2022 / XC-CT/ECA3-Queckenstedt
+# Package name separated from source folder name
+#
 # 23.02.2022 / XC-CT/ECA3-Queckenstedt
 # Usage of %RobotPythonPath% exchanged by sys.executable
 #
@@ -86,7 +89,8 @@ class CConfig():
         self.__dictConfig['sReferencePath'] = self.__sReferencePath # only to have the possibility to print out all values only with help of 'self.__dictConfig'
 
         # 1. basic setup stuff
-        self.__dictConfig['sPackageName']                = "RobotResults2RQM"
+        self.__dictConfig['sPackageName']                = "robotframework-testresult2rqmtool"
+        self.__dictConfig['sImportName']                 = "RobotResults2RQM"
         self.__dictConfig['sVersion']                    = VERSION
         self.__dictConfig['sAuthor']                     = "Tran Duy Ngoan"
         self.__dictConfig['sAuthorEMail']                = "Ngoan.TranDuy@vn.bosch.com"
@@ -100,7 +104,7 @@ class CConfig():
         self.__dictConfig['sDevelopmentStatus']          = "Development Status :: 4 - Beta"
         self.__dictConfig['sIntendedAudience']           = "Intended Audience :: Developers"
         self.__dictConfig['sTopic']                      = "Topic :: Software Development"
-        self.__dictConfig['arInstallRequires']            = ['sphinx','pypandoc','colorama']
+        self.__dictConfig['arInstallRequires']           = ['sphinx','pypandoc','colorama']
 
 
         # 2. certain folder and executables (things that requires computation)
@@ -137,14 +141,14 @@ class CConfig():
 
         if sPlatformSystem == "Windows":
             SPHINXBUILD                = f"{sPythonPath}/Scripts/sphinx-build.exe"
-            sInstalledPackageFolder    = f"{sPythonPath}/Lib/site-packages/" + self.__dictConfig['sPackageName']
-            sInstalledPackageDocFolder = f"{sPythonPath}/Lib/site-packages/" + self.__dictConfig['sPackageName'] + "_doc"
+            sInstalledPackageFolder    = f"{sPythonPath}/Lib/site-packages/" + self.__dictConfig['sImportName']
+            sInstalledPackageDocFolder = f"{sPythonPath}/Lib/site-packages/" + self.__dictConfig['sImportName'] + "_doc"
             sLaTeXInterpreter          = os.path.normpath(os.path.expandvars("%ROBOTLATEXPATH%/miktex/bin/x64/pdflatex.exe"))
 
         elif sPlatformSystem == "Linux":
             SPHINXBUILD                = f"{sPythonPath}/sphinx-build"
-            sInstalledPackageFolder    = f"{sPythonPath}/../lib/python3.9/site-packages/" + self.__dictConfig['sPackageName']
-            sInstalledPackageDocFolder = f"{sPythonPath}/../lib/python3.9/site-packages/" + self.__dictConfig['sPackageName'] + "_doc"
+            sInstalledPackageFolder    = f"{sPythonPath}/../lib/python3.9/site-packages/" + self.__dictConfig['sImportName']
+            sInstalledPackageDocFolder = f"{sPythonPath}/../lib/python3.9/site-packages/" + self.__dictConfig['sImportName'] + "_doc"
             sLaTeXInterpreter          = os.path.normpath(os.path.expandvars("${ROBOTLATEXPATH}/miktex/bin/x64/pdflatex"))
 
         else:
@@ -199,9 +203,10 @@ class CConfig():
 
         self.__dictConfig['sSetupBuildFolder']       = os.path.normpath(self.__sReferencePath + "/build")
         self.__dictConfig['sSetupBuildLibFolder']    = os.path.normpath(self.__sReferencePath + "/build/lib")
-        self.__dictConfig['sSetupBuildLibDocFolder'] = os.path.normpath(self.__sReferencePath + "/build/lib/" + self.__dictConfig['sPackageName'] + "_doc")
+        self.__dictConfig['sSetupBuildLibDocFolder'] = os.path.normpath(self.__sReferencePath + "/build/lib/" + self.__dictConfig['sImportName'] + "_doc")
         self.__dictConfig['sSetupDistFolder']        = os.path.normpath(self.__sReferencePath + "/dist")
-        self.__dictConfig['sEggInfoFolder']          = os.path.normpath(self.__sReferencePath + "/" + self.__dictConfig['sPackageName'] + ".egg-info")
+        sLocalEggFolderNamePart = self.__dictConfig['sPackageName'].replace("-", "_") # to be aligned to the way the setuptools modify the name also
+        self.__dictConfig['sEggInfoFolder']          = os.path.normpath(self.__sReferencePath + "/" + sLocalEggFolderNamePart + ".egg-info")
 
         print()
         print(f"Running under {sPlatformSystem} ({sOSName})")
