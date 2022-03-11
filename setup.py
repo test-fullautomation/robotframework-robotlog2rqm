@@ -230,7 +230,7 @@ setuptools.setup(
     package_data={
         '' : ['RQM_templates/*.xml']
     },
-    install_requires=['colorama', 'lxml', 'requests'], # public package dependencies from PyPI
+    install_requires = oRepositoryConfig.Get('arInstallRequires'), # public package dependencies from PyPI
     entry_points={
         'console_scripts': [
             'RobotResults2RQM = RobotResults2RQM.__main__:RobotResults2RQM',
