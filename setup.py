@@ -60,6 +60,9 @@
 #
 # --------------------------------------------------------------------------------------------------------------
 #
+# 11.03.2022 / XC-CT/ECA3-Queckenstedt
+# 'package_dir' added
+#
 # 23.02.2022 / XC-CI1/ECA3-Queckenstedt
 # Maintenance
 #
@@ -111,7 +114,7 @@ class ExtendedInstallCommand(install):
             print()
             print(COLBY + "Extended setup step 4/5: install.run(self)") # creates the build folder .\build
             print()
-            install.run(self) # TODO: What does install.run(self) return? How to realize error handling?
+            install.run(self)
             print()
             if 'bdist_wheel' in listCmdArgs:
                 print(COLBY + "Extended setup step 5/5: Add html documentation to local wheel folder inside build")
@@ -210,7 +213,8 @@ setuptools.setup(
     long_description = long_description,
     long_description_content_type = str(oRepositoryConfig.Get('sLongDescriptionContentType')),
     url = str(oRepositoryConfig.Get('sURL')),
-    packages = [str(oRepositoryConfig.Get('sPackageName')), ],
+    packages = [str(oRepositoryConfig.Get('sImportName')),],
+    package_dir = {str(oRepositoryConfig.Get('sPackageName')) : str(oRepositoryConfig.Get('sImportName'))},
     classifiers = [
         str(oRepositoryConfig.Get('sProgrammingLanguage')),
         str(oRepositoryConfig.Get('sLicence')),
