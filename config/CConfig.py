@@ -104,7 +104,7 @@ class CConfig():
         self.__dictConfig['sDevelopmentStatus']          = "Development Status :: 4 - Beta"
         self.__dictConfig['sIntendedAudience']           = "Intended Audience :: Developers"
         self.__dictConfig['sTopic']                      = "Topic :: Software Development"
-        self.__dictConfig['arInstallRequires']           = ['sphinx','pypandoc','colorama']
+        self.__dictConfig['arInstallRequires']           = ['sphinx','pypandoc','colorama','lxml','requests']
 
 
         # 2. certain folder and executables (things that requires computation)
