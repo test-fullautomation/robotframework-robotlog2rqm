@@ -105,6 +105,7 @@ class CConfig():
         self.__dictConfig['sIntendedAudience']           = "Intended Audience :: Developers"
         self.__dictConfig['sTopic']                      = "Topic :: Software Development"
         self.__dictConfig['arInstallRequires']           = ['sphinx','pypandoc','colorama','lxml','requests']
+        self.__dictConfig['arConsoleScripts']            = ['RobotResults2RQM = RobotResults2RQM.robot2rqm:RobotResults2RQM']
 
 
         # 2. certain folder and executables (things that requires computation)
