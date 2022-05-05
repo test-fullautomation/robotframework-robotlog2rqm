@@ -3,4 +3,5 @@ __pycache__/
 build/
 dist/
 doc/_build/
+!/doc/_build/latex/RobotResults2RQM.pdf
 *.egg-info
