@@ -242,6 +242,7 @@ def __process_commandline():
    cmdlineparser.add_argument('testplan', type=str, help='testplan ID for this execution.')
    cmdlineparser.add_argument('-recursive',action="store_true", help='if set, then the path is searched recursively for log files to be imported.')
    cmdlineparser.add_argument('-createmissing', action="store_true", help='if set, then all testcases without fcid are created when importing.')
+   cmdlineparser.add_argument('-updatetestcase', action="store_true", help='if set, then testcase information on RQM will be updated bases on robot testfile.')
    cmdlineparser.add_argument('-dryrun',action="store_true", help='if set, then just show what would be done.')
    # cmdlineparser.add_argument('-testsuite',type=str, help='testsuite ID for this execution.')
    # cmdlineparser.add_argument('-syncfid', action="store_true", help='update FID information from TML test cases to RQM.')
@@ -346,6 +347,7 @@ def process_test(RQMClient, test):
    _tc_fid = ";".join(get_from_tags(test.tags, "fid-(.+)"))
    lTCIDTags = get_from_tags(test.tags, "tcid-(.+)")
    _tc_id = ";".join(lTCIDTags)
+   _tc_link = ";".join(get_from_tags(test.tags, "robotfile-(.+)"))
 
    # from metadata
    metadata_info = process_metadata(test.parent.metadata)
@@ -358,6 +360,7 @@ def process_test(RQMClient, test):
    _tc_config_id   = RQMClient.configuration
    _tc_build_id    = RQMClient.build
    _tc_createmissing = RQMClient.createmissing
+   _tc_update = RQMClient.updatetestcase
    # from robot result object
    _tc_name = test.name
    _tc_desc = test.doc
@@ -372,31 +375,55 @@ def process_test(RQMClient, test):
    _tc_duration = _tc_end_time - _tc_start_time
    _tc_duration = int(_tc_duration.total_seconds())
 
-   # If -createmissing is set. Test case without tcid will be created on RQM:
-      # Template
-      # Upload
-      # Update dMappingTCID (to update *.robot test file with generated ID)
-   if _tc_id == "" and _tc_createmissing:
-      oTCTemplate = RQMClient.createTestcaseTemplate( _tc_name, 
-                                                      _tc_desc,
-                                                      _tc_cmpt, 
-                                                      _tc_fid,
-                                                      _tc_team)
-      res = RQMClient.createResource('testcase', oTCTemplate)
-      if res['success']:
-         _tc_id = res['id']
-         Logger.log("Create testcase '%s' with id %s successfully!"%(_tc_name, _tc_id))
-         RQMClient.dMappingTCID[_tc_id] = _tc_name
-      else:
-         Logger.log_error("Create testcase '%s' failed. Reason: %s"%(_tc_name, res['message']))
-         return
-
+   # Verify the tcid is provided or not
    if _tc_id == "":
-      Logger.log_error("There is no 'tcid' information for importing test '%s'."%_tc_name)
-      return
-   elif len(lTCIDTags) > 1:
-      _tc_id = lTCIDTags[0]
-      Logger.log_warning("More than 1 'tcid-' tags in test '%s', use id '%s'."%(_tc_name, _tc_id))
+      # If -createmissing is set. Test case without tcid will be created on RQM:
+      # Create new testcase template
+      # Create new testcase on RQM
+      # Update dMappingTCID (to update *.robot testfile with generated ID - Not implemented yet).
+      if _tc_createmissing:
+         oTCTemplate = RQMClient.createTestcaseTemplate( _tc_name, 
+                                                         _tc_desc,
+                                                         _tc_cmpt, 
+                                                         _tc_fid,
+                                                         _tc_team,
+                                                         _tc_link)
+         res = RQMClient.createResource('testcase', oTCTemplate)
+         if res['success']:
+            _tc_id = res['id']
+            Logger.log("Create testcase '%s' with id %s successfully!"%(_tc_name, _tc_id))
+            RQMClient.dMappingTCID[_tc_id] = _tc_name
+         else:
+            Logger.log_error("Create testcase '%s' failed. Reason: %s"%(_tc_name, res['message']))
+            return
+      else:
+         Logger.log_error("There is no 'tcid' information for importing test '%s'."%_tc_name)
+         return
+   else:
+      # If more than 1 tcid are defined in [Tags], the first one is used.
+      if len(lTCIDTags) > 1:
+         _tc_id = lTCIDTags[0]
+         Logger.log_warning("More than 1 'tcid-' tags in test '%s', use id '%s'."%(_tc_name, _tc_id))
+
+      # If -updatetestcase is set. Test case with provided tcid will be updated on RQM:
+      # Get existing resource of testcase from RQM.
+      # Update information in testcase xml template.
+      # Update the existing testcase resource with the new one on RQM.
+      if _tc_update:
+         resTC = RQMClient.getResourceByID('testcase', _tc_id)
+         if resTC.status_code == 200 and resTC.text:
+            oTCTemplate = RQMClient.createTestcaseTemplate( _tc_name, 
+                                                            _tc_desc,
+                                                            _tc_cmpt, 
+                                                            _tc_fid,
+                                                            _tc_team,
+                                                            _tc_link,
+                                                            sTCtemplate=str(resTC.text))
+            RQMClient.updateResourceByID('testcase', _tc_id, oTCTemplate)
+            Logger.log("Update testcase '%s' with id %s successfully!"%(_tc_name, _tc_id))
+         else:
+            Logger.log_error("Update testcase with ID '%s' failed. Please check whether it is existing on RQM."%_tc_id)
+            return
 
    # Create TCER:
       # Template
@@ -473,6 +500,7 @@ def RobotResults2RQM(args=None):
          - `testplan` : RQM testplan ID.
          - `recursive` : if True, then the path is searched recursively for log files to be imported.
          - `createmissing` : if True, then all testcases without fcid are created when importing.
+         - `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
          - `dryrun` : if True, then just check the RQM authentication and show what would be done.
 
    Returns:
@@ -541,7 +569,7 @@ def RobotResults2RQM(args=None):
          metadata_info['version_sw'] = None
          metadata_info['project'] = None
       RQMClient.config(args.testplan, metadata_info['version_sw'], 
-                    metadata_info['project'], args.createmissing)
+                    metadata_info['project'], args.createmissing, args.updatetestcase)
       # Process suite for importing 
       suite_info = process_suite(RQMClient, result.suite)
 

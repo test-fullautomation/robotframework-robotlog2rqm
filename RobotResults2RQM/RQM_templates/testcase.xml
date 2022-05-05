@@ -38,7 +38,7 @@
          <ns2:description/>
       </ns2:customAttribute>
       <ns2:customAttribute type="SMALL_STRING" required="false">
-         <ns2:name>TML File</ns2:name>
+         <ns2:name>Robot File</ns2:name>
          <ns2:value></ns2:value>
          <ns2:description/>
       </ns2:customAttribute>
