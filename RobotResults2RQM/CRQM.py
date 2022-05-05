@@ -88,6 +88,34 @@ class CRQMClient():
                     'inconclusive', 'part_blocked', 'failed', 'error', 
                     'blocked', 'perm_failed', 'deferred']
 
+   # This namespace definition is used when update resource because the namespace
+   # definition is response(get from ETM) maybe different with the using template.
+   # There is a deviation in namespace definition between IBM Rational Quality 
+   # Manager(RQM) v6 and IBM Engineering Test Management (ETM) v7.
+   # (from ns1->ns7, only change values within ns order, no new definition).
+   NAMESPACES = {
+      'ns2' : "http://jazz.net/xmlns/alm/qm/v0.1/" ,
+      'ns1' : "http://schema.ibm.com/vega/2008/" ,
+      'ns3' : "http://purl.org/dc/elements/1.1/" ,
+      'ns4' : "http://jazz.net/xmlns/prod/jazz/process/0.6/" ,
+      'ns5' : "http://jazz.net/xmlns/alm/v0.1/" ,
+      'ns6' : "http://purl.org/dc/terms/" ,
+      'ns7' : "http://www.w3.org/1999/02/22-rdf-syntax-ns#" ,
+      'ns8' : "http://jazz.net/xmlns/alm/qm/v0.1/testscript/v0.1/" ,
+      'ns9' : "http://jazz.net/xmlns/alm/qm/v0.1/executionworkitem/v0.1" ,
+      'ns10' : "http://open-services.net/ns/core#" ,
+      'ns11' : "http://open-services.net/ns/qm#" ,
+      'ns12' : "http://jazz.net/xmlns/prod/jazz/rqm/process/1.0/" ,
+      'ns13' : "http://www.w3.org/2002/07/owl#" ,
+      'ns14' : "http://jazz.net/xmlns/alm/qm/qmadapter/v0.1" ,
+      'ns15' : "http://jazz.net/xmlns/alm/qm/qmadapter/task/v0.1" ,
+      'ns16' : "http://jazz.net/xmlns/alm/qm/v0.1/executionresult/v0.1" ,
+      'ns17' : "http://jazz.net/xmlns/alm/qm/v0.1/catalog/v0.1" ,
+      'ns18' : "http://jazz.net/xmlns/alm/qm/v0.1/tsl/v0.1/" ,
+      'ns20' : "http://jazz.net/xmlns/alm/qm/styleinfo/v0.1/" ,
+      'ns21' : "http://www.w3.org/1999/XSL/Transform"
+   }
+
    def __init__(self, user, password, project, host):
       """
       Constructor for CRQMClient class
@@ -566,7 +594,7 @@ class CRQMClient():
          sTemplatePath = os.path.join(self.templatesDir ,'testcase.xml')
          oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       else:
-         oTree = get_xml_tree(BytesIO(sTCtemplate),bdtd_validation=False)
+         oTree = get_xml_tree(BytesIO(sTCtemplate.encode()),bdtd_validation=False)
 
       root         = oTree.getroot()
       nsmap        = root.nsmap
@@ -574,9 +602,9 @@ class CRQMClient():
       testcaseTittle  = testcaseName
 
       # find nodes to change data 
-      oTittle      = oTree.find('ns3:title', nsmap)
-      oDescription = oTree.find('ns3:description', nsmap)
-      oOwner       = oTree.find('ns5:owner', nsmap)
+      oTittle      = oTree.find(f'{{{self.NAMESPACES["ns3"]}}}title')
+      oDescription = oTree.find(f'{{{self.NAMESPACES["ns3"]}}}description')
+      oOwner       = oTree.find(f'{{{self.NAMESPACES["ns5"]}}}owner')
       
       # change nodes's data
       oTittle.text       = testcaseTittle
@@ -585,39 +613,39 @@ class CRQMClient():
       # Incase not specify owner in template or input data, set it as provided user in cli
       if sOwnerID:
          oOwner.text = sOwnerID
-         oOwner.attrib['{%s}resource' % nsmap['ns7']] = self.userURL(sOwnerID)
+         oOwner.attrib[f'{{{self.NAMESPACES["ns7"]}}}resource'] = self.userURL(sOwnerID)
       elif oOwner.text == None or oOwner.text == '':
          oOwner.text = self.userID
-         oOwner.attrib['{%s}resource' % nsmap['ns7']] = self.userURL(self.userID)
+         oOwner.attrib[f'{{{self.NAMESPACES["ns7"]}}}resource'] = self.userURL(self.userID)
 
       # Modify Categories data
       # These Categories and default values are defined in template testcase.xml
       # If the category is not required for project, remove/comment it from the template
-      oComponent = oTree.find('ns2:category[@term="Component"]', nsmap)
+      oComponent = oTree.find(f'{{{self.NAMESPACES["ns2"]}}}category[@term="Component"]', nsmap)
       if (oComponent != None) and sComponent:
          oComponent.set('value', sComponent)
 
       # Component is used in CMD project but Categories is used in others
-      oCategory = oTree.find('ns2:category[@term="Categories"]', nsmap)
+      oCategory = oTree.find(f'{{{self.NAMESPACES["ns2"]}}}category[@term="Categories"]', nsmap)
       if (oCategory != None) and sComponent:
          oCategory.set('value', sComponent)
 
-      oTesttype = oTree.find('ns2:category[@term="Test Type"]', nsmap)
+      oTesttype = oTree.find(f'{{{self.NAMESPACES["ns2"]}}}category[@term="Test Type"]', nsmap)
       if (oTesttype != None) and sTestType:
          oTesttype.set('value', sTestType)
 
-      oASIL = oTree.find('ns2:category[@term="ASIL relevant"]', nsmap)
+      oASIL = oTree.find(f'{{{self.NAMESPACES["ns2"]}}}category[@term="ASIL relevant"]', nsmap)
       if (oASIL != None) and sASIL:
          oASIL.set('value', sASIL) 
 
       # Modify custom attributes
-      oRequirementID = oTree.find('ns2:customAttributes/ns2:customAttribute/[ns2:name="Requirement ID"]', nsmap)
+      oRequirementID = oTree.find(f'{{{self.NAMESPACES["ns2"]}}}customAttributes/{{{self.NAMESPACES["ns2"]}}}customAttribute/[{{{self.NAMESPACES["ns2"]}}}name="Requirement ID"]', nsmap)
       if oRequirementID != None:
-         oRequirementID.find('ns2:value', nsmap).text = sFID
+         oRequirementID.find(f'{{{self.NAMESPACES["ns2"]}}}value', nsmap).text = sFID
 
-      oRobotFile = oTree.find('ns2:customAttributes/ns2:customAttribute/[ns2:name="Robot file"]', nsmap)
+      oRobotFile = oTree.find(f'{{{self.NAMESPACES["ns2"]}}}customAttributes/{{{self.NAMESPACES["ns2"]}}}customAttribute/[{{{self.NAMESPACES["ns2"]}}}name="Robot File"]', nsmap)
       if oRobotFile != None:
-         oRobotFile.find('ns2:value', nsmap).text = sRobotFile
+         oRobotFile.find(f'{{{self.NAMESPACES["ns2"]}}}value', nsmap).text = sRobotFile
 
       # link to provided valid team-area
       if sTeam:
