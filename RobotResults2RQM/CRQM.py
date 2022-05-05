@@ -140,6 +140,7 @@ class CRQMClient():
       self.build         = None
       self.configuration = None
       self.createmissing = None
+      self.updatetestcase= None
       self.testsuite     = None
 
    def login(self):
@@ -209,7 +210,7 @@ class CRQMClient():
       self.session.close()
 
    def config(self, plan_id, build_name=None, config_name=None, 
-              createmissing=False, suite_id=None):
+              createmissing=False, updatetestcase=False,suite_id=None):
       '''
       Configure RQMClient with testplan ID, build, configuration, createmissing, ...
          - Verify the existence of provided testplan ID.
@@ -228,6 +229,9 @@ class CRQMClient():
          createmissing (optional) : in case this argument is set to `True`, 
             the testcase without `tcid` information will be created on RQM.
 
+         updatetestcase (optional) : in case this argument is set to `True`, 
+            the information of testcase on RQM will be updated bases on robot testfile.
+
          suite_id (optional) : testsuite ID of RQM project for importing result(s).
       
       Returns:
@@ -235,6 +239,7 @@ class CRQMClient():
       '''
       try:
          self.createmissing = createmissing
+         self.updatetestcase = updatetestcase
          self.testsuite = suite_id
          self.testplan  = plan_id
          # Verify testplan ID
@@ -528,7 +533,7 @@ class CRQMClient():
 
    def createTestcaseTemplate(self, testcaseName, sDescription='', 
                               sComponent='', sFID='', sTeam='', sRobotFile='', 
-                              sTestType='', sASIL='', sOwnerID=''):
+                              sTestType='', sASIL='', sOwnerID='', sTCtemplate=None):
       '''
       Return testcase template from provided information.
 
@@ -551,11 +556,18 @@ class CRQMClient():
 
          sOwnerID (optional) : user ID of testcase owner.
 
+         sTCtemplate (optional) : existing testcase template as xml string. 
+         If not provided, template file under *RQM_templates* is used as default.
+
       Returns:
          xml template as string.
       '''
-      sTemplatePath = os.path.join(self.templatesDir ,'testcase.xml')
-      oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
+      if not sTCtemplate:
+         sTemplatePath = os.path.join(self.templatesDir ,'testcase.xml')
+         oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
+      else:
+         oTree = get_xml_tree(BytesIO(sTCtemplate),bdtd_validation=False)
+
       root         = oTree.getroot()
       nsmap        = root.nsmap
       # prepare required data for template
