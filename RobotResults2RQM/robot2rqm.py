@@ -346,6 +346,7 @@ def process_test(RQMClient, test):
    _tc_fid = ";".join(get_from_tags(test.tags, "fid-(.+)"))
    lTCIDTags = get_from_tags(test.tags, "tcid-(.+)")
    _tc_id = ";".join(lTCIDTags)
+   _tc_link = ";".join(get_from_tags(test.tags, "robotfile-(.+)"))
 
    # from metadata
    metadata_info = process_metadata(test.parent.metadata)
@@ -381,7 +382,8 @@ def process_test(RQMClient, test):
                                                       _tc_desc,
                                                       _tc_cmpt, 
                                                       _tc_fid,
-                                                      _tc_team)
+                                                      _tc_team,
+                                                      _tc_link)
       res = RQMClient.createResource('testcase', oTCTemplate)
       if res['success']:
          _tc_id = res['id']

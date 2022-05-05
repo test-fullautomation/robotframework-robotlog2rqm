@@ -527,8 +527,8 @@ class CRQMClient():
       return root
 
    def createTestcaseTemplate(self, testcaseName, sDescription='', 
-                              sComponent='', sFID='', sTeam='', sTestType='', 
-                              sASIL='', sOwnerID=''):
+                              sComponent='', sFID='', sTeam='', sRobotFile='', 
+                              sTestType='', sASIL='', sOwnerID=''):
       '''
       Return testcase template from provided information.
 
@@ -542,6 +542,8 @@ class CRQMClient():
          sFID (optional) : function ID(requirement ID) for linking.
 
          sTeam (optional) : team name for linking.
+
+         sRobotFile (optional) : link to robot file on source control.
 
          sTestType (optional) : test type information.
 
@@ -600,6 +602,10 @@ class CRQMClient():
       oRequirementID = oTree.find('ns2:customAttributes/ns2:customAttribute/[ns2:name="Requirement ID"]', nsmap)
       if oRequirementID != None:
          oRequirementID.find('ns2:value', nsmap).text = sFID
+
+      oRobotFile = oTree.find('ns2:customAttributes/ns2:customAttribute/[ns2:name="Robot file"]', nsmap)
+      if oRobotFile != None:
+         oRobotFile.find('ns2:value', nsmap).text = sRobotFile
 
       # link to provided valid team-area
       if sTeam:
