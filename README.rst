@@ -227,4 +227,4 @@ limitations under the License.
 .. _Holger Queckenstedt: mailto:Holger.Queckenstedt@de.bosch.com
 .. _RobotResults2RQM: https://github.com/test-fullautomation/robotframework-testresult2rqmtool
 .. _RobotResults2RQM Issues: https://github.com/test-fullautomation/robotframework-testresult2rqmtool/issues
-.. _RobotResults2RQM tool’s Documentation: https://github.com/test-fullautomation/robotframework-testresult2rqmtool/blob/develop/doc/_build/latex/RobotResults2RQM.pdf
+.. _RobotResults2RQM tool’s Documentation: https://github.com/test-fullautomation/robotframework-testresult2rqmtool/blob/develop/RobotResults2RQM/RobotResults2RQM.pdf
