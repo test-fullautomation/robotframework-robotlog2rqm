@@ -15,5 +15,6 @@
 RobotResults2RQM package provides an interface to import robot result(s)
 from output.xml result file to IBM Rational Quality Manager (RQM).
 """
-from .robot2rqm import RobotResults2RQM, Logger, VERSION
+from .robot2rqm import RobotResults2RQM, Logger
+from .version import VERSION
 from .CRQM import CRQMClient
