@@ -155,7 +155,7 @@ tool.
 To understand more detail about the tool\'s features and how resources
 are mapped between Robot results and RQM, please refer to
 [RobotResults2RQM tool's
-Documentation](https://github.com/test-fullautomation/robotframework-testresult2rqmtool/blob/develop/doc/_build/latex/RobotResults2RQM.pdf).
+Documentation](https://github.com/test-fullautomation/robotframework-testresult2rqmtool/blob/develop/RobotResults2RQM/RobotResults2RQM.pdf).
 
 ## Feedback
 

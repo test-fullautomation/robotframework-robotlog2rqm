@@ -12,6 +12,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*RobotResults2RQM*
+RobotResults2RQM_ tool provides the ability to interact with RQM resources (test 
+plan, test case, build, ...).
 
-!!! add introduction - if wanted !!
+RobotResults2RQM_ tool uses RqmAPI_ to:
+   - get resource: by given ID or all vailable entities of resource type.
+   - update resource: by given ID.
+   - create new resource: with resource templates under RQM_templates_ folder
+
+.. _RqmAPI: https://jazz.net/wiki/bin/view/Main/RqmApi
+.. _RQM_templates: https://github.com/test-fullautomation/robotframework-testresult2rqmtool/tree/develop/RobotResults2RQM/RQM_templates
+.. _RobotResults2RQM: https://github.com/test-fullautomation/robotframework-testresult2rqmtool
