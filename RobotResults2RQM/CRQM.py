@@ -588,6 +588,17 @@ Return all entries (in all pages) of provided resource by GET method.
    / *Type*: dict /
 
    A dictionary which contains response status, message and data.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False, 
+         'message' : '',
+         'data'    : {}
+      }
+
       """
       dReturn = {
          'success' : False, 
@@ -664,10 +675,13 @@ Get all available configurations of project on RQM and store them into `dConfigu
 Get all available team-areas of project on RQM and store them into `dTeamAreas` property.
 
 Example: 
-   {
-      'teamA' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamA-id},
-      'teamB' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamB-id}
-   }
+
+   .. code:: python
+
+      {
+         'teamA' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamA-id},
+         'teamB' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamB-id}
+      }
 
 **Arguments:**
 
@@ -807,10 +821,13 @@ Return testcase template from provided information.
 
 **Returns:**
 
+* ``sTCxml``
+
    / *Type*: str /
 
-   The xml template as string.
+   The xml testcase template as string.
       """
+      sTCxml = ''
       if not sTCtemplate:
          sTemplatePath = os.path.join(self.templatesDir ,'testcase.xml')
          oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
@@ -873,7 +890,8 @@ Return testcase template from provided information.
          root = self.addTeamAreaNode(root, sTeam)
 
       # return xml template as string
-      return etree.tostring(oTree)
+      sTCxml = etree.tostring(oTree)
+      return sTCxml
 
    def createTCERTemplate(self, testcaseID, testcaseName, testplanID,
                           confID='', sTeam='', sOwnerID=''):
@@ -920,10 +938,13 @@ Return testcase execution record template from provided information.
 
 **Returns:**
 
+* ``sTCERxml``
+
    / *Type*: str /
 
-   The xml template as string.
+   The xml testcase execution record template as string.
       """
+      sTCERxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'executionworkitem.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       root = oTree.getroot()
@@ -965,7 +986,8 @@ Return testcase execution record template from provided information.
          root = self.addTeamAreaNode(root, sTeam)
 
       # return xml template as string
-      return etree.tostring(oTree)
+      sTCERxml = etree.tostring(oTree)
+      return sTCERxml
 
    def createExecutionResultTemplate(self, testcaseID, testcaseName, testplanID, 
          TCERID, resultState, startTime='', endTime='', duration='',  testPC='', 
@@ -1061,10 +1083,13 @@ Return testcase execution result template from provided information.
 
 **Returns:**
 
+* ``sTCResultxml``
+
    / *Type*: str /
 
-   The xml template as string.
+   The xml testcase result template as string.
       """
+      sTCResultxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'executionresult.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       root = oTree.getroot()
@@ -1138,7 +1163,8 @@ Return testcase execution result template from provided information.
          root = self.addTeamAreaNode(root, sTeam)
 
       # return xml template as string
-      return etree.tostring(oTree)
+      sTCResultxml = etree.tostring(oTree)
+      return sTCResultxml
 
    def createBuildRecordTemplate(self, buildName):
       """
@@ -1154,10 +1180,13 @@ Return build record template from provided build name.
 
 **Returns:**
 
+* ``sBuildxml``
+
    / *Type*: str /
 
-   The xml template as string.
+   The xml build template as string.
       """
+      sBuildxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'buildrecord.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
 
@@ -1165,7 +1194,8 @@ Return build record template from provided build name.
       oTittle      = oTree.find('ns3:title', nsmap)
       oTittle.text = buildName
 
-      return etree.tostring(oTree)
+      sBuildxml = etree.tostring(oTree)
+      return sBuildxml
 
    def createConfigurationTemplate(self, confName):
       """
@@ -1181,10 +1211,13 @@ Return configuration - Test Environment template from provided configuration nam
 
 **Returns:**
 
+* ``sEnvironmentxml``
+
    / *Type*: str /
    
-   The xml template as string.
+   The xml test environment template as string.
       """      
+      sEnvironmentxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'configuration.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
 
@@ -1192,7 +1225,8 @@ Return configuration - Test Environment template from provided configuration nam
       oTittle      = oTree.find('ns3:title', nsmap)
       oTittle.text = confName
 
-      return etree.tostring(oTree)
+      sEnvironmentxml = etree.tostring(oTree)
+      return sEnvironmentxml
 
    def createTSERTemplate(self, testsuiteID, testsuiteName, testplanID, 
                           confID='', sOwnerID=''):
@@ -1233,10 +1267,13 @@ Return testsuite execution record (TSER) template from provided configuration na
 
 **Returns:**
 
+* ``sTSxml``
+
    / *Type*: str /
 
-   The xml template as string.
+   The xml testsuite template as string.
       """  
+      sTSxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 
                                    'suiteexecutionrecord.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
@@ -1274,7 +1311,8 @@ Return testsuite execution record (TSER) template from provided configuration na
          root.append(oConf)
 
       # return xml template as string
-      return etree.tostring(oTree)
+      sTSxml = etree.tostring(oTree)
+      return sTSxml
 
    def createTestsuiteResultTemplate(self, testsuiteID, testsuiteName, TSERID, 
                                      lTCER, lTCResults, startTime='', 
@@ -1340,10 +1378,13 @@ Return testsuite execution result template from provided configuration name.
 
 **Returns:**
 
+* ``sTSResultxml``
+
    / *Type*: str /
 
-   The xml template as string.
+   The xml testsuite result template as string.
       """  
+      sTSResultxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'testsuitelog.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
 
@@ -1407,7 +1448,8 @@ Return testsuite execution result template from provided configuration name.
          root.append(oExecutionResult)
          
       # return xml template as string
-      return etree.tostring(oTree)
+      sTSResultxml = etree.tostring(oTree)
+      return sTSResultxml
 
    #
    #  Methods to create RQM resources
@@ -1439,14 +1481,17 @@ Create new resource with provided data from template by POST method.
 
    A dictionary reponse which contains status, ID, status_code and error message.
 
-   E.g:
+   Example:
 
-   {
-      'success' : False, 
-      'id': None, 
-      'message': '', 
-      'status_code': ''
-   }
+   .. code:: python
+
+      {
+         'success' : False, 
+         'id': None, 
+         'message': '', 
+         'status_code': ''
+      }
+
       """
       returnObj = {
          'success' : False, 
@@ -1523,14 +1568,17 @@ Create new build record.
 
    A dictionary reponse which contains status, ID, status_code and error message.
 
-   E.g:
+   Example:
 
-   {
-      'success' : False, 
-      'id': None, 
-      'message': '', 
-      'status_code': ''
-   }
+   .. code:: python
+
+      {
+         'success' : False, 
+         'id': None, 
+         'message': '', 
+         'status_code': ''
+      }
+
       """
       # check existing build record in this execution
       returnObj = {'success' : False, 'id': None, 'message': '', 'status_code': ''}
@@ -1573,14 +1621,17 @@ Create new configuration - test environment.
 
    A dictionary reponse which contains status, ID, status_code and error message.
 
-   E.g:
+   Example:
 
-   {
-      'success' : False, 
-      'id': None, 
-      'message': '', 
-      'status_code': ''
-   }
+   .. code:: python
+
+      {
+         'success' : False, 
+         'id': None, 
+         'message': '', 
+         'status_code': ''
+      }
+
       """
       returnObj = {'success' : False, 'id': None, 'message': '', 'status_code': ''}
       # check existing build record in this executioon
@@ -1665,12 +1716,15 @@ Link list of test cases to provided testplan ID.
    
    Response dictionary which contains status and error message.
 
-   E.g:
+   Example:
 
-   {
-      'success' : False, 
-      'message': ''
-   }
+   .. code:: python
+
+      {
+         'success' : False, 
+         'message': ''
+      }
+
       """
       returnObj = {'success' : False, 'message': ''}
       if lTestcases == None:
@@ -1726,12 +1780,15 @@ Link list of test cases to provided testsuite ID
    
    Response dictionary which contains status and error message.
 
-   E.g:
+   Example:
 
-   {
-      'success' : False, 
-      'message': ''
-   }
+   .. code:: python
+
+      {
+         'success' : False, 
+         'message': ''
+      }
+
       """
       returnObj = {'success' : False, 'message': ''}
       if lTestcases == None:
