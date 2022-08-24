@@ -38,8 +38,7 @@ import colorama as col
 
 from robot.api import ExecutionResult
 from RobotResults2RQM.CRQM import CRQMClient
-
-VERSION = "1.0.1"
+from RobotResults2RQM.version import VERSION, VERSION_DATE
 
 DRESULT_MAPPING = {
    "PASS":  "Passed",
@@ -73,7 +72,7 @@ DEFAULT_METADATA = {
 ########################################################################
 class Logger():
    """
-      Logger class for logging message.
+Logger class for logging message.
    """
    output_logfile = None
    output_console = True
@@ -88,22 +87,40 @@ class Logger():
    dryrun = False
 
    @classmethod
-   def config(cls, output_console=True, output_logfile=None, indent=0, 
-              dryrun=False):
+   def config(cls, output_console=True, output_logfile=None, 
+              indent=0, dryrun=False):
       """
-      Configure Logger class.
+Configure Logger class.
 
-      Args:
-         output_console : write message to console output.
+**Arguments:**
 
-         output_logfile : path to log file output.
+* ``output_console``
 
-         indent : offset indent.
+   / *Condition*: optional / *Type*: bool / *Default*: True /
 
-         dryrun : if set, a prefix as 'dryrun' is added for all messages.
+   Write message to console output.
 
-      Returns:
-         None.
+* ``output_logfile``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   Path to log file output.
+
+* ``indent``
+
+   / *Condition*: optional / *Type*: int / *Default*: 0 /
+
+   Offset indent.
+
+* ``dryrun``
+
+   / *Condition*: optional / *Type*: bool / *Default*: True /
+
+   If set, a prefix as 'dryrun' is added for all messages.
+
+**Returns:**
+
+(*no returns*)
       """
       cls.output_console = output_console
       cls.output_logfile = output_logfile
@@ -114,17 +131,31 @@ class Logger():
    @classmethod
    def log(cls, msg='', color=None, indent=0):
       """
-      Write log message to console/file output.
+Write log message to console/file output.
 
-      Args:
-         msg : message to write to output.
+**Arguments:**
 
-         color : color style for the message.
+* ``msg``
 
-         indent : offset indent.
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Message which is written to output.
+
+* ``color``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   Color style for the message.
+
+* ``indent``
+
+   / *Condition*: optional / *Type*: int / *Default*: 0 /
+
+   Offset indent.
       
-      Returns:
-         None.
+**Returns:**
+
+(*no returns*)
       """
       if color==None:
          color = cls.color_normal
@@ -138,28 +169,42 @@ class Logger():
    @classmethod
    def log_warning(cls, msg):
       """
-      Write warning message to console/file output.
+Write warning message to console/file output.
       
-      Args:
-         msg : message to write to output.
+**Arguments:**
 
-      Returns:
-         None.
+* ``msg``
+
+   / *Condition*: required / *Type*: str /
+
+   Warning message which is written to output.
+
+**Returns:**
+
+(*no returns*)
       """
       cls.log(cls.prefix_warn+str(msg), cls.color_warn)
 
    @classmethod
    def log_error(cls, msg, fatal_error=False):
       """
-      Write error message to console/file output.
+Write error message to console/file output.
 
-      Args:
-         msg : message to write to output.
+* ``msg``
 
-         fatal_error : if set, tool will terminate after logging error message.
+   / *Condition*: required / *Type*: str /
 
-      Returns:
-         None.
+   Error message which is written to output.
+
+* ``fatal_error``
+
+   / *Condition*: optional / *Type*: bool / *Default*: False /
+
+   If set, tool will terminate after logging error message.
+
+**Returns:**
+
+(*no returns*)
       """
       prefix = cls.prefix_error
       if fatal_error:
@@ -173,18 +218,32 @@ class Logger():
 
 def get_from_tags(lTags, reInfo):
    """
-      Extract testcase information from tags.
+Extract testcase information from tags.
 
-      Example: 
-         TCID-xxxx, FID-xxxx, ...
+Example: 
+   TCID-xxxx, FID-xxxx, ...
 
-      Args:
-         lTags : list of tag information.
+**Arguments:**
 
-         reInfo : regex to get the expectated info (ID) from tag info.
+* ``lTags``
 
-      Returns:
-         lInfo : list of expected information (ID)
+   / *Condition*: required / *Type*: list /
+
+   List of tag information.
+
+* ``reInfo``
+
+   / *Condition*: required / *Type*: str /
+
+   Regex to get the expectated info (ID) from tag info.
+
+**Returns:**
+
+* ``lInfo``
+
+   / *Type*: list /
+   
+   List of expected information (ID)
    """
    lInfo = []
    if len(lTags) != 0:
@@ -196,13 +255,23 @@ def get_from_tags(lTags, reInfo):
 
 def convert_to_datetime(time):
    """
-   Convert time string to datetime.
+Convert time string to datetime.
 
-   Args:
-      time : string of time.
+**Arguments:**
 
-   Returns:
-      dt : datetime object
+* ``time``
+
+   / *Condition*: required / *Type*: str /
+
+   String of time.
+
+**Returns:**
+
+* ``dt``
+
+   / *Type*: `datetime` object/
+
+   Datetime object.
    """
    tp=re.findall("(\d{4})(\d{2})(\d{2})\s(\d+):(\d+):(\d+)\.(\d+)",time)[0]
    tp=list(map(int,tp))
@@ -211,29 +280,36 @@ def convert_to_datetime(time):
 
 def __process_commandline():
    """
-   process provided argument(s) from command line.
+Process provided argument(s) from command line.
 
-   Avalable arguments in command line:
-      - `-v` : tool version information.
-      - `outputfile` : path to the output file or directory with output files to be imported.
-      - `host` : RQM host url.
-      - `project` : RQM project name.
-      - `user` : user for RQM login.
-      - `password` : user password for RQM login.
-      - `testplan` : RQM testplan ID.
-      - `-recursive` : if True, then the path is searched recursively for log files to be imported.
-      - `-createmissing` : if True, then all testcases without fcid are created when importing.
-      - `-dryrun` : if True, then just check the RQM authentication and show what would be done.
+Avalable arguments in command line:
+   - `-v` : tool version information.
+   - `outputfile` : path to the output file or directory with output files to be imported.
+   - `host` : RQM host url.
+   - `project` : RQM project name.
+   - `user` : user for RQM login.
+   - `password` : user password for RQM login.
+   - `testplan` : RQM testplan ID.
+   - `-recursive` : if True, then the path is searched recursively for log files to be imported.
+   - `-createmissing` : if True, then all testcases without fcid are created when importing.
+   - `-dryrun` : if True, then just check the RQM authentication and show what would be done.
 
-   Returns:
-      ArgumentParser object.
+**Arguments:**
+
+(*no arguments*)
+
+**Returns:**
+
+   / *Type*: `ArgumentParser` object /
+
+   ArgumentParser object.
    """
    cmdlineparser=argparse.ArgumentParser(prog="RobotResults2RQM (XMLoutput to RQM importer)", 
                                        description="RobotResults2RQM imports XML output files (default: output.xml) " + \
                                                    "generated by the Robot Framework into a IBM Rational Quality Manager."
                                        )
 
-   cmdlineparser.add_argument('-v',action='version', version='%(prog)s '+VERSION,help='Version of the RobotResults2RQM importer.')
+   cmdlineparser.add_argument('-v',action='version', version=f'v{VERSION} ({VERSION_DATE})',help='Version of the RobotResults2RQM importer.')
    cmdlineparser.add_argument('outputfile', type=str, help='absolute or relative path to the output file or directory with output files to be imported.')
    cmdlineparser.add_argument('host', type=str, help='RQM host url.')
    cmdlineparser.add_argument('project', type=str, help='project on RQM.')
@@ -251,18 +327,31 @@ def __process_commandline():
 
 def process_suite_metadata(suite, default_metadata=DEFAULT_METADATA):
    """
-   Try to find metadata information from all suite levels.
-   
-   Note:
-      Metadata at top suite level has a highest priority.
-   
-   Args:
-      suite :  Robot suite object.
+Try to find metadata information from all suite levels.
 
-      default_metadata: initial Metadata information for updating.
+Metadata at top suite level has a highest priority.
+   
+**Arguments:**
 
-   Returns:
-      dMetadata : dictionary of Metadata information.
+* ``suite``
+
+   / *Condition*: required / *Type*: `TestSuite` object /
+
+   Robot suite object.
+
+* ``default_metadata``
+
+   / *Condition*: optional / *Type*: dict / *Default*: DEFAULT_METADATA /
+
+   Initial Metadata information for updating.
+
+**Returns:**
+
+* ``dMetadata``
+
+   / *Type*: dict /
+
+   Dictionary of Metadata information.
    """
    dMetadata = dict(default_metadata)
    # Try to get metadata from first child of suite - multiple log files
@@ -276,15 +365,29 @@ def process_suite_metadata(suite, default_metadata=DEFAULT_METADATA):
 
 def process_metadata(metadata, default_metadata=DEFAULT_METADATA):
    """
-   Extract metadata from suite result bases on DEFAULT_METADATA
+Extract metadata from suite result bases on DEFAULT_METADATA.
 
-   Args:
-      metadata :  Robot metadata object.
+**Arguments:**
 
-      default_metadata: initial Metadata information for updating.
+* ``metadata``
 
-   Returns:
-      dMetadata : dictionary of Metadata information.   
+   / *Condition*: required / *Type*: dict /
+
+   Robot metadata object.
+
+* ``default_metadata``
+
+   / *Condition*: optional / *Type*: dict / *Default*: DEFAULT_METADATA /
+
+   Initial Metadata information for updating.
+
+**Returns:**
+
+* ``dMetadata``
+   
+   / *Type*: dict /
+   
+   Dictionary of Metadata information.   
    """
    dMetadata = dict(default_metadata)
    for key in dMetadata.keys():
@@ -296,15 +399,25 @@ def process_metadata(metadata, default_metadata=DEFAULT_METADATA):
 
 def process_suite(RQMClient, suite):
    """
-   process robot suite for importing to RQM.
+Process robot suite for importing to RQM.
 
-   Args:
-      RQMClient :  RQMClient object.
+**Arguments:**
 
-      suite : Robot suite object.
+* ``RQMClient``
 
-   Returns:
-      None.   
+   / *Condition*: required / *Type*: `RQMClient` object/
+
+   RQMClient object.
+
+* ``suite``
+
+   / *Condition*: required / *Type*: `TestSuite` object/
+
+   Robot suite object.
+
+**Returns:**
+
+(*no returns*)  
    """
    if len(list(suite.suites)) > 0:
       for subsuite in suite.suites:
@@ -327,15 +440,25 @@ def process_suite(RQMClient, suite):
 
 def process_test(RQMClient, test):
    """
-   process robot test for importing to RQM.
+Process robot test for importing to RQM.
 
-   Args:
-      RQMClient :  RQMClient object.
+**Arguments:**
 
-      test : Robot test object.
+* ``RQMClient``
 
-   Returns:
-      None.   
+   / *Condition*: required / *Type*: `RQMClient` object/
+
+   RQMClient object.
+
+* ``test``
+
+   / *Condition*: required / *Type*: `TestCase` object/
+
+   Robot test object.
+
+**Returns:**
+
+(*no returns*)   
    """
    Logger.log("Process test: %s"%test.name)
 
@@ -481,30 +604,36 @@ def process_test(RQMClient, test):
 
 def RobotResults2RQM(args=None):
    """
-   Import robot results from output.xml to RQM - IBM Rational Quality Manager.
+Import robot results from output.xml to RQM - IBM Rational Quality Manager.
 
-   Flow to import Robot results to RQM: 
-      1. Process provided arguments from command line
-      2. Login Rational Quality Management (RQM)
-      3. Parse Robot results
-      4. Import results into RQM 
-      5. Link all executed testcases to provided testplan/testsuite ID
+Flow to import Robot results to RQM: 
+   1. Process provided arguments from command line
+   2. Login Rational Quality Management (RQM)
+   3. Parse Robot results
+   4. Import results into RQM 
+   5. Link all executed testcases to provided testplan/testsuite ID
 
-   Args:
-      args : Argument parser object:
-         - `outputfile` : path to the output file or directory with output files to be imported.
-         - `host` : RQM host url.
-         - `project` : RQM project name.
-         - `user` : user for RQM login.
-         - `password` : user password for RQM login.
-         - `testplan` : RQM testplan ID.
-         - `recursive` : if True, then the path is searched recursively for log files to be imported.
-         - `createmissing` : if True, then all testcases without fcid are created when importing.
-         - `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
-         - `dryrun` : if True, then just check the RQM authentication and show what would be done.
+**Arguments:**
 
-   Returns:
-      None.
+* ``args``
+
+   / *Condition*: required / *Type*: `ArgumentParser` object /
+
+   Argument parser object which contains:
+      - `outputfile` : path to the output file or directory with output files to be imported.
+      - `host` : RQM host url.
+      - `project` : RQM project name.
+      - `user` : user for RQM login.
+      - `password` : user password for RQM login.
+      - `testplan` : RQM testplan ID.
+      - `recursive` : if True, then the path is searched recursively for log files to be imported.
+      - `createmissing` : if True, then all testcases without fcid are created when importing.
+      - `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
+      - `dryrun` : if True, then just check the RQM authentication and show what would be done.
+
+**Returns:**
+
+(*no returns*)
    """
 
    # 1. process provided arguments from command line as default

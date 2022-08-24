@@ -1,0 +1,202 @@
+%
+% Generated at 18.08.2022 - 16:04:07 by RobotResults2RQM
+%
+
+\hypertarget{description-sample-robotframework-testcase}{%
+\section{Sample RobotFramework
+Testcase:}\label{description-sample-robotframework-testcase}}
+
+For test case management, we need some tracable information such as
+version, testcase ID, component, ... to manage and track testcase(s) on
+RQM.
+
+So, this information can be provided in \rcode{Metadata} (for the whole
+testsuite/execution info: version, build, ...) and \rcode{{[}Tags{]}}
+information (for specific testcase info: component, testcase ID,
+requirement ID, ...).
+
+Sample Robot testcase with the neccessary information for importing to
+RQM: :
+
+\begin{robotcode}
+*** Settings ***
+Metadata   project      ROBFW             # Test Environment
+Metadata   version_sw   SW_VERSION_0.1    # Build Record
+Metadata   component    Import_Tools      # Component - is used for test case
+Metadata   machine      %{COMPUTERNAME}   # Hostname
+Metadata   team-area    Internet Team RQM  # team-area (case-sensitive)
+
+*** Test Cases ***
+Testcase 01
+   [Documentation]   This test is traceable with provided tcid
+   [Tags]   TCID-1001   FID-112   FID-111    robotfile-https://github.com/test-fullautomation
+   Log      This is Testcase 01
+
+Testcase 02
+   [Documentation]  This new testcase will be created if -createmissing argument
+               ...  is provided when importing
+   [Tags]   FID-113  robotfile-https://github.com/test-fullautomation
+   Log      This is Testcase 02
+\end{robotcode}
+
+\hypertarget{description-tool-features}{%
+\section{Tool features:}\label{description-tool-features}}
+
+By default, tool will base on provided arguments (see
+Usage) and \rcode{tcid} information in Robot test case(s)
+to:
+
+\begin{itemize}
+\tightlist
+\item
+  Login the RQM server and verify the provided \rlog{project},
+  \rlog{testplan}.
+\item
+  Create build record and test environment (if already provided in Robot
+  test case and not existing on RQM) for execution.
+\item
+  Create new Test Case Execution Record - TCER (if it is not existing)
+  bases on test case ID and \rlog{testplan} ID.
+\item
+  Create new Test Case Execution Result which contents the detail and
+  result state of test case.
+\item
+  Link all test case(s) to provided \rlog{testplan}.
+\end{itemize}
+
+Besides,
+\href{https://github.com/test-fullautomation/robotframework-testresult2rqmtool}{RobotResults2RQM}
+tool also supports to:
+
+\begin{itemize}
+\tightlist
+\item
+  Create new test case(s) which is not existing on RQM (do not have
+  \rcode{tcid} information) while importing result(s) to RQM with
+  optional argument \rlog{-createmissing}.
+\item
+  Update information (such as testcase name, Requirement ID, ...) of
+  existing testcase on RQM with optional argument
+  \rlog{-updatetestcase}.
+\end{itemize}
+
+\hypertarget{description-robot-testcase-information-on-rqm}{%
+\section{Robot Testcase information on
+RQM:}\label{description-robot-testcase-information-on-rqm}}
+
+For more detail how the RobotFramework testcase information is displayed
+on RQM, please refer be mapping table:
+
+\begin{table}[h]
+   \label{table:RobotResults2RQM-mapping}
+   \begin{tabular}{|p{0.115\linewidth}|p{0.12\linewidth}|p{0.31\linewidth}|p{0.45\linewidth}|}
+      \hline
+      \multicolumn{2}{|c|}{\textbf{RQM data}}
+                                      &\multicolumn{2}{|c|}{\textbf{RobotFramework}}\\
+      \hline
+      \textbf{Resource} &\textbf{Attribute/ Field}
+                                      &\textbf{Testsuite/Testcase}   
+                                                    &\textbf{Output.xml}\\
+      \hline
+      Build Record      &Title        &\rcode{Metadata version_sw Build}   
+                                                    &\textbf{//suite/metadata/item[@name="version\_sw"]}\\
+      \hline
+      Test Environment  &Title        &\rcode{Metadata project Environment} 
+                                                    &\textbf{//suite/metadata/item[@name="project"]}\\
+      \hline
+      \multirow{8}{*}{\textbf{Test Case}} 
+                        &ID           &\rcode{[Tags] tcid-xxx} 
+                                                    &\textbf{//suite/test/tags/tag[@text="tcid-xxx"]}\\
+                        \cline{2-4}
+                        &Name         &tesname      &\textbf{//suite/test/@name}\\
+                        \cline{2-4}
+                        &Team Area    &\rcode{Metadata team-area Team_Area} 
+                                                    &\textbf{//suite/metadata/item[@name="team-area"]}\\
+                        \cline{2-4}
+                        &Description  &test doc - \rcode{[Documentation]}
+                                                    &\textbf{//suite/test/doc/@text}\\
+                        \cline{2-4}
+                        &Owner        &provided \rlog{user} in cli  
+                                                    &\\
+                        \cline{2-4}
+                        &Component/ Categories 
+                                      &\rcode{Metadata component Component}
+                                                    &\textbf{//suite/metadata/item[@name="component"]}\\
+                        \cline{2-4}
+                        &Requirement ID 
+                                      &\rcode{[Tags] fid-yyy}  
+                                                    &\textbf{//suite/test/tags/tag[@text="fid-yyy"]}\\
+                        \cline{2-4}
+                        &Robot File   &\rcode{[Tags] robotfile-zzz}   
+                                                    &\textbf{//suite/test/tags/tag[@text="robotfile-zzz"]}\\
+      \hline
+      \multirow{8}{\linewidth}{\textbf{Test Case Execution Record (TCER)}}
+                        &Owner        &provided \rlog{user} in cli  
+                                                    &\\
+                        \cline{2-4}
+                        &Team Area    &\rcode{Metadata team-area Team_Area} 
+                                                    &\textbf{//suite/metadata/item[@name="team-area"]}\\
+                        \cline{2-4}
+                        &Test Plan    &Interaction URL to provided \rlog{testplan} in cli
+                                                    &\\
+                        \cline{2-4}
+                        &Test Case    &Interaction URL to provided testcase ID: 
+                                      provided tcid in \rcode{[Tags]: tcid-xxx} or
+                                      generated tcid when using \rlog{-createmissing}
+                                                    &\textbf{//suite/test/tags/tag[@text="tcid-xxx"]}\\
+                        \cline{2-4}
+                        &Test Environment  
+                                      &\rcode{Metadata project Environment} 
+                                                    &\textbf{//suite/metadata/item[@name="project"]}\\
+      \hline
+      \multirow{13}{\linewidth}{\textbf{Test Result }}
+                        &Owner        &provided \rlog{user} in cli  
+                                                    &\\
+                        \cline{2-4}
+                        &Tested By    &provided \rlog{user} in cli - userid must be used
+                                                    &\\
+                        \cline{2-4}
+                        &Team Area    &\rcode{Metadata team-area Team_Area}
+                                                    &\textbf{//suite/metadata/item[@name="team-area"]}\\
+                        \cline{2-4}
+                        &Actual Result&Test case result (\ifpassed{PASSED}, \iffailed{FAILED}, \ifunknown{UNKNOWN})
+                                                    &\textbf{//suite/test/status/@status}\\
+                        \cline{2-4}
+                        &Host Name    &\begin{robotcode}
+  Metadata machine %{COMPUTERNAME}
+\end{robotcode}
+                                                    &\textbf{//suite/metadata/item[@name="machine"]}\\
+                        \cline{2-4}
+                        &Test Plan    &Interaction URL to provided \rlog{testplan} in cli
+                                                    &\\
+                        \cline{2-4}
+                        &Test Case    &Interaction URL to provided testcase ID: 
+                                      provided tcid in \rcode{[Tags]: tcid-xxx} or
+                                      generated tcid when using \rlog{-createmissing}
+                                                    &\textbf{//suite/test/tags/tag[@text="tcid-xxx"]}\\
+                        \cline{2-4}
+                        &Test Case Execution Record 
+                                      &Interaction URL to TCER ID
+                                                    &\\
+                        \cline{2-4}
+                        &Build        &\rcode{Metadata version_sw Build}
+                                                    &\textbf{//suite/metadata/item[@name="version\_sw"]}\\
+                        \cline{2-4}
+                        &Start Time   &Test case start time
+                                                    &\textbf{//suite/test/status/@starttime}\\
+                        \cline{2-4}
+                        &End Time     &Test case end time
+                                                    &\textbf{//suite/test/status/@endtime}\\
+                        \cline{2-4}
+                        &Total Run Time
+                                      &Calculated from start and end time
+                                                    &\\
+                        \cline{2-4}
+                        &Result Details 
+                                      &Test case message log             
+                                                    &\textbf{//suite/test/status/@text}\\
+                        \cline{2-4}
+      \hline
+   \end{tabular} 
+   \caption{RQM data \& RobotFramework testcase/output.xml}
+\end{table}

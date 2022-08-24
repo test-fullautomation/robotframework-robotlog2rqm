@@ -44,16 +44,31 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 ######################################################################## 
 
 def get_xml_tree(file_name, bdtd_validation=True):
-   '''
-   Parse xml object from file.
+   """
+Parse xml object from file.
 
-   Args:
-      file_name : path to file or file-like object.
-      bdtd_validation : if True, validate against a DTD referenced by the document.
+**Arguments:**
 
-   Returns:
-      oTree : xml etree object
-   '''
+* ``file_name``
+
+   / *Condition*: required / *Type*: str /
+
+   Path to file or file-like object.
+
+* ``bdtd_validation``
+
+   / *Condition*: optional / *Type*: bool /
+
+   If True, validate against a DTD referenced by the document.
+
+**Returns:**
+
+* ``oTree``
+
+  / *Type*: `lxml.etree._ElementTree` object /
+
+  The xml etree object.
+   """
    oTree = None
    try:
       oParser = etree.XMLParser(dtd_validation=bdtd_validation)
@@ -68,22 +83,21 @@ def get_xml_tree(file_name, bdtd_validation=True):
 #
 ########################################################################### 
 class CRQMClient():
-   '''
-   CRQMClient class uses RQM REST APIs to get, create and update resources
-   (testplan, testcase, test result, ...) on RQM - Rational Quality Manager
-   
-   Resoure type mapping:
-      - buildrecord:          Build Record
-      - configuration:        Test Environment
-      - testplan:             Test Plan
-      - testsuite:            Test Suite
-      - suiteexecutionrecord: Test Suite Execution Record (TSER)
-      - testsuitelog:         Test Suite Log
-      - testcase:             Test Case
-      - executionworkitem:    Test Execution Record (TCER)
-      - executionresult:      Execution Result
+   """
+CRQMClient class uses RQM REST APIs to get, create and update resources
+(testplan, testcase, test result, ...) on RQM - Rational Quality Manager
 
-   '''
+Resoure type mapping:
+   - buildrecord:          Build Record
+   - configuration:        Test Environment
+   - testplan:             Test Plan
+   - testsuite:            Test Suite
+   - suiteexecutionrecord: Test Suite Execution Record (TSER)
+   - testsuitelog:         Test Suite Log
+   - testcase:             Test Case
+   - executionworkitem:    Test Execution Record (TCER)
+   - executionresult:      Execution Result
+   """
    RESULT_STATES = ['paused', 'inprogress', 'notrun', 'passed', 'incomplete', 
                     'inconclusive', 'part_blocked', 'failed', 'error', 
                     'blocked', 'perm_failed', 'deferred']
@@ -118,20 +132,31 @@ class CRQMClient():
 
    def __init__(self, user, password, project, host):
       """
-      Constructor for CRQMClient class
+Constructor of class ``CRQMClient``.
 
-      Args:
-         user : user name for RQM's authentication.
+* ``user``
 
-         password : user password for RQM's authentication.
+   / *Condition*: required / *Type*: str /
 
-         project : RQM project name.
+   User name for RQM's authentication.
 
-         host : the url that RQM is hosted.
+* ``password``
 
-      Returns:
-         CRQMClient instance
+   / *Condition*: required / *Type*: str /
 
+   User password for RQM's authentication.
+   
+* ``project``
+
+   / *Condition*: required / *Type*: str /
+
+   The RQM project name.
+   
+* ``host``
+
+   / *Condition*: required / *Type*: str /
+
+   The url that RQM is hosted.
       """
       # RQM authentication 
       self.host    = host
@@ -172,23 +197,29 @@ class CRQMClient():
       self.testsuite     = None
 
    def login(self):
-      '''
-      Log in RQM by provided user & password.
+      """
+Log in RQM by provided user & password.
 
-      Note: 
-         When the authentication is successful, the JSESSIONID from cookies will 
-         be stored as header for later POST method.
+**Arguments:**
 
-      Returns:
-         True if successful, False otherwise.
-      '''
+(*no arguments*)
+
+**Returns:**
+
+* ``bSuccess``
+
+  / *Type*: bool /
+
+  Indicates if the computation of the method ``login`` was successful or not.
+      """
       bSuccess = False
       res = self.session.post(self.host + '/qm/j_security_check', allow_redirects=True, verify=False, 
                               data={'j_username':self.userID,'j_password':self.pw})
       if res.status_code == 200:
          # verify login
          if self.verifyProjectName():
-            # get JSESSIONID from cookies and store into request headers
+            # When the authentication is successful, the JSESSIONID from cookies will 
+            # be stored as header for later POST method.
             try:
                self.headers['X-Jazz-CSRF-Prevent'] = self.session.cookies['JSESSIONID']
                bSuccess = True
@@ -197,22 +228,26 @@ class CRQMClient():
       return bSuccess
 
    def verifyProjectName(self):
-      ''' 
-      Verify the project name by searching it in `project-areas` XML response.
+      """ 
+Verify the project name by searching it in `project-areas` XML response.
 
-      Note:
-         The found project ID will be stored and:
-            - required for `team-areas` request (project name cannot be used)
-            - used for all later request urls instead of project name
+**Arguments:**
 
-      Returns:
-         - True if the authentication is successful.
-         - False if the authentication is failed.
-      '''
+(*no arguments*)
+
+**Returns:**
+
+* ``bSuccess``
+
+  / *Type*: bool /
+
+  Indicates if the computation of the method ``verifyProjectName`` was successful or not.
+      """
       bSuccess = False
 
-      # Try to get project UUID from provided project name
-      # Then use project UUID instead of name in request URL
+      # The found project ID will be stored and:
+      #    - required for `team-areas` request (project name cannot be used)
+      #    - used for all later request urls instead of project name
       resProjects = self.session.get(self.host + '/qm/process/project-areas', 
                                        allow_redirects=True, verify=False)
       if resProjects.status_code == 200:
@@ -233,38 +268,69 @@ class CRQMClient():
 
    def disconnect(self):
       """
-      Disconnect from RQM 
+Disconnect from RQM.
+
+**Arguments:**
+
+(*no arguments*)
+
+**Returns:**
+
+(*no returns*)
       """
       self.session.close()
 
    def config(self, plan_id, build_name=None, config_name=None, 
               createmissing=False, updatetestcase=False,suite_id=None):
-      '''
-      Configure RQMClient with testplan ID, build, configuration, createmissing, ...
-         - Verify the existence of provided testplan ID.
-         - Verify the existences of provided build and configuration names
-           before creating new ones.
+      """
+Configure RQMClient with testplan ID, build, configuration, createmissing, ...
+   - Verify the existence of provided testplan ID.
+   - Verify the existences of provided build and configuration names
+      before creating new ones.
 
-      Args:
-         plan_id : testplan ID of RQM project for importing result(s).
+**Arguments:**
+* ``plan_id``
 
-         build_name (optional) : the `Build Record` for linking result(s).
-            Set it to `None` if not be used, the empty name '' may lead to error.
+   / *Condition*: required / *Type*: str /
 
-         config_name (optional) : the `Test Environment` for linking result(s).
-            Set it to `None` if not be used, the empty name '' may lead to error.
+   Testplan ID of RQM project for importing result(s).
 
-         createmissing (optional) : in case this argument is set to `True`, 
-            the testcase without `tcid` information will be created on RQM.
+* ``build_name``
 
-         updatetestcase (optional) : in case this argument is set to `True`, 
-            the information of testcase on RQM will be updated bases on robot testfile.
+   / *Condition*: optional / *Type*: str / *Default*: None / 
 
-         suite_id (optional) : testsuite ID of RQM project for importing result(s).
-      
-      Returns:
-         None.
-      '''
+   The `Build Record` for linking result(s).
+   Set it to `None` if not be used, the empty name '' will lead to error.
+
+* ``config_name``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   The `Test Environment` for linking result(s).
+   Set it to `None` if not be used, the empty name '' may lead to error.
+
+* ``createmissing``
+
+   / *Condition*: optional / *Type*: bool / *Default*: False /
+   
+   If `True`, the testcase without `tcid` information will be created on RQM.
+
+* ``updatetestcase``
+
+   / *Condition*: optional / *Type*: bool / *Default*: False /
+   
+   If `True`, the information of testcase on RQM will be updated bases on robot testfile.
+
+* ``suite_id (optional)``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   Testsuite ID of RQM project for importing result(s).
+
+**Returns:**
+
+(*no returns*)
+      """
       try:
          self.createmissing = createmissing
          self.updatetestcase = updatetestcase
@@ -306,37 +372,63 @@ class CRQMClient():
          raise Exception('Configure RQMClient failed: %s'%error)
 
    def userURL(self, userID):
-      '''
-      Return interaction URL of provided userID
+      """
+Return interaction URL of provided userID
 
-      Args:
-         userID : the user ID
-      
-      Returns:
-         userURL : the interaction URL of provided userID
-      '''
+**Arguments:**
+
+* ``userID``
+
+   / *Condition*: required / *Type*: str /
+
+   The user ID.
+
+**Returns:**
+
+* ``userURL``
+
+   / *Type*: str /
+   
+   The interaction URL of provided userID.
+      """
       userURL = self.host + "/jts/resource/itemName/com.ibm.team.repository.Contributor/" + userID
       return userURL
 
    def integrationURL(self, resourceType, id=None, forceinternalID=False):
-      '''
-      Return interaction URL of provided reource and ID.
+      """
+Return interaction URL of provided reource and ID.
+The provided ID can be internalID (contains only digits) or externalID.
 
-      Note:
-         ID can be internalID (contains only digits) or externalID.
+**Arguments:**
 
-      Args:
-         resourceType : the RQM resource type (e.g: "testplan", "testcase", ...)
+* ``resourceType``
 
-         id (optional) : ID of given resource.
-            If given: the specified url to resource ID is returned.
-            If `None`: the url to resource type (to get all entity) is returned.
+   / *Condition*: required / *Type*: str /
 
-         forceinternalID (optional) : force to return the url of resource as internal ID.
+   The RQM resource type (e.g: "testplan", "testcase", ...).
 
-      Returns:
-         integrationURL : interaction URL of provided reource and ID.
-      '''
+* ``id``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   The ID of given resource.
+      If given: the specified url to resource ID is returned.
+      If `None`: the url to resource type (to get all entity) is returned.
+
+* ``forceinternalID`` 
+
+   / *Condition*: optional / *Type*: bool / *Default*: False /
+
+   If `True`, force to return the url of resource as internal ID.
+
+**Returns:**
+
+* ``integrationURL``
+
+   / *Type*: str /
+
+   The interaction URL of provided reource and ID.
+      """
       integrationURL = self.host + "/qm/service/com.ibm.rqm.integration.service.IIntegrationService/resources/" + \
                        self.projectID + '/' + resourceType 
       if(id != None):
@@ -349,20 +441,34 @@ class CRQMClient():
       return integrationURL
 
    def webIDfromResponse(self, response, tagID='rqm:resultId'):
-      '''
-      Get internal ID (number) from response of POST method.
+      """
+Get internal ID (number) from response of POST method.
 
-      Note:
-         Only `executionresult` has response text. Other resources has only response header.
+Note:
+   Only `executionresult` has response text. Other resources has only response header.
 
-      Args:
-         response : the response from POST method.
+**Arguments:**
 
-         tagID : tag name which contains ID information.
+* ``response``
 
-      Returns:
-         resultId : internal ID (as number).
-      '''
+   / *Condition*: required / *Type*: str /
+
+   The xml response from POST method for parsing ID information.
+
+* ``tagID``
+
+   / *Condition*: optional / *Type*: str / *Default*: 'rqm:resultId' /
+
+   Tag name which contains ID information.
+
+**Returns:**
+
+* ``resultId``
+
+   / *Type*: str /
+   
+   The internal ID (as number).
+      """
       resultId = ''
       try:
          oResponse = get_xml_tree(BytesIO(str(response).encode()),
@@ -374,21 +480,35 @@ class CRQMClient():
       return resultId
 
    def webIDfromGeneratedID(self, resourrceType, generateID):
-      '''
-      Return web ID (ns2:webId) from generate ID by get resource data from RQM.
+      """
+Return web ID (ns2:webId) from generate ID by get resource data from RQM.
 
-      Note:
-         - This method is only used for generated `testcase`, `executionworkitem` and `executionresult`.
-         - `buildrecord` and `configuration` does not have `ns2:webId` in response data.
+Note:
+   - This method is only used for generated `testcase`, `executionworkitem` and `executionresult`.
+   - `buildrecord` and `configuration` does not have `ns2:webId` in response data.
 
-      Args:
-         resourrceType : the RQM resource type.
+**Arguments:**
 
-         generateID : the Slug ID which is returned in `Content-Location` from POST response.
+* ``resourrceType``
 
-      Returns:
-         webID : web ID (number).
-      '''
+   / *Condition*: required / *Type*: str /
+
+   The RQM resource type.
+
+* ``generateID``
+
+   / *Condition*: required / *Type*: str /
+
+   The Slug ID which is returned in `Content-Location` from POST response.
+
+**Returns:**
+
+* ``webID``
+
+   / *Type*: str /
+   
+   The web ID (as number).
+      """
       webID = generateID
       # below resources that have ns2:webId node in response data
       lSupportedResources = [ 'attachment', 
@@ -420,34 +540,66 @@ class CRQMClient():
    #
    ###########################################################################
    def getResourceByID(self, resourceType, id):
-      '''
-      Return data of provided resource and ID by GET method
+      """
+Return data of provided resource and ID by GET method
 
-      Args:
-         resourrceType : the RQM resource type.
+**Arguments:**
 
-         id : ID of resource.
+* ``resourrceType``
 
-      Returns:
-         res : response data of GET request.
-      '''
+   / *Condition*: required / *Type*: str /
+
+   The RQM resource type.
+
+* ``id``
+
+   / *Condition*: required / *Type*: str /      
+
+   ID of resource.
+
+**Returns:**
+
+* ``res``
+
+   / *Type*: `Response` object /
+
+   Response data of GET request.
+      """
       res = self.session.get(self.integrationURL(resourceType, id), 
                              allow_redirects=True, verify=False)
       return res
 
    def getAllByResource(self, resourceType):
-      '''
-      Return all entries of provided resource by GET method.
+      """
+Return all entries (in all pages) of provided resource by GET method.
 
-      Note:
-         This method will try to fetch all entries in all pages of resource.
+**Arguments:**
 
-      Args:
-         resourrceType : the RQM resource type.
+* ``resourrceType``
 
-      Returns:
-         dReturn : a dictionary which contains response status, message and data.
-      '''
+   / *Condition*: required / *Type*: str /
+
+   The RQM resource type.
+
+**Returns:**
+
+* ``dReturn``
+
+   / *Type*: dict /
+
+   A dictionary which contains response status, message and data.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False, 
+         'message' : '',
+         'data'    : {}
+      }
+
+      """
       dReturn = {
          'success' : False, 
          'message' : '',
@@ -483,10 +635,17 @@ class CRQMClient():
       return dReturn
 
    def getAllBuildRecords(self):
-      '''
-      Get all available build records of project on RQM and store them into 
-      `dBuildVersion` property.   
-      '''
+      """
+Get all available build records of project on RQM and store them into `dBuildVersion` property.
+
+**Arguments:**
+
+(*no arguments*)
+
+**Returns:**
+
+(*no returns*)
+      """
       res = self.getAllByResource('buildrecord')
       if res['success']:
          self.dBuildVersion = res['data']
@@ -494,10 +653,17 @@ class CRQMClient():
          raise Exception("Get all builds failed. Reason: %s"%res['message'])
 
    def getAllConfigurations(self):
-      '''
-      Get all available configurations of project on RQM and store them into 
-      `dConfiguation` property.
-      '''
+      """
+Get all available configurations of project on RQM and store them into `dConfiguation` property.
+
+**Arguments:**
+
+(*no arguments*)
+
+**Returns:**
+
+(*no returns*)
+      """
       res = self.getAllByResource('configuration')
       if res['success']:
          self.dConfiguation = res['data']
@@ -505,16 +671,26 @@ class CRQMClient():
          raise Exception("Get all configurations failed. Reason: %s"%res['message'])
 
    def getAllTeamAreas(self):
-      '''
-      Get all available team-areas of project on RQM and store them into 
-      `dTeamAreas` property.
+      """
+Get all available team-areas of project on RQM and store them into `dTeamAreas` property.
 
-      Example: 
-         {\
-            'teamA' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamA-id},\
-            'teamB' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamB-id}\
-         }
-      '''
+Example: 
+
+   .. code:: python
+
+      {
+         'teamA' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamA-id}',
+         'teamB' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamB-id}'
+      }
+
+**Arguments:**
+
+(*no arguments*)
+
+**Returns:**
+
+(*no returns*)
+      """
       req_url = f"{self.host}/qm/process/project-areas/{self.projectID}/team-areas"
       resTeamAreas = self.session.get(req_url, allow_redirects=True, verify=False)
       if resTeamAreas.status_code == 200:
@@ -534,20 +710,34 @@ class CRQMClient():
    #
    ###########################################################################
    def addTeamAreaNode(self, root, sTeam):
-      '''
-      Append `team-area` node which contains URL to given team-area into xml template
+      """
+Append `team-area` node which contains URL to given team-area into xml template.
 
-      Note: 
-         `team-area` information is case-casesensitive
+Note: 
+   `team-area` information is case-casesensitive
 
-      Args:
-         root : xml root object.
+**Arguments:**
 
-         sTeam : team name to be added.
+* ``root``
 
-      Returns:
-         root : xml root object with addition `team-area` node.
-      '''
+   / *Condition*: required / *Type*: `Element` object /
+
+   The xml root object.
+
+* ``sTeam``
+
+   / *Condition*: required / *Type*: str /
+
+   Team name to be added.
+
+**Returns:**
+
+* ``root``
+
+   / *Type*: str /
+
+   The xml root object with addition `team-area` node.
+      """
       if sTeam in self.dTeamAreas:
          oTeamArea = etree.Element('{http://jazz.net/xmlns/prod/jazz/process/0.6/}team-area', root.nsmap)
          oTeamURL  = etree.Element('{http://jazz.net/xmlns/prod/jazz/process/0.6/}url', root.nsmap)
@@ -562,34 +752,82 @@ class CRQMClient():
    def createTestcaseTemplate(self, testcaseName, sDescription='', 
                               sComponent='', sFID='', sTeam='', sRobotFile='', 
                               sTestType='', sASIL='', sOwnerID='', sTCtemplate=None):
-      '''
-      Return testcase template from provided information.
+      """
+Return testcase template from provided information.
 
-      Args:
-         testcaseName : testcase name.
+**Arguments:**
 
-         sDescription (optional) : testcase description.
+* ``testcaseName``
 
-         sComponent (optional) : component which testcase is belong to.
+   / *Condition*: required / *Type*: str /
 
-         sFID (optional) : function ID(requirement ID) for linking.
+   Testcase name.
 
-         sTeam (optional) : team name for linking.
+* ``sDescription``
 
-         sRobotFile (optional) : link to robot file on source control.
+   / *Condition*: optional / *Type*: str / *Default*: '' /
 
-         sTestType (optional) : test type information.
+   Testcase description.
 
-         sASIL (optional) : ASIL information.
+* ``sComponent``
 
-         sOwnerID (optional) : user ID of testcase owner.
+   / *Condition*: optional / *Type*: str / *Default*: '' /
 
-         sTCtemplate (optional) : existing testcase template as xml string. 
-         If not provided, template file under *RQM_templates* is used as default.
+   Component which testcase is belong to.
 
-      Returns:
-         xml template as string.
-      '''
+* ``sFID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Function ID (requirement ID) for linking.
+
+* ``sTeam``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Team name for linking.
+
+* ``sRobotFile``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Link to robot file on source control.
+
+* ``sTestType``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+   
+   Test type information.
+
+* ``sASIL``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+   
+   ASIL information.
+
+* ``sOwnerID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+   
+   User ID of testcase owner.
+
+* ``sTCtemplate``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+   
+   Existing testcase template as xml string.
+
+   If not provided, template file under `RQM_templates` is used as default.
+
+**Returns:**
+
+* ``sTCxml``
+
+   / *Type*: str /
+
+   The xml testcase template as string.
+      """
+      sTCxml = ''
       if not sTCtemplate:
          sTemplatePath = os.path.join(self.templatesDir ,'testcase.xml')
          oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
@@ -652,29 +890,61 @@ class CRQMClient():
          root = self.addTeamAreaNode(root, sTeam)
 
       # return xml template as string
-      return etree.tostring(oTree)
+      sTCxml = etree.tostring(oTree)
+      return sTCxml
 
    def createTCERTemplate(self, testcaseID, testcaseName, testplanID,
                           confID='', sTeam='', sOwnerID=''):
-      '''
-      Return testcase execution record template from provided information
+      """
+Return testcase execution record template from provided information.
 
-      Args:
-         testcaseID : testcase ID.
+**Arguments:**
 
-         testcaseName : testcase name.
+* ``testcaseID``
 
-         testplanID : testplan ID for linking.
+   / *Condition*: required / *Type*: str /
 
-         confID (optional) : configuration - `Test Environment` for linking.
+   Testcase ID for linking.
 
-         sTeam (optional) : team name for linking.
+* ``testcaseName``
 
-         sOwnerID (optional) : user ID of testcase owner.
+   / *Condition*: required / *Type*: str /
 
-      Returns:
-         xml template as string.
-      '''
+   Testcase name.
+
+* ``testplanID``
+
+   / *Condition*: required / *Type*: str /
+   
+   Testplan ID for linking.
+
+* ``confID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Configuration - `Test Environment` for linking.
+
+* ``sTeam``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+   
+   Team name for linking.
+
+* ``sOwnerID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+   
+   User ID of testcase owner.
+
+**Returns:**
+
+* ``sTCERxml``
+
+   / *Type*: str /
+
+   The xml testcase execution record template as string.
+      """
+      sTCERxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'executionworkitem.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       root = oTree.getroot()
@@ -716,46 +986,110 @@ class CRQMClient():
          root = self.addTeamAreaNode(root, sTeam)
 
       # return xml template as string
-      return etree.tostring(oTree)
+      sTCERxml = etree.tostring(oTree)
+      return sTCERxml
 
    def createExecutionResultTemplate(self, testcaseID, testcaseName, testplanID, 
          TCERID, resultState, startTime='', endTime='', duration='',  testPC='', 
          testBy='', lastlog='', buildrecordID='', sTeam='', sOwnerID=''):
-      '''
-      Return testcase execution result template from provided information
+      """
+Return testcase execution result template from provided information.
 
-      Args:
-         testcaseID : testcase ID.
+**Arguments:**
 
-         testcaseName : testcase name.
+* ``testcaseID``
 
-         testplanID : testplan ID for linking.
+   / *Condition*: required / *Type*: str /
 
-         TCERID : testcase execution record (TCER) ID for linking.
+   Testcase ID for linking.
 
-         resultState : testcase result status.
+* ``testcaseName``
 
-         startTime : testcase start time.
+   / *Condition*: required / *Type*: str /
 
-         endTime (optional) : testcase end time.
+   Testcase name.
 
-         duration (optional) : testcase duration.
+* ``testplanID``
 
-         testPC (optional) : test PC which executed testcase.
+   / *Condition*: required / *Type*: str /
 
-         testBy (optional) : user ID who executed testcase.
+   Testplan ID for linking.
 
-         lastlog (optional) : traceback information (for Failed testcase).
+* ``TCERID``
 
-         buildrecordID (optional) : `Build Record` ID for linking.
+   / *Condition*: required / *Type*: str /
 
-         sTeam (optional) : team name for linking.
+   Testcase execution record (TCER) ID for linking.
 
-         sOwnerID (optional) : user ID of testcase owner.
+* ``resultState``
 
-      Returns:
-         xml template as string.
-      '''
+   / *Condition*: required / *Type*: str /
+
+   Testcase result status.
+
+* ``startTime``
+
+   / *Condition*: required / *Type*: str /
+
+   Testcase start time.
+
+* ``endTime``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Testcase end time.
+
+* ``duration``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Testcase duration.
+
+* ``testPC``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Test PC which executed testcase.
+
+* ``testBy``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   User ID who executed testcase.
+
+* ``lastlog``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Traceback information (for Failed testcase).
+
+* ``buildrecordID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   `Build Record` ID for linking.
+
+* ``sTeam``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Team name for linking.
+
+* ``sOwnerID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   User ID of testcase owner.
+
+**Returns:**
+
+* ``sTCResultxml``
+
+   / *Type*: str /
+
+   The xml testcase result template as string.
+      """
+      sTCResultxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'executionresult.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       root = oTree.getroot()
@@ -829,18 +1163,30 @@ class CRQMClient():
          root = self.addTeamAreaNode(root, sTeam)
 
       # return xml template as string
-      return etree.tostring(oTree)
+      sTCResultxml = etree.tostring(oTree)
+      return sTCResultxml
 
    def createBuildRecordTemplate(self, buildName):
-      '''
-      Return build record template from provided build name
+      """
+Return build record template from provided build name.
 
-      Args:
-         buildName : `Build Record` name.
+**Arguments:**
 
-      Returns:
-         xml template as string.
-      '''
+* ``buildName``
+
+   / *Condition*: required / *Type*: str /
+   
+   `Build Record` name.
+
+**Returns:**
+
+* ``sBuildxml``
+
+   / *Type*: str /
+
+   The xml build template as string.
+      """
+      sBuildxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'buildrecord.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
 
@@ -848,18 +1194,30 @@ class CRQMClient():
       oTittle      = oTree.find('ns3:title', nsmap)
       oTittle.text = buildName
 
-      return etree.tostring(oTree)
+      sBuildxml = etree.tostring(oTree)
+      return sBuildxml
 
    def createConfigurationTemplate(self, confName):
-      '''
-      Return configuration - Test Environment template from provided configuration name
+      """
+Return configuration - Test Environment template from provided configuration name.
 
-      Args:
-         buildName : configuration - `Test Environment` name.
+**Arguments:**
 
-      Returns:
-         xml template as string.
-      '''      
+* ``buildName``
+
+   / *Condition*: required / *Type*: str /
+   
+   Configuration - `Test Environment` name.
+
+**Returns:**
+
+* ``sEnvironmentxml``
+
+   / *Type*: str /
+   
+   The xml test environment template as string.
+      """      
+      sEnvironmentxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'configuration.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
 
@@ -867,28 +1225,55 @@ class CRQMClient():
       oTittle      = oTree.find('ns3:title', nsmap)
       oTittle.text = confName
 
-      return etree.tostring(oTree)
+      sEnvironmentxml = etree.tostring(oTree)
+      return sEnvironmentxml
 
    def createTSERTemplate(self, testsuiteID, testsuiteName, testplanID, 
                           confID='', sOwnerID=''):
-      '''
-      Return testsuite execution record (TSER) template from provided 
-      configuration name
+      """
+Return testsuite execution record (TSER) template from provided configuration name.
 
-      Args:
-         testsuiteID : testsuite ID.
+**Arguments:**
 
-         testsuiteName : testsuite name.
+* ``testsuiteID``
 
-         testplanID : testplan ID for linking.
+   / *Condition*: required / *Type*: str /
 
-         confID (optional) : configuration - `Test Environment` ID for linking.
+   Testsuite ID.
 
-         sOwnerID (optional) : user ID of testsuite owner.
+* ``testsuiteName``
 
-      Returns:
-         xml template as string.
-      '''  
+   / *Condition*: required / *Type*: str /
+
+   Testsuite name.
+
+* ``testplanID``
+
+   / *Condition*: required / *Type*: str /
+
+   Testplan ID for linking.
+
+* ``confID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Configuration - `Test Environment` ID for linking.
+
+* ``sOwnerID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   User ID of testsuite owner.
+
+**Returns:**
+
+* ``sTSxml``
+
+   / *Type*: str /
+
+   The xml testsuite template as string.
+      """  
+      sTSxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 
                                    'suiteexecutionrecord.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
@@ -926,38 +1311,80 @@ class CRQMClient():
          root.append(oConf)
 
       # return xml template as string
-      return etree.tostring(oTree)
+      sTSxml = etree.tostring(oTree)
+      return sTSxml
 
    def createTestsuiteResultTemplate(self, testsuiteID, testsuiteName, TSERID, 
                                      lTCER, lTCResults, startTime='', 
                                      endTime='', duration='', sOwnerID=''):
-      '''
-      Return testsuite execution result template from provided 
-      configuration name
+      """
+Return testsuite execution result template from provided configuration name.
 
-      Args:
-         testsuiteID : testsuite ID.
+**Arguments:**
 
-         testsuiteName : testsuite name.
+* ``testsuiteID``
 
-         TSERID : testsuite execution record (TSER) ID for linking.
+   / *Condition*: required / *Type*: str /
 
-         lTCER : list of testcase execution records (TCER) for linking.
+   Testsuite ID.
 
-         lTCResults : list of testcase results for linking.
+* ``testsuiteName``
 
-         startTime (optional) : testsuite start time.
+   / *Condition*: required / *Type*: str /
 
-         endTime (optional) : testsuite end time.
+   Testsuite name.
 
-         duration (optional) : testsuite duration.
+* ``TSERID``
 
-         sOwnerID (optional) : user ID of testsuite owner.
+   / *Condition*: required / *Type*: str /
 
-      Returns:
-         xml template as string.
+   Testsuite execution record (TSER) ID for linking.
 
-      '''  
+* ``lTCER``
+
+   / *Condition*: required / *Type*: str /
+
+   List of testcase execution records (TCER) for linking.
+
+* ``lTCResults``
+
+   / *Condition*: required / *Type*: str /
+
+   List of testcase results for linking.
+
+* ``startTime``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Testsuite start time.
+
+* ``endTime``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Testsuite end time.
+
+* ``duration``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Testsuite duration.
+
+* ``sOwnerID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   User ID of testsuite owner.
+
+**Returns:**
+
+* ``sTSResultxml``
+
+   / *Type*: str /
+
+   The xml testsuite result template as string.
+      """  
+      sTSResultxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'testsuitelog.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
 
@@ -1021,30 +1448,51 @@ class CRQMClient():
          root.append(oExecutionResult)
          
       # return xml template as string
-      return etree.tostring(oTree)
+      sTSResultxml = etree.tostring(oTree)
+      return sTSResultxml
 
    #
    #  Methods to create RQM resources
    #
    ###########################################################################
    def createResource(self, resourceType, content):
-      '''
-      Create new resource with provided data from template by POST method.
+      """
+Create new resource with provided data from template by POST method.
 
-      Args:
-         resourceType : resource type.
+**Arguments:**
 
-         content: xml template as string.
+* ``resourceType``
 
-      Returns:
-         returnObj: a response dictionary which contains status, ID, status_code and error message.
-            {\
-               'success' : False, \
-               'id': None, \
-               'message': '', \
-               'status_code': ''\
-            }
-      '''
+   / *Condition*: required / *Type*: str /
+
+   Resource type.
+
+* ``content``
+
+   / *Condition*: required / *Type*: str /
+
+   The xml template as string.
+
+**Returns:**
+
+* ``returnObj``
+
+   / *Type*: dict /
+
+   A dictionary reponse which contains status, ID, status_code and error message.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False, 
+         'id': None, 
+         'message': '', 
+         'status_code': ''
+      }
+
+      """
       returnObj = {
          'success' : False, 
          'id': None, 
@@ -1095,26 +1543,43 @@ class CRQMClient():
       return returnObj
 
    def createBuildRecord(self, sBuildSWVersion, forceCreate=False):
-      '''
-      Create new build record.
+      """
+Create new build record.
 
-      Note:
-         Tool will check if build record is already existing or not (both on RQM and current execution).
+**Arguments:**
 
-      Args:
-         sBuildSWVersion : build version - `Build Record` name.
+* ``sBuildSWVersion``
 
-         forceCreate (optional) : if True, force to create new build record without existing verification.
+   / *Condition*: required / *Type*: str /
 
-      Returns:
-         returnObj: a response dictionary which contains status, ID, status_code and error message.
-            {\
-               'success' : False, \
-               'id': None, \
-               'message': '', \ 
-               'status_code': '' \
-            }.
-      '''
+   Build version - `Build Record` name.
+
+* ``forceCreate``
+
+   / *Condition*: optional / *Type*: bool / *Default*: False /
+
+   If True, force to create new build record without existing verification.
+
+**Returns:**
+
+* ``returnObj``
+
+   / *Type*: dict /
+
+   A dictionary reponse which contains status, ID, status_code and error message.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False, 
+         'id': None, 
+         'message': '', 
+         'status_code': ''
+      }
+
+      """
       # check existing build record in this execution
       returnObj = {'success' : False, 'id': None, 'message': '', 'status_code': ''}
       if (sBuildSWVersion not in self.dBuildVersion.values()) or forceCreate:
@@ -1131,26 +1596,43 @@ class CRQMClient():
       return returnObj
 
    def createConfiguration(self, sConfigurationName, forceCreate=False):
-      '''
-      Create new configuration - test environment.
+      """
+Create new configuration - test environment.
 
-      Note:
-         Tool will check if configuration is already existing or not (both on RQM and current execution).
+**Arguments:**
 
-      Args:
-         sConfigurationName : configuration - `Test Environment` name.
+* ``sConfigurationName``
 
-         forceCreate (optional) : if True, force to create new Test Environment without existing verification.
+   / *Condition*: required / *Type*: str /
 
-      Returns:
-         returnObj: a response dictionary which contains status, ID, status_code and error message.      
-            {\
-               'success' : False, \
-               'id': None, \
-               'message': '', \
-               'status_code': ''\
-            }
-      '''
+   Configuration - `Test Environment` name.
+
+* ``forceCreate``
+
+   / *Condition*: optional / *Type*: str / *Default*: False /
+
+   If True, force to create new Test Environment without existing verification.
+
+**Returns:**
+
+* ``returnObj``
+
+   / *Type*: dict /
+
+   A dictionary reponse which contains status, ID, status_code and error message.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False, 
+         'id': None, 
+         'message': '', 
+         'status_code': ''
+      }
+
+      """
       returnObj = {'success' : False, 'id': None, 'message': '', 'status_code': ''}
       # check existing build record in this executioon
       sConfID = ''
@@ -1172,39 +1654,78 @@ class CRQMClient():
    #
    ###########################################################################
    def updateResourceByID(self, resourceType, id, content):
-      '''
-      Update data of provided resource and ID by PUT method.
+      """
+Update data of provided resource and ID by PUT method.
 
-      Args:
-         resourceType : resource type.
+**Arguments:**
 
-         id : resource id.
+* ``resourceType``
 
-         content : xml template as string.
-         
-      Returns:
-         res : response object from PUT request.
-      '''
+   / *Condition*: required / *Type*: str /
+
+   Resource type.
+
+* ``id``
+
+   / *Condition*: required / *Type*: str /
+
+   Resource id.
+
+* ``content``
+
+   / *Condition*: required / *Type*: str /
+
+   The xml template as string.
+
+**Returns:**
+
+* ``res``
+
+   / *Type*: `Response` object /
+
+   Response object from PUT request.
+      """
       res = self.session.put(self.integrationURL(resourceType, id), allow_redirects=True, verify=False, data=content)
       return res
 
    def linkListTestcase2Testplan(self, testplanID, lTestcases=None):
-      '''
-      Link list of test cases to provided testplan ID.
+      """
+Link list of test cases to provided testplan ID.
 
-      Args:
-         testplanID : testplan ID to link given testcase(s).
+**Arguments:**
 
-         lTestcases : list of testcase(s) to be linked with given testplan.
-            If None (as default), `lTestcaseIDs` property will be used as list of testcase.
+* ``testplanID``
+
+   / *Condition*: required / *Type*: str /
+
+   Testplan ID to link given testcase(s).
+
+* ``lTestcases``
+
+   / *Condition*: optional / *Type*: list / *Default*: None /
+
+   List of testcase(s) to be linked with given testplan.
+
+   If not provide, `lTestcaseIDs` property will be used as list of testcase.
          
-      Returns:
-         res : response object which contains status and error message.
-            {\
-               'success' : False, \
-               'message': ''\
-            }
-      '''
+**Returns:**
+
+* ``returnObj``
+
+   / *Type*: dict /
+   
+   Response dictionary which contains status and error message.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False, 
+         'message': ''
+      }
+
+      """
       returnObj = {'success' : False, 'message': ''}
       if lTestcases == None:
          lTestcases = self.lTestcaseIDs
@@ -1232,22 +1753,43 @@ class CRQMClient():
       return returnObj      
 
    def linkListTestcase2Testsuite(self, testsuiteID, lTestcases=None):
-      '''
-      Link list of test cases to provided testsuite ID
+      """
+Link list of test cases to provided testsuite ID
 
-      Args:
-         testsuiteID : testsuite ID to link given testcase(s).
+**Arguments:**
 
-         lTestcases : list of testcase(s) to be linked with given testsuite.
-            If None (as default), `lTestcaseIDs` property will be used as list of testcase.
+* ``testsuiteID``
+
+   / *Condition*: required / *Type*: str /
+
+   Testsuite ID to link given testcase(s).
+
+* ``lTestcases``
+
+   / *Condition*: optional / *Type*: list / *Default*: None /
+
+   List of testcase(s) to be linked with given testplan.
+
+   If not provide, `lTestcaseIDs` property will be used as list of testcase.
          
-      Returns:
-         res : response object which contains status and error message.
-            {\
-               'success' : False, \
-               'message': ''\
-            }
-      '''
+**Returns:**
+
+* ``returnObj``
+
+   / *Type*: dict /
+   
+   Response dictionary which contains status and error message.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False, 
+         'message': ''
+      }
+
+      """
       returnObj = {'success' : False, 'message': ''}
       if lTestcases == None:
          lTestcases = self.lTestcaseIDs

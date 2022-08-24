@@ -19,5 +19,5 @@
 # Version and date of RobotResults2RQM
 #
 VERSION      = "1.1.1"
-VERSION_DATE = "05.07.2022"
+VERSION_DATE = "01.08.2022"
 

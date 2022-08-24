@@ -52,7 +52,7 @@
 
    "TOC" : {
             "introduction"  : "./additional_docs/Introduction.rst",
-            "description"   : "./additional_docs/Description.rst",
+            "description"   : "./additional_docs/Description.tex",
             "INTERFACE"     : "../###PACKAGENAME###",
             "appendix"      : "./additional_docs/Appendix.rst",
             "history"       : "./additional_docs/History.tex",
