@@ -679,8 +679,8 @@ Example:
    .. code:: python
 
       {
-         'teamA' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamA-id},
-         'teamB' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamB-id}
+         'teamA' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamA-id}',
+         'teamB' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamB-id}'
       }
 
 **Arguments:**

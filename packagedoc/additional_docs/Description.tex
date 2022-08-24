@@ -89,7 +89,7 @@ on RQM, please refer be mapping table:
 
 \begin{table}[h]
    \label{table:RobotResults2RQM-mapping}
-   \begin{tabular}{|p{0.11\linewidth}|p{0.12\linewidth}|p{0.31\linewidth}|p{0.45\linewidth}|}
+   \begin{tabular}{|p{0.115\linewidth}|p{0.12\linewidth}|p{0.31\linewidth}|p{0.45\linewidth}|}
       \hline
       \multicolumn{2}{|c|}{\textbf{RQM data}}
                                       &\multicolumn{2}{|c|}{\textbf{RobotFramework}}\\
@@ -162,7 +162,9 @@ on RQM, please refer be mapping table:
                         &Actual Result&Test case result (\ifpassed{PASSED}, \iffailed{FAILED}, \ifunknown{UNKNOWN})
                                                     &\textbf{//suite/test/status/@status}\\
                         \cline{2-4}
-                        &Host Name    &\rcode{Metadata machine \%\{COMPUTERNAME\}}
+                        &Host Name    &\begin{robotcode}
+  Metadata machine %{COMPUTERNAME}
+\end{robotcode}
                                                     &\textbf{//suite/metadata/item[@name="machine"]}\\
                         \cline{2-4}
                         &Test Plan    &Interaction URL to provided \rlog{testplan} in cli
