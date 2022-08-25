@@ -3,8 +3,8 @@
 %
 
 \hypertarget{description-sample-robotframework-testcase}{%
-\section{Sample RobotFramework
-Testcase:}\label{description-sample-robotframework-testcase}}
+\section{Sample \rfwcore\ Testcase:}
+\label{description-sample-robotframework-testcase}}
 
 For test case management, we need some tracable information such as
 version, testcase ID, component, ... to manage and track testcase(s) on
@@ -15,10 +15,10 @@ testsuite/execution info: version, build, ...) and \rcode{{[}Tags{]}}
 information (for specific testcase info: component, testcase ID,
 requirement ID, ...).
 
-Sample Robot testcase with the neccessary information for importing to
+Sample \rfwcore\ testcase with the neccessary information for importing to
 RQM: :
 
-\begin{robotcode}
+\begin{robotcode}[caption=Sample \rfwcore\ testcase]
 *** Settings ***
 Metadata   project      ROBFW             # Test Environment
 Metadata   version_sw   SW_VERSION_0.1    # Build Record
@@ -84,7 +84,7 @@ tool also supports to:
 \section{Robot Testcase information on
 RQM:}\label{description-robot-testcase-information-on-rqm}}
 
-For more detail how the RobotFramework testcase information is displayed
+For more detail how the \rfwcore\ testcase information is displayed
 on RQM, please refer be mapping table:
 
 \begin{table}[h]
@@ -92,7 +92,7 @@ on RQM, please refer be mapping table:
    \begin{tabular}{|p{0.115\linewidth}|p{0.12\linewidth}|p{0.31\linewidth}|p{0.45\linewidth}|}
       \hline
       \multicolumn{2}{|c|}{\textbf{RQM data}}
-                                      &\multicolumn{2}{|c|}{\textbf{RobotFramework}}\\
+                                      &\multicolumn{2}{|c|}{\textbf{\rfwcore}}\\
       \hline
       \textbf{Resource} &\textbf{Attribute/ Field}
                                       &\textbf{Testsuite/Testcase}   
@@ -198,5 +198,5 @@ on RQM, please refer be mapping table:
                         \cline{2-4}
       \hline
    \end{tabular} 
-   \caption{RQM data \& RobotFramework testcase/output.xml}
+   \caption{RQM data \& \rfwcore\ testcase/output.xml}
 \end{table}

@@ -94,25 +94,25 @@ Configure Logger class.
 
 **Arguments:**
 
-* ``output_console``
+*  ``output_console``
 
    / *Condition*: optional / *Type*: bool / *Default*: True /
 
    Write message to console output.
 
-* ``output_logfile``
+*  ``output_logfile``
 
    / *Condition*: optional / *Type*: str / *Default*: None /
 
    Path to log file output.
 
-* ``indent``
+*  ``indent``
 
    / *Condition*: optional / *Type*: int / *Default*: 0 /
 
    Offset indent.
 
-* ``dryrun``
+*  ``dryrun``
 
    / *Condition*: optional / *Type*: bool / *Default*: True /
 
@@ -135,19 +135,19 @@ Write log message to console/file output.
 
 **Arguments:**
 
-* ``msg``
+*  ``msg``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Message which is written to output.
 
-* ``color``
+*  ``color``
 
    / *Condition*: optional / *Type*: str / *Default*: None /
 
    Color style for the message.
 
-* ``indent``
+*  ``indent``
 
    / *Condition*: optional / *Type*: int / *Default*: 0 /
 
@@ -173,7 +173,7 @@ Write warning message to console/file output.
       
 **Arguments:**
 
-* ``msg``
+*  ``msg``
 
    / *Condition*: required / *Type*: str /
 
@@ -190,13 +190,13 @@ Write warning message to console/file output.
       """
 Write error message to console/file output.
 
-* ``msg``
+*  ``msg``
 
    / *Condition*: required / *Type*: str /
 
    Error message which is written to output.
 
-* ``fatal_error``
+*  ``fatal_error``
 
    / *Condition*: optional / *Type*: bool / *Default*: False /
 
@@ -225,13 +225,13 @@ Example:
 
 **Arguments:**
 
-* ``lTags``
+*  ``lTags``
 
    / *Condition*: required / *Type*: list /
 
    List of tag information.
 
-* ``reInfo``
+*  ``reInfo``
 
    / *Condition*: required / *Type*: str /
 
@@ -239,7 +239,7 @@ Example:
 
 **Returns:**
 
-* ``lInfo``
+*  ``lInfo``
 
    / *Type*: list /
    
@@ -259,7 +259,7 @@ Convert time string to datetime.
 
 **Arguments:**
 
-* ``time``
+*  ``time``
 
    / *Condition*: required / *Type*: str /
 
@@ -267,7 +267,7 @@ Convert time string to datetime.
 
 **Returns:**
 
-* ``dt``
+*  ``dt``
 
    / *Type*: `datetime` object/
 
@@ -333,13 +333,13 @@ Metadata at top suite level has a highest priority.
    
 **Arguments:**
 
-* ``suite``
+*  ``suite``
 
    / *Condition*: required / *Type*: `TestSuite` object /
 
    Robot suite object.
 
-* ``default_metadata``
+*  ``default_metadata``
 
    / *Condition*: optional / *Type*: dict / *Default*: DEFAULT_METADATA /
 
@@ -347,7 +347,7 @@ Metadata at top suite level has a highest priority.
 
 **Returns:**
 
-* ``dMetadata``
+*  ``dMetadata``
 
    / *Type*: dict /
 
@@ -369,13 +369,13 @@ Extract metadata from suite result bases on DEFAULT_METADATA.
 
 **Arguments:**
 
-* ``metadata``
+*  ``metadata``
 
    / *Condition*: required / *Type*: dict /
 
    Robot metadata object.
 
-* ``default_metadata``
+*  ``default_metadata``
 
    / *Condition*: optional / *Type*: dict / *Default*: DEFAULT_METADATA /
 
@@ -383,7 +383,7 @@ Extract metadata from suite result bases on DEFAULT_METADATA.
 
 **Returns:**
 
-* ``dMetadata``
+*  ``dMetadata``
    
    / *Type*: dict /
    
@@ -403,13 +403,13 @@ Process robot suite for importing to RQM.
 
 **Arguments:**
 
-* ``RQMClient``
+*  ``RQMClient``
 
    / *Condition*: required / *Type*: `RQMClient` object/
 
    RQMClient object.
 
-* ``suite``
+*  ``suite``
 
    / *Condition*: required / *Type*: `TestSuite` object/
 
@@ -444,13 +444,13 @@ Process robot test for importing to RQM.
 
 **Arguments:**
 
-* ``RQMClient``
+*  ``RQMClient``
 
    / *Condition*: required / *Type*: `RQMClient` object/
 
    RQMClient object.
 
-* ``test``
+*  ``test``
 
    / *Condition*: required / *Type*: `TestCase` object/
 
@@ -606,30 +606,32 @@ def RobotResults2RQM(args=None):
    """
 Import robot results from output.xml to RQM - IBM Rational Quality Manager.
 
-Flow to import Robot results to RQM: 
-   1. Process provided arguments from command line
-   2. Login Rational Quality Management (RQM)
-   3. Parse Robot results
-   4. Import results into RQM 
-   5. Link all executed testcases to provided testplan/testsuite ID
+Flow to import Robot results to RQM:
+
+1. Process provided arguments from command line
+2. Login Rational Quality Management (RQM)
+3. Parse Robot results
+4. Import results into RQM 
+5. Link all executed testcases to provided testplan/testsuite ID
 
 **Arguments:**
 
-* ``args``
+*  ``args``
 
    / *Condition*: required / *Type*: `ArgumentParser` object /
 
    Argument parser object which contains:
-      - `outputfile` : path to the output file or directory with output files to be imported.
-      - `host` : RQM host url.
-      - `project` : RQM project name.
-      - `user` : user for RQM login.
-      - `password` : user password for RQM login.
-      - `testplan` : RQM testplan ID.
-      - `recursive` : if True, then the path is searched recursively for log files to be imported.
-      - `createmissing` : if True, then all testcases without fcid are created when importing.
-      - `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
-      - `dryrun` : if True, then just check the RQM authentication and show what would be done.
+
+   * `outputfile` : path to the output file or directory with output files to be imported.
+   * `host` : RQM host url.
+   * `project` : RQM project name.
+   * `user` : user for RQM login.
+   * `password` : user password for RQM login.
+   * `testplan` : RQM testplan ID.
+   * `recursive` : if True, then the path is searched recursively for log files to be imported.
+   * `createmissing` : if True, then all testcases without fcid are created when importing.
+   * `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
+   * `dryrun` : if True, then just check the RQM authentication and show what would be done.
 
 **Returns:**
 
