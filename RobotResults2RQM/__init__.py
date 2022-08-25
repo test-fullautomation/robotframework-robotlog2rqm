@@ -11,10 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""
-RobotResults2RQM package provides an interface to import robot result(s)
-from output.xml result file to IBM Rational Quality Manager (RQM).
-"""
+
 from .robot2rqm import RobotResults2RQM, Logger
 from .version import VERSION
 from .CRQM import CRQMClient

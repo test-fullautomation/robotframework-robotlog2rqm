@@ -49,13 +49,13 @@ Parse xml object from file.
 
 **Arguments:**
 
-* ``file_name``
+*  ``file_name``
 
    / *Condition*: required / *Type*: str /
 
    Path to file or file-like object.
 
-* ``bdtd_validation``
+*  ``bdtd_validation``
 
    / *Condition*: optional / *Type*: bool /
 
@@ -63,11 +63,11 @@ Parse xml object from file.
 
 **Returns:**
 
-* ``oTree``
+*  ``oTree``
 
-  / *Type*: `lxml.etree._ElementTree` object /
+   / *Type*: `lxml.etree._ElementTree` object /
 
-  The xml etree object.
+   The xml etree object.
    """
    oTree = None
    try:
@@ -88,15 +88,16 @@ CRQMClient class uses RQM REST APIs to get, create and update resources
 (testplan, testcase, test result, ...) on RQM - Rational Quality Manager
 
 Resoure type mapping:
-   - buildrecord:          Build Record
-   - configuration:        Test Environment
-   - testplan:             Test Plan
-   - testsuite:            Test Suite
-   - suiteexecutionrecord: Test Suite Execution Record (TSER)
-   - testsuitelog:         Test Suite Log
-   - testcase:             Test Case
-   - executionworkitem:    Test Execution Record (TCER)
-   - executionresult:      Execution Result
+
+* buildrecord:          Build Record
+* configuration:        Test Environment
+* testplan:             Test Plan
+* testsuite:            Test Suite
+* suiteexecutionrecord: Test Suite Execution Record (TSER)
+* testsuitelog:         Test Suite Log
+* testcase:             Test Case
+* executionworkitem:    Test Execution Record (TCER)
+* executionresult:      Execution Result
    """
    RESULT_STATES = ['paused', 'inprogress', 'notrun', 'passed', 'incomplete', 
                     'inconclusive', 'part_blocked', 'failed', 'error', 
@@ -134,25 +135,25 @@ Resoure type mapping:
       """
 Constructor of class ``CRQMClient``.
 
-* ``user``
+*  ``user``
 
    / *Condition*: required / *Type*: str /
 
    User name for RQM's authentication.
 
-* ``password``
+*  ``password``
 
    / *Condition*: required / *Type*: str /
 
    User password for RQM's authentication.
    
-* ``project``
+*  ``project``
 
    / *Condition*: required / *Type*: str /
 
    The RQM project name.
    
-* ``host``
+*  ``host``
 
    / *Condition*: required / *Type*: str /
 
@@ -206,11 +207,11 @@ Log in RQM by provided user & password.
 
 **Returns:**
 
-* ``bSuccess``
+*  ``bSuccess``
 
-  / *Type*: bool /
+   / *Type*: bool /
 
-  Indicates if the computation of the method ``login`` was successful or not.
+   Indicates if the computation of the method ``login`` was successful or not.
       """
       bSuccess = False
       res = self.session.post(self.host + '/qm/j_security_check', allow_redirects=True, verify=False, 
@@ -237,11 +238,11 @@ Verify the project name by searching it in `project-areas` XML response.
 
 **Returns:**
 
-* ``bSuccess``
+*  ``bSuccess``
 
-  / *Type*: bool /
+   / *Type*: bool /
 
-  Indicates if the computation of the method ``verifyProjectName`` was successful or not.
+   Indicates if the computation of the method ``verifyProjectName`` was successful or not.
       """
       bSuccess = False
 
@@ -284,44 +285,46 @@ Disconnect from RQM.
               createmissing=False, updatetestcase=False,suite_id=None):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
-   - Verify the existence of provided testplan ID.
-   - Verify the existences of provided build and configuration names
-      before creating new ones.
+
+* Verify the existence of provided testplan ID.
+* Verify the existences of provided build and configuration names
+  before creating new ones.
 
 **Arguments:**
-* ``plan_id``
+
+*  ``plan_id``
 
    / *Condition*: required / *Type*: str /
 
    Testplan ID of RQM project for importing result(s).
 
-* ``build_name``
+*  ``build_name``
 
    / *Condition*: optional / *Type*: str / *Default*: None / 
 
    The `Build Record` for linking result(s).
    Set it to `None` if not be used, the empty name '' will lead to error.
 
-* ``config_name``
+*  ``config_name``
 
    / *Condition*: optional / *Type*: str / *Default*: None /
 
    The `Test Environment` for linking result(s).
    Set it to `None` if not be used, the empty name '' may lead to error.
 
-* ``createmissing``
+*  ``createmissing``
 
    / *Condition*: optional / *Type*: bool / *Default*: False /
    
    If `True`, the testcase without `tcid` information will be created on RQM.
 
-* ``updatetestcase``
+*  ``updatetestcase``
 
    / *Condition*: optional / *Type*: bool / *Default*: False /
    
    If `True`, the information of testcase on RQM will be updated bases on robot testfile.
 
-* ``suite_id (optional)``
+*  ``suite_id (optional)``
 
    / *Condition*: optional / *Type*: str / *Default*: None /
 
@@ -377,7 +380,7 @@ Return interaction URL of provided userID
 
 **Arguments:**
 
-* ``userID``
+*  ``userID``
 
    / *Condition*: required / *Type*: str /
 
@@ -385,7 +388,7 @@ Return interaction URL of provided userID
 
 **Returns:**
 
-* ``userURL``
+*  ``userURL``
 
    / *Type*: str /
    
@@ -401,21 +404,22 @@ The provided ID can be internalID (contains only digits) or externalID.
 
 **Arguments:**
 
-* ``resourceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
    The RQM resource type (e.g: "testplan", "testcase", ...).
 
-* ``id``
+*  ``id``
 
    / *Condition*: optional / *Type*: str / *Default*: None /
 
    The ID of given resource.
-      If given: the specified url to resource ID is returned.
-      If `None`: the url to resource type (to get all entity) is returned.
 
-* ``forceinternalID`` 
+   * If given: the specified url to resource ID is returned.
+   * If ``None``: the url to resource type (to get all entity) is returned.
+
+*  ``forceinternalID`` 
 
    / *Condition*: optional / *Type*: bool / *Default*: False /
 
@@ -423,7 +427,7 @@ The provided ID can be internalID (contains only digits) or externalID.
 
 **Returns:**
 
-* ``integrationURL``
+*  ``integrationURL``
 
    / *Type*: str /
 
@@ -449,13 +453,13 @@ Note:
 
 **Arguments:**
 
-* ``response``
+*  ``response``
 
    / *Condition*: required / *Type*: str /
 
    The xml response from POST method for parsing ID information.
 
-* ``tagID``
+*  ``tagID``
 
    / *Condition*: optional / *Type*: str / *Default*: 'rqm:resultId' /
 
@@ -463,7 +467,7 @@ Note:
 
 **Returns:**
 
-* ``resultId``
+*  ``resultId``
 
    / *Type*: str /
    
@@ -484,18 +488,19 @@ Note:
 Return web ID (ns2:webId) from generate ID by get resource data from RQM.
 
 Note:
-   - This method is only used for generated `testcase`, `executionworkitem` and `executionresult`.
-   - `buildrecord` and `configuration` does not have `ns2:webId` in response data.
+
+* This method is only used for generated `testcase`, `executionworkitem` and `executionresult`.
+* `buildrecord` and `configuration` does not have `ns2:webId` in response data.
 
 **Arguments:**
 
-* ``resourrceType``
+*  ``resourrceType``
 
    / *Condition*: required / *Type*: str /
 
    The RQM resource type.
 
-* ``generateID``
+*  ``generateID``
 
    / *Condition*: required / *Type*: str /
 
@@ -503,7 +508,7 @@ Note:
 
 **Returns:**
 
-* ``webID``
+*  ``webID``
 
    / *Type*: str /
    
@@ -545,13 +550,13 @@ Return data of provided resource and ID by GET method
 
 **Arguments:**
 
-* ``resourrceType``
+*  ``resourrceType``
 
    / *Condition*: required / *Type*: str /
 
    The RQM resource type.
 
-* ``id``
+*  ``id``
 
    / *Condition*: required / *Type*: str /      
 
@@ -559,7 +564,7 @@ Return data of provided resource and ID by GET method
 
 **Returns:**
 
-* ``res``
+*  ``res``
 
    / *Type*: `Response` object /
 
@@ -575,7 +580,7 @@ Return all entries (in all pages) of provided resource by GET method.
 
 **Arguments:**
 
-* ``resourrceType``
+*  ``resourrceType``
 
    / *Condition*: required / *Type*: str /
 
@@ -583,7 +588,7 @@ Return all entries (in all pages) of provided resource by GET method.
 
 **Returns:**
 
-* ``dReturn``
+*  ``dReturn``
 
    / *Type*: dict /
 
@@ -676,12 +681,12 @@ Get all available team-areas of project on RQM and store them into `dTeamAreas` 
 
 Example: 
 
-   .. code:: python
+.. code:: python
 
-      {
-         'teamA' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamA-id}',
-         'teamB' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamB-id}'
-      }
+   {
+      'teamA' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamA-id}',
+      'teamB' : '{host}/qm/process/project-areas/{project-id}/team-areas/{teamB-id}'
+   }
 
 **Arguments:**
 
@@ -718,13 +723,13 @@ Note:
 
 **Arguments:**
 
-* ``root``
+*  ``root``
 
    / *Condition*: required / *Type*: `Element` object /
 
    The xml root object.
 
-* ``sTeam``
+*  ``sTeam``
 
    / *Condition*: required / *Type*: str /
 
@@ -732,7 +737,7 @@ Note:
 
 **Returns:**
 
-* ``root``
+*  ``root``
 
    / *Type*: str /
 
@@ -757,61 +762,61 @@ Return testcase template from provided information.
 
 **Arguments:**
 
-* ``testcaseName``
+*  ``testcaseName``
 
    / *Condition*: required / *Type*: str /
 
    Testcase name.
 
-* ``sDescription``
+*  ``sDescription``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Testcase description.
 
-* ``sComponent``
+*  ``sComponent``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Component which testcase is belong to.
 
-* ``sFID``
+*  ``sFID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Function ID (requirement ID) for linking.
 
-* ``sTeam``
+*  ``sTeam``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Team name for linking.
 
-* ``sRobotFile``
+*  ``sRobotFile``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Link to robot file on source control.
 
-* ``sTestType``
+*  ``sTestType``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
    
    Test type information.
 
-* ``sASIL``
+*  ``sASIL``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
    
    ASIL information.
 
-* ``sOwnerID``
+*  ``sOwnerID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
    
    User ID of testcase owner.
 
-* ``sTCtemplate``
+*  ``sTCtemplate``
 
    / *Condition*: optional / *Type*: str / *Default*: None /
    
@@ -821,7 +826,7 @@ Return testcase template from provided information.
 
 **Returns:**
 
-* ``sTCxml``
+*  ``sTCxml``
 
    / *Type*: str /
 
@@ -900,37 +905,37 @@ Return testcase execution record template from provided information.
 
 **Arguments:**
 
-* ``testcaseID``
+*  ``testcaseID``
 
    / *Condition*: required / *Type*: str /
 
    Testcase ID for linking.
 
-* ``testcaseName``
+*  ``testcaseName``
 
    / *Condition*: required / *Type*: str /
 
    Testcase name.
 
-* ``testplanID``
+*  ``testplanID``
 
    / *Condition*: required / *Type*: str /
    
    Testplan ID for linking.
 
-* ``confID``
+*  ``confID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Configuration - `Test Environment` for linking.
 
-* ``sTeam``
+*  ``sTeam``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
    
    Team name for linking.
 
-* ``sOwnerID``
+*  ``sOwnerID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
    
@@ -938,7 +943,7 @@ Return testcase execution record template from provided information.
 
 **Returns:**
 
-* ``sTCERxml``
+*  ``sTCERxml``
 
    / *Type*: str /
 
@@ -997,85 +1002,85 @@ Return testcase execution result template from provided information.
 
 **Arguments:**
 
-* ``testcaseID``
+*  ``testcaseID``
 
    / *Condition*: required / *Type*: str /
 
    Testcase ID for linking.
 
-* ``testcaseName``
+*  ``testcaseName``
 
    / *Condition*: required / *Type*: str /
 
    Testcase name.
 
-* ``testplanID``
+*  ``testplanID``
 
    / *Condition*: required / *Type*: str /
 
    Testplan ID for linking.
 
-* ``TCERID``
+*  ``TCERID``
 
    / *Condition*: required / *Type*: str /
 
    Testcase execution record (TCER) ID for linking.
 
-* ``resultState``
+*  ``resultState``
 
    / *Condition*: required / *Type*: str /
 
    Testcase result status.
 
-* ``startTime``
+*  ``startTime``
 
    / *Condition*: required / *Type*: str /
 
    Testcase start time.
 
-* ``endTime``
+*  ``endTime``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Testcase end time.
 
-* ``duration``
+*  ``duration``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Testcase duration.
 
-* ``testPC``
+*  ``testPC``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Test PC which executed testcase.
 
-* ``testBy``
+*  ``testBy``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    User ID who executed testcase.
 
-* ``lastlog``
+*  ``lastlog``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Traceback information (for Failed testcase).
 
-* ``buildrecordID``
+*  ``buildrecordID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    `Build Record` ID for linking.
 
-* ``sTeam``
+*  ``sTeam``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Team name for linking.
 
-* ``sOwnerID``
+*  ``sOwnerID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
@@ -1083,7 +1088,7 @@ Return testcase execution result template from provided information.
 
 **Returns:**
 
-* ``sTCResultxml``
+*  ``sTCResultxml``
 
    / *Type*: str /
 
@@ -1172,7 +1177,7 @@ Return build record template from provided build name.
 
 **Arguments:**
 
-* ``buildName``
+*  ``buildName``
 
    / *Condition*: required / *Type*: str /
    
@@ -1180,7 +1185,7 @@ Return build record template from provided build name.
 
 **Returns:**
 
-* ``sBuildxml``
+*  ``sBuildxml``
 
    / *Type*: str /
 
@@ -1203,7 +1208,7 @@ Return configuration - Test Environment template from provided configuration nam
 
 **Arguments:**
 
-* ``buildName``
+*  ``buildName``
 
    / *Condition*: required / *Type*: str /
    
@@ -1211,7 +1216,7 @@ Return configuration - Test Environment template from provided configuration nam
 
 **Returns:**
 
-* ``sEnvironmentxml``
+*  ``sEnvironmentxml``
 
    / *Type*: str /
    
@@ -1235,31 +1240,31 @@ Return testsuite execution record (TSER) template from provided configuration na
 
 **Arguments:**
 
-* ``testsuiteID``
+*  ``testsuiteID``
 
    / *Condition*: required / *Type*: str /
 
    Testsuite ID.
 
-* ``testsuiteName``
+*  ``testsuiteName``
 
    / *Condition*: required / *Type*: str /
 
    Testsuite name.
 
-* ``testplanID``
+*  ``testplanID``
 
    / *Condition*: required / *Type*: str /
 
    Testplan ID for linking.
 
-* ``confID``
+*  ``confID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Configuration - `Test Environment` ID for linking.
 
-* ``sOwnerID``
+*  ``sOwnerID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
@@ -1267,7 +1272,7 @@ Return testsuite execution record (TSER) template from provided configuration na
 
 **Returns:**
 
-* ``sTSxml``
+*  ``sTSxml``
 
    / *Type*: str /
 
@@ -1322,55 +1327,55 @@ Return testsuite execution result template from provided configuration name.
 
 **Arguments:**
 
-* ``testsuiteID``
+*  ``testsuiteID``
 
    / *Condition*: required / *Type*: str /
 
    Testsuite ID.
 
-* ``testsuiteName``
+*  ``testsuiteName``
 
    / *Condition*: required / *Type*: str /
 
    Testsuite name.
 
-* ``TSERID``
+*  ``TSERID``
 
    / *Condition*: required / *Type*: str /
 
    Testsuite execution record (TSER) ID for linking.
 
-* ``lTCER``
+*  ``lTCER``
 
    / *Condition*: required / *Type*: str /
 
    List of testcase execution records (TCER) for linking.
 
-* ``lTCResults``
+*  ``lTCResults``
 
    / *Condition*: required / *Type*: str /
 
    List of testcase results for linking.
 
-* ``startTime``
+*  ``startTime``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Testsuite start time.
 
-* ``endTime``
+*  ``endTime``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Testsuite end time.
 
-* ``duration``
+*  ``duration``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
    Testsuite duration.
 
-* ``sOwnerID``
+*  ``sOwnerID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
 
@@ -1378,7 +1383,7 @@ Return testsuite execution result template from provided configuration name.
 
 **Returns:**
 
-* ``sTSResultxml``
+*  ``sTSResultxml``
 
    / *Type*: str /
 
@@ -1461,13 +1466,13 @@ Create new resource with provided data from template by POST method.
 
 **Arguments:**
 
-* ``resourceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
    Resource type.
 
-* ``content``
+*  ``content``
 
    / *Condition*: required / *Type*: str /
 
@@ -1475,7 +1480,7 @@ Create new resource with provided data from template by POST method.
 
 **Returns:**
 
-* ``returnObj``
+*  ``returnObj``
 
    / *Type*: dict /
 
@@ -1548,13 +1553,13 @@ Create new build record.
 
 **Arguments:**
 
-* ``sBuildSWVersion``
+*  ``sBuildSWVersion``
 
    / *Condition*: required / *Type*: str /
 
    Build version - `Build Record` name.
 
-* ``forceCreate``
+*  ``forceCreate``
 
    / *Condition*: optional / *Type*: bool / *Default*: False /
 
@@ -1562,7 +1567,7 @@ Create new build record.
 
 **Returns:**
 
-* ``returnObj``
+*  ``returnObj``
 
    / *Type*: dict /
 
@@ -1601,13 +1606,13 @@ Create new configuration - test environment.
 
 **Arguments:**
 
-* ``sConfigurationName``
+*  ``sConfigurationName``
 
    / *Condition*: required / *Type*: str /
 
    Configuration - `Test Environment` name.
 
-* ``forceCreate``
+*  ``forceCreate``
 
    / *Condition*: optional / *Type*: str / *Default*: False /
 
@@ -1615,7 +1620,7 @@ Create new configuration - test environment.
 
 **Returns:**
 
-* ``returnObj``
+*  ``returnObj``
 
    / *Type*: dict /
 
@@ -1659,19 +1664,19 @@ Update data of provided resource and ID by PUT method.
 
 **Arguments:**
 
-* ``resourceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
    Resource type.
 
-* ``id``
+*  ``id``
 
    / *Condition*: required / *Type*: str /
 
    Resource id.
 
-* ``content``
+*  ``content``
 
    / *Condition*: required / *Type*: str /
 
@@ -1679,7 +1684,7 @@ Update data of provided resource and ID by PUT method.
 
 **Returns:**
 
-* ``res``
+*  ``res``
 
    / *Type*: `Response` object /
 
@@ -1694,13 +1699,13 @@ Link list of test cases to provided testplan ID.
 
 **Arguments:**
 
-* ``testplanID``
+*  ``testplanID``
 
    / *Condition*: required / *Type*: str /
 
    Testplan ID to link given testcase(s).
 
-* ``lTestcases``
+*  ``lTestcases``
 
    / *Condition*: optional / *Type*: list / *Default*: None /
 
@@ -1710,7 +1715,7 @@ Link list of test cases to provided testplan ID.
          
 **Returns:**
 
-* ``returnObj``
+*  ``returnObj``
 
    / *Type*: dict /
    
@@ -1758,13 +1763,13 @@ Link list of test cases to provided testsuite ID
 
 **Arguments:**
 
-* ``testsuiteID``
+*  ``testsuiteID``
 
    / *Condition*: required / *Type*: str /
 
    Testsuite ID to link given testcase(s).
 
-* ``lTestcases``
+*  ``lTestcases``
 
    / *Condition*: optional / *Type*: list / *Default*: None /
 
@@ -1774,7 +1779,7 @@ Link list of test cases to provided testsuite ID
          
 **Returns:**
 
-* ``returnObj``
+*  ``returnObj``
 
    / *Type*: dict /
    
