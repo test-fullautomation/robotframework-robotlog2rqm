@@ -61,7 +61,7 @@ with below steps:
    python setup.py install
 
 After succesful installation, the executable file **RobotResults2RQM** 
-will be available (under *Scripts* folder of python on Windows 
+will be available (under *Scripts* folder of Python on Windows 
 and *~/.local/bin/* folder on Linux).
 
 In case above location is added to **PATH** environment variable 
@@ -74,13 +74,15 @@ RobotResults2RQM_ tool requires the robot ``output.xml`` result file(s) which wi
 be imported, RQM information(e.g. host url, project, ...) and user 
 credential(user name and password) to interact with RQM resources.
 
-Try with below command to get tools's uage
+Try with below command to get tools's usage:
+
 ::
 
    RobotResults2RQM -h
 
 
 The usage should be showed as below:
+
 ::
 
    usage: RobotResults2RQM (XMLoutput to RQM importer) [-h] [-v] [-recursive] [-createmissing] [-updatetestcase] [-dryrun]
@@ -105,13 +107,15 @@ The usage should be showed as below:
    -dryrun          if set, then just show what would be done.
 
 
-The below command is simple usage witth all required argurments to import 
+The below command is simple usage witth all required arguments to import 
 robot results into RQM:
+
 ::
 
    RobotResults2RQM <outputfile> <host> <project> <user> <password> <testplan>
 
-Besides the executable file, you can also run tool as a python module
+Besides the executable file, you can also run tool as a Python module
+
 ::
 
    python -m RobotResults2RQM <outputfile> <host> <project> <user> <password> <testplan>
@@ -121,9 +125,10 @@ Example
 -------
 In order the import the robot result(s) to RQM, we need the ``output.xml`` result file.
 
-So, firslty execute the robot testcase(s) to get the ``output.xml`` result file.
+So, firstly execute the robot testcase(s) to get the ``output.xml`` result file.
 
 Sample robot testcase which contains neccessary information for importing into RQM:
+
 ::
 
    *** Settings ***
@@ -148,6 +153,7 @@ Sample robot testcase which contains neccessary information for importing into R
 After getting ``output.xml`` result file, try with below sample command to 
 import that result into testplan ID ``720`` of ``CMD`` project which is hosted 
 at ``https://rb-alm-20-p.de.bosch.com`` 
+
 ::
 
    RobotResults2RQM output.xml https://rb-alm-20-p.de.bosch.com CMD test_user test_pw 720
