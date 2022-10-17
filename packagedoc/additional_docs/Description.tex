@@ -16,14 +16,15 @@ information (for specific testcase info: component, testcase ID,
 requirement ID, ...).
 
 Sample \rfwcore\ testcase with the neccessary information for importing to
-RQM: :
+RQM:
 
-\begin{robotcode}[caption=Sample \rfwcore\ testcase]
+\begin{robotcode}[caption=Sample \rfwcore\ testcase,
+                  linebackgroundcolor=\hlcode{2,3,4}]
 *** Settings ***
 Metadata   project      ROBFW             # Test Environment
 Metadata   version_sw   SW_VERSION_0.1    # Build Record
-Metadata   component    Import_Tools      # Component - is used for test case
 Metadata   machine      %{COMPUTERNAME}   # Hostname
+Metadata   component    Import_Tools      # Component - is used for test case
 Metadata   team-area    Internet Team RQM  # team-area (case-sensitive)
 
 *** Test Cases ***
@@ -39,11 +40,22 @@ Testcase 02
    Log      This is Testcase 02
 \end{robotcode}
 
+\begin{boxhint} {Hint}
+  In case you are using \rfw\ with 
+  \href{https://github.com/test-fullautomation/robotframework-testsuitesmanagement}{RobotFramework\_Testsuites}
+  library for executing Robot testcase(s). 
+  You do not need to define above highlighted\rcode{Metadata}in your Robot test case.
+
+  These\rcode{Metadata}information will be defined implicitly within the 
+  \rcode{Suite Setup} bases on your environment and configuration in *.json file.
+\end{boxhint}
+
 \hypertarget{description-tool-features}{%
 \section{Tool features:}\label{description-tool-features}}
 
 By default, tool will base on provided arguments (see
-Usage) and \rcode{tcid} information in Robot test case(s)
+\href{https://github.com/test-fullautomation/robotframework-testresult2rqmtool#usage}{Usage}) 
+and \rcode{tcid} information in Robot test case(s)
 to:
 
 \begin{itemize}
