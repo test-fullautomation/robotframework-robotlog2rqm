@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from .robot2rqm import RobotResults2RQM
 
-if __name__ == "__main__":
-   RobotResults2RQM()
+from .robotlog2rqm import RobotLog2RQM, Logger
+from .version import VERSION
+from .CRQM import CRQMClient

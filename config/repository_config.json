@@ -1,11 +1,11 @@
 {
-   "REPOSITORYNAME" : "robotframework-testresult2rqmtool",
-   "PACKAGENAME" : "RobotResults2RQM",
+   "REPOSITORYNAME" : "robotframework-robotlog2rqm",
+   "PACKAGENAME" : "RobotLog2RQM",
    "AUTHOR" : "Tran Duy Ngoan",
    "AUTHOREMAIL" : "Ngoan.TranDuy@vn.bosch.com",
    "DESCRIPTION" : "Imports robot result(s) to IBM Rational Quality Manager (RQM)",
    "LONGDESCRIPTIONCONTENTTYPE" : "text/markdown",
-   "URL" : "https://github.com/test-fullautomation/robotframework-testresult2rqmtool",
+   "URL" : "https://github.com/test-fullautomation/robotframework-robotlog2rqm",
    "PROGRAMMINGLANGUAGE" : "Programming Language :: Python :: 3",
    "LICENCE" : "License :: OSI Approved :: Apache Software License",
    "OPERATINGSYSTEM" : "Operating System :: OS Independent",
@@ -16,5 +16,5 @@
    "INSTALLREQUIRES" : ["lxml","requests","pypandoc","colorama","GenPackageDoc","PythonExtensionsCollection"],
    "PACKAGEDATA" : ["RQM_templates/*.xml", "*.pdf"],
    "PACKAGEDOC" : "./packagedoc",
-   "CONSOLESCRIPTS" : ["RobotResults2RQM = RobotResults2RQM.robot2rqm:RobotResults2RQM"]
+   "CONSOLESCRIPTS" : ["RobotLog2RQM = RobotLog2RQM.robotlog2rqm:RobotLog2RQM"]
 }

@@ -16,7 +16,7 @@
 #
 # **************************************************************************************************************
 #
-# Version and date of RobotResults2RQM
+# Version and date of RobotLog2RQM
 #
 VERSION      = "1.1.3"
 VERSION_DATE = "13.10.2022"
