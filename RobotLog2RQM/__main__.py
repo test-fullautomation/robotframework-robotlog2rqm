@@ -1,6 +1,4 @@
-# **************************************************************************************************************
-#
-#  Copyright 2020-2022 Robert Bosch GmbH
+#  Copyright 2020-2022 Robert Bosch Car Multimedia GmbH
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -13,11 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-#
-# **************************************************************************************************************
-#
-# Version and date of RobotResults2RQM
-#
-VERSION      = "1.1.3"
-VERSION_DATE = "13.10.2022"
+from .robotlog2rqm import RobotLog2RQM
 
+if __name__ == "__main__":
+   RobotLog2RQM()
