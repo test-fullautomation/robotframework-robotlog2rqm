@@ -105,7 +105,7 @@ The usage should be showed as below:
    -v, --version     Version of the RobotLog2RQM importer.
    --recursive       if set, then the path is searched recursively for 
                      log files to be imported.
-   --createmissing   if set, then all testcases without fcid are created 
+   --createmissing   if set, then all testcases without tcid are created 
                      when importing.
    --updatetestcase  if set, then testcase information on RQM will be updated 
                      bases on robot testfile.
@@ -152,7 +152,7 @@ Sample Robot testcase which contains neccessary information for importing into R
       Log      This is Testcase 01
 
    Testcase 02
-      [Documentation]  This new testcase will be created if -createmissing argument 
+      [Documentation]  This new testcase will be created if --createmissing argument 
                   ...  is provided when importing
       [Tags]   FID-113  robotfile-https://github.com/test-fullautomation
       Log      This is Testcase 02

@@ -281,7 +281,7 @@ Avalable arguments in command line:
    - `password` : user password for RQM login.
    - `testplan` : RQM testplan ID.
    - `--recursive` : if True, then the path is searched recursively for log files to be imported.
-   - `--createmissing` : if True, then all testcases without fcid are created when importing.
+   - `--createmissing` : if True, then all testcases without tcid are created when importing.
    - `--dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
 
 **Arguments:**
@@ -314,7 +314,7 @@ Avalable arguments in command line:
    cmdParser.add_argument('--recursive',action="store_true", 
                           help='if set, then the path is searched recursively for log files to be imported.')
    cmdParser.add_argument('--createmissing', action="store_true", 
-                          help='if set, then all testcases without fcid are created when importing.')
+                          help='if set, then all testcases without tcid are created when importing.')
    cmdParser.add_argument('--updatetestcase', action="store_true", 
                           help='if set, then testcase information on RQM will be updated bases on robot testfile.')
    cmdParser.add_argument('--dryrun',action="store_true", 
@@ -454,7 +454,7 @@ Process robot test for importing to RQM.
 
 (*no returns*)   
    """
-   Logger.log("Process test: {test.name}")
+   Logger.log(f"Process test: {test.name}")
 
    # Avoid create resources with dryrun
    if Logger.dryrun:
@@ -494,7 +494,7 @@ Process robot test for importing to RQM.
 
    # Verify the tcid is provided or not
    if _tc_id == "":
-      # If -createmissing is set. Test case without tcid will be created on RQM:
+      # If --createmissing is set. Test case without tcid will be created on RQM:
       # Create new testcase template
       # Create new testcase on RQM
       # Update dMappingTCID (to update *.robot testfile with generated ID - Not implemented yet).
@@ -622,7 +622,7 @@ Flow to import Robot results to RQM:
    * `password` : user password for RQM login.
    * `testplan` : RQM testplan ID.
    * `recursive` : if True, then the path is searched recursively for log files to be imported.
-   * `createmissing` : if True, then all testcases without fcid are created when importing.
+   * `createmissing` : if True, then all testcases without tcid are created when importing.
    * `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
    * `dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
 
