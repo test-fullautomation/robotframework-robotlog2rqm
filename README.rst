@@ -41,23 +41,51 @@ How to install
 
       pip install RobotLog2RQM
 
-   `RobotLog2RQM in PyPi <https://pypi.org/project/RobotLog2RQM/>`_
+   `RobotLog2RQM in PyPi <https://pypi.org/project/robotframework-robotlog2rqm/>`_
 
 2. Installation via GitHub (recommended for developers)
 
-   Clone the **python-robotlog2rqm** repository to your machine.
+   * Clone the **robotframework-robotlog2rqm** repository to your machine.
 
-   .. code::
+     .. code::
 
-      git clone https://github.com/test-fullautomation/python-robotlog2rqm.git
+        git clone https://github.com/test-fullautomation/robotframework-robotlog2rqm.git
 
-   `RobotLog2RQM in GitHub <https://github.com/test-fullautomation/python-robotlog2rqm>`_
+     `RobotLog2RQM in GitHub <https://github.com/test-fullautomation/robotframework-robotlog2rqm>`_
 
-   Use the following command to install **RobotLog2RQM**:
+   * Install dependencies
 
-   .. code::
+     **RobotLog2RQM** requires some additional Python libraries. Before you install the cloned repository sources
+     you have to install the dependencies manually. The names of all related packages you can find in the file ``requirements.txt``
+     in the repository root folder. Use pip to install them:
 
-      setup.py install
+     .. code::
+
+        pip install -r ./requirements.txt
+
+     Additionally install **LaTeX** (recommended: TeX Live). This is used to render the documentation.
+
+   * Configure dependencies
+
+     The installation of **RobotLog2RQM** includes to generate the documentation in PDF format. This is done by
+     an application called **GenPackageDoc**, that is part of the installation dependencies (see ``requirements.txt``).
+
+     **GenPackageDoc** uses **LaTeX** to generate the documentation in PDF format. Therefore **GenPackageDoc** needs to know where to find
+     **LaTeX**. This is defined in the **GenPackageDoc** configuration file
+
+     .. code::
+
+        packagedoc\packagedoc_config.json
+
+     Before you start the installation you have to introduce the following environment variable, that is used in ``packagedoc_config.json``:
+
+     - ``GENDOC_LATEXPATH`` : path to ``pdflatex`` executable
+
+   * Use the following command to install **RobotLog2RQM**:
+
+     .. code::
+
+        python setup.py install
 
 After succesful installation, the executable file **RobotLog2RQM** 
 will be available (under *Scripts* folder of Python on Windows 
