@@ -1,4 +1,4 @@
-#  Copyright 2020-2022 Robert Bosch Car Multimedia GmbH
+#  Copyright 2020-2023 Robert Bosch GmbH
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 # Initialy created by Tran Duy Ngoan(RBVH/ECM11) / January 2021
 #
 # This is CRQMClient class which is used to interact with RQM via RQM REST APIs
-#  
+#
 # History:
-# 
+#
 # 2020-01-08:
 #  - initial version
 #
@@ -41,7 +41,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 #
 #  helper functions for processing xml data
 #
-######################################################################## 
+########################################################################
 
 def get_xml_tree(file_name, bdtd_validation=True):
    """
@@ -81,7 +81,7 @@ Parse xml object from file.
 #
 #  IBM Rational Quality Manager
 #
-########################################################################### 
+###########################################################################
 class CRQMClient():
    """
 CRQMClient class uses RQM REST APIs to get, create and update resources
@@ -99,13 +99,13 @@ Resoure type mapping:
 * executionworkitem:    Test Execution Record (TCER)
 * executionresult:      Execution Result
    """
-   RESULT_STATES = ['paused', 'inprogress', 'notrun', 'passed', 'incomplete', 
-                    'inconclusive', 'part_blocked', 'failed', 'error', 
+   RESULT_STATES = ['paused', 'inprogress', 'notrun', 'passed', 'incomplete',
+                    'inconclusive', 'part_blocked', 'failed', 'error',
                     'blocked', 'perm_failed', 'deferred']
 
    # This namespace definition is used when update resource because the namespace
    # definition is response(get from ETM) maybe different with the using template.
-   # There is a deviation in namespace definition between IBM Rational Quality 
+   # There is a deviation in namespace definition between IBM Rational Quality
    # Manager(RQM) v6 and IBM Engineering Test Management (ETM) v7.
    # (from ns1->ns7, only change values within ns order, no new definition).
    NAMESPACES = {
@@ -146,20 +146,20 @@ Constructor of class ``CRQMClient``.
    / *Condition*: required / *Type*: str /
 
    User password for RQM's authentication.
-   
+
 *  ``project``
 
    / *Condition*: required / *Type*: str /
 
    The RQM project name.
-   
+
 *  ``host``
 
    / *Condition*: required / *Type*: str /
 
    The url that RQM is hosted.
       """
-      # RQM authentication 
+      # RQM authentication
       self.host    = host
       self.userID  = user
       self.pw      = password
@@ -214,12 +214,12 @@ Log in RQM by provided user & password.
    Indicates if the computation of the method ``login`` was successful or not.
       """
       bSuccess = False
-      res = self.session.post(self.host + '/qm/j_security_check', allow_redirects=True, verify=False, 
+      res = self.session.post(self.host + '/qm/j_security_check', allow_redirects=True, verify=False,
                               data={'j_username':self.userID,'j_password':self.pw})
       if res.status_code == 200:
          # verify login
          if self.verifyProjectName():
-            # When the authentication is successful, the JSESSIONID from cookies will 
+            # When the authentication is successful, the JSESSIONID from cookies will
             # be stored as header for later POST method.
             try:
                self.headers['X-Jazz-CSRF-Prevent'] = self.session.cookies['JSESSIONID']
@@ -229,7 +229,7 @@ Log in RQM by provided user & password.
       return bSuccess
 
    def verifyProjectName(self):
-      """ 
+      """
 Verify the project name by searching it in `project-areas` XML response.
 
 **Arguments:**
@@ -249,7 +249,7 @@ Verify the project name by searching it in `project-areas` XML response.
       # The found project ID will be stored and:
       #    - required for `team-areas` request (project name cannot be used)
       #    - used for all later request urls instead of project name
-      resProjects = self.session.get(self.host + '/qm/process/project-areas', 
+      resProjects = self.session.get(self.host + '/qm/process/project-areas',
                                        allow_redirects=True, verify=False)
       if resProjects.status_code == 200:
          oProjects=get_xml_tree(BytesIO(str(resProjects.text).encode()),
@@ -265,7 +265,7 @@ Verify the project name by searching it in `project-areas` XML response.
       if not bSuccess:
          raise Exception(f"Could not find project with name '{self.projectname}'")
 
-      return bSuccess   
+      return bSuccess
 
    def disconnect(self):
       """
@@ -281,7 +281,7 @@ Disconnect from RQM.
       """
       self.session.close()
 
-   def config(self, plan_id, build_name=None, config_name=None, 
+   def config(self, plan_id, build_name=None, config_name=None,
               createmissing=False, updatetestcase=False,suite_id=None):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
@@ -300,7 +300,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
 *  ``build_name``
 
-   / *Condition*: optional / *Type*: str / *Default*: None / 
+   / *Condition*: optional / *Type*: str / *Default*: None /
 
    The `Build Record` for linking result(s).
    Set it to `None` if not be used, the empty name '' will lead to error.
@@ -315,13 +315,13 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 *  ``createmissing``
 
    / *Condition*: optional / *Type*: bool / *Default*: False /
-   
+
    If `True`, the testcase without `tcid` information will be created on RQM.
 
 *  ``updatetestcase``
 
    / *Condition*: optional / *Type*: bool / *Default*: False /
-   
+
    If `True`, the information of testcase on RQM will be updated bases on robot testfile.
 
 *  ``suite_id (optional)``
@@ -391,7 +391,7 @@ Return interaction URL of provided userID
 *  ``userURL``
 
    / *Type*: str /
-   
+
    The interaction URL of provided userID.
       """
       userURL = self.host + "/jts/resource/itemName/com.ibm.team.repository.Contributor/" + userID
@@ -419,7 +419,7 @@ The provided ID can be internalID (contains only digits) or externalID.
    * If given: the specified url to resource ID is returned.
    * If ``None``: the url to resource type (to get all entity) is returned.
 
-*  ``forceinternalID`` 
+*  ``forceinternalID``
 
    / *Condition*: optional / *Type*: bool / *Default*: False /
 
@@ -434,14 +434,14 @@ The provided ID can be internalID (contains only digits) or externalID.
    The interaction URL of provided reource and ID.
       """
       integrationURL = self.host + "/qm/service/com.ibm.rqm.integration.service.IIntegrationService/resources/" + \
-                       self.projectID + '/' + resourceType 
+                       self.projectID + '/' + resourceType
       if(id != None):
          ### externalID
          if (not str(id).isdigit()) and (not forceinternalID):
-            integrationURL += '/'+ str(id)  
+            integrationURL += '/'+ str(id)
          else:
             ### internalID
-            integrationURL += "/urn:com.ibm.rqm:" + resourceType + ':' + str(id)  
+            integrationURL += "/urn:com.ibm.rqm:" + resourceType + ':' + str(id)
       return integrationURL
 
    def webIDfromResponse(self, response, tagID='rqm:resultId'):
@@ -470,7 +470,7 @@ Note:
 *  ``resultId``
 
    / *Type*: str /
-   
+
    The internal ID (as number).
       """
       resultId = ''
@@ -511,22 +511,22 @@ Note:
 *  ``webID``
 
    / *Type*: str /
-   
+
    The web ID (as number).
       """
       webID = generateID
       # below resources that have ns2:webId node in response data
-      lSupportedResources = [ 'attachment', 
-                              'executionresult', 
-                              'executionscript', 
-                              'executionworkitem', 
-                              'keyword', 
-                              'remotescript', 
-                              'suiteexecutionrecord', 
-                              'testcase', 
-                              'testplan', 
-                              'testscript', 
-                              'testsuite', 
+      lSupportedResources = [ 'attachment',
+                              'executionresult',
+                              'executionscript',
+                              'executionworkitem',
+                              'keyword',
+                              'remotescript',
+                              'suiteexecutionrecord',
+                              'testcase',
+                              'testplan',
+                              'testscript',
+                              'testsuite',
                               'testsuitelog']
       if resourrceType in lSupportedResources:
          resResource = self.getResourceByID(resourrceType, generateID)
@@ -558,7 +558,7 @@ Return data of provided resource and ID by GET method
 
 *  ``id``
 
-   / *Condition*: required / *Type*: str /      
+   / *Condition*: required / *Type*: str /
 
    ID of resource.
 
@@ -570,7 +570,7 @@ Return data of provided resource and ID by GET method
 
    Response data of GET request.
       """
-      res = self.session.get(self.integrationURL(resourceType, id), 
+      res = self.session.get(self.integrationURL(resourceType, id),
                              allow_redirects=True, verify=False)
       return res
 
@@ -599,14 +599,14 @@ Return all entries (in all pages) of provided resource by GET method.
    .. code:: python
 
       {
-         'success' : False, 
+         'success' : False,
          'message' : '',
          'data'    : {}
       }
 
       """
       dReturn = {
-         'success' : False, 
+         'success' : False,
          'message' : '',
          'data'    : {}
       }
@@ -622,7 +622,7 @@ Return all entries (in all pages) of provided resource by GET method.
             sEntryID = (sURLID.split("/")[-1]).split(":")[-1]
             sEntryName = oEntry.find("./title", nsmap).text
             dReturn['data'][sEntryID] = sEntryName
-         
+
          # Try to get data from next page
          oNextPage = oResData.find('./link[@rel="next"]', nsmap)
          if oNextPage != None:
@@ -679,7 +679,7 @@ Get all available configurations of project on RQM and store them into `dConfigu
       """
 Get all available team-areas of project on RQM and store them into `dTeamAreas` property.
 
-Example: 
+Example:
 
 .. code:: python
 
@@ -708,7 +708,7 @@ Example:
             self.dTeamAreas[sTeamName] = sTeamURL
       else:
          raise Exception(f"Could not get 'team-areas' of project '{self.projectname}'.")
-   
+
 
    #
    #  Methods to create XML template for resources
@@ -718,7 +718,7 @@ Example:
       """
 Append `team-area` node which contains URL to given team-area into xml template.
 
-Note: 
+Note:
    `team-area` information is case-casesensitive
 
 **Arguments:**
@@ -754,8 +754,8 @@ Note:
 
       return root
 
-   def createTestcaseTemplate(self, testcaseName, sDescription='', 
-                              sComponent='', sFID='', sTeam='', sRobotFile='', 
+   def createTestcaseTemplate(self, testcaseName, sDescription='',
+                              sComponent='', sFID='', sTeam='', sRobotFile='',
                               sTestType='', sASIL='', sOwnerID='', sTCtemplate=None):
       """
 Return testcase template from provided information.
@@ -801,25 +801,25 @@ Return testcase template from provided information.
 *  ``sTestType``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
-   
+
    Test type information.
 
 *  ``sASIL``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
-   
+
    ASIL information.
 
 *  ``sOwnerID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
-   
+
    User ID of testcase owner.
 
 *  ``sTCtemplate``
 
    / *Condition*: optional / *Type*: str / *Default*: None /
-   
+
    Existing testcase template as xml string.
 
    If not provided, template file under `RQM_templates` is used as default.
@@ -844,11 +844,11 @@ Return testcase template from provided information.
       # prepare required data for template
       testcaseTittle  = testcaseName
 
-      # find nodes to change data 
+      # find nodes to change data
       oTittle      = oTree.find(f'{{{self.NAMESPACES["ns3"]}}}title')
       oDescription = oTree.find(f'{{{self.NAMESPACES["ns3"]}}}description')
       oOwner       = oTree.find(f'{{{self.NAMESPACES["ns5"]}}}owner')
-      
+
       # change nodes's data
       oTittle.text       = testcaseTittle
       oDescription.text  = sDescription
@@ -879,7 +879,7 @@ Return testcase template from provided information.
 
       oASIL = oTree.find(f'{{{self.NAMESPACES["ns2"]}}}category[@term="ASIL relevant"]', nsmap)
       if (oASIL != None) and sASIL:
-         oASIL.set('value', sASIL) 
+         oASIL.set('value', sASIL)
 
       # Modify custom attributes
       oRequirementID = oTree.find(f'{{{self.NAMESPACES["ns2"]}}}customAttributes/{{{self.NAMESPACES["ns2"]}}}customAttribute/[{{{self.NAMESPACES["ns2"]}}}name="Requirement ID"]', nsmap)
@@ -920,7 +920,7 @@ Return testcase execution record template from provided information.
 *  ``testplanID``
 
    / *Condition*: required / *Type*: str /
-   
+
    Testplan ID for linking.
 
 *  ``confID``
@@ -932,13 +932,13 @@ Return testcase execution record template from provided information.
 *  ``sTeam``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
-   
+
    Team name for linking.
 
 *  ``sOwnerID``
 
    / *Condition*: optional / *Type*: str / *Default*: '' /
-   
+
    User ID of testcase owner.
 
 **Returns:**
@@ -962,7 +962,7 @@ Return testcase execution record template from provided information.
       testplanURL = self.integrationURL('testplan', testplanID)
       testerURL   = self.userURL(self.userID)
 
-      # find nodes to change data 
+      # find nodes to change data
       oTittle   = oTree.find('ns3:title', nsmap)
       oTestcase = oTree.find('ns2:testcase', nsmap)
       oTestplan = oTree.find('ns2:testplan', nsmap)
@@ -994,8 +994,8 @@ Return testcase execution record template from provided information.
       sTCERxml = etree.tostring(oTree)
       return sTCERxml
 
-   def createExecutionResultTemplate(self, testcaseID, testcaseName, testplanID, 
-         TCERID, resultState, startTime='', endTime='', duration='',  testPC='', 
+   def createExecutionResultTemplate(self, testcaseID, testcaseName, testplanID,
+         TCERID, resultState, startTime='', endTime='', duration='',  testPC='',
          testBy='', lastlog='', buildrecordID='', sTeam='', sOwnerID=''):
       """
 Return testcase execution result template from provided information.
@@ -1107,7 +1107,7 @@ Return testcase execution result template from provided information.
       TCERURL      = self.integrationURL('executionworkitem', TCERID)
       testerURL    = self.userURL(self.userID)
 
-      # find nodes to change data 
+      # find nodes to change data
       oTittle      = oTree.find('ns3:title', nsmap)
       oMachine     = oTree.find('ns16:machine', nsmap)
       oState       = oTree.find('ns5:state', nsmap)
@@ -1137,9 +1137,9 @@ Return testcase execution result template from provided information.
          oOwner.attrib['{%s}resource' % nsmap['ns7']] = self.userURL(sOwnerID)
       elif oOwner.text == None or oOwner.text == '':
          oOwner.text = self.userID
-         oOwner.attrib['{%s}resource' % nsmap['ns7']] = testerURL 
+         oOwner.attrib['{%s}resource' % nsmap['ns7']] = testerURL
       # currently assign user name is not worked
-      # oTester.text             = testBy 
+      # oTester.text             = testBy
       oTester.text             = self.userID
       oTester.attrib['{%s}resource' % nsmap['ns7']] = testerURL
       oStarttime.text          = str(startTime).replace(' ', 'T')
@@ -1180,7 +1180,7 @@ Return build record template from provided build name.
 *  ``buildName``
 
    / *Condition*: required / *Type*: str /
-   
+
    `Build Record` name.
 
 **Returns:**
@@ -1211,7 +1211,7 @@ Return configuration - Test Environment template from provided configuration nam
 *  ``buildName``
 
    / *Condition*: required / *Type*: str /
-   
+
    Configuration - `Test Environment` name.
 
 **Returns:**
@@ -1219,9 +1219,9 @@ Return configuration - Test Environment template from provided configuration nam
 *  ``sEnvironmentxml``
 
    / *Type*: str /
-   
+
    The xml test environment template as string.
-      """      
+      """
       sEnvironmentxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'configuration.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
@@ -1233,7 +1233,7 @@ Return configuration - Test Environment template from provided configuration nam
       sEnvironmentxml = etree.tostring(oTree)
       return sEnvironmentxml
 
-   def createTSERTemplate(self, testsuiteID, testsuiteName, testplanID, 
+   def createTSERTemplate(self, testsuiteID, testsuiteName, testplanID,
                           confID='', sOwnerID=''):
       """
 Return testsuite execution record (TSER) template from provided configuration name.
@@ -1277,9 +1277,9 @@ Return testsuite execution record (TSER) template from provided configuration na
    / *Type*: str /
 
    The xml testsuite template as string.
-      """  
+      """
       sTSxml = ''
-      sTemplatePath = os.path.join(self.templatesDir, 
+      sTemplatePath = os.path.join(self.templatesDir,
                                    'suiteexecutionrecord.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       root = oTree.getroot()
@@ -1289,7 +1289,7 @@ Return testsuite execution record (TSER) template from provided configuration na
       testplanURL  = self.integrationURL('testplan', testplanID)
       testerURL    = self.userURL(self.userID)
 
-      # find nodes to change data 
+      # find nodes to change data
       nsmap      = oTree.getroot().nsmap
       oTittle    = oTree.find('ns4:title', nsmap)
       oTestsuite = oTree.find('ns2:testsuite', nsmap)
@@ -1300,7 +1300,7 @@ Return testsuite execution record (TSER) template from provided configuration na
       oTittle.text              = TSERTittle
       oTestsuite.attrib['href'] = testsuiteURL
       oTestplan.attrib['href']  = testplanURL
-      # Incase not specify owner in template or input data, 
+      # Incase not specify owner in template or input data,
       # set its value as provided user in cli
       if sOwnerID:
          oOwner.text = sOwnerID
@@ -1319,8 +1319,8 @@ Return testsuite execution record (TSER) template from provided configuration na
       sTSxml = etree.tostring(oTree)
       return sTSxml
 
-   def createTestsuiteResultTemplate(self, testsuiteID, testsuiteName, TSERID, 
-                                     lTCER, lTCResults, startTime='', 
+   def createTestsuiteResultTemplate(self, testsuiteID, testsuiteName, TSERID,
+                                     lTCER, lTCResults, startTime='',
                                      endTime='', duration='', sOwnerID=''):
       """
 Return testsuite execution result template from provided configuration name.
@@ -1388,7 +1388,7 @@ Return testsuite execution result template from provided configuration name.
    / *Type*: str /
 
    The xml testsuite result template as string.
-      """  
+      """
       sTSResultxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'testsuitelog.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
@@ -1405,7 +1405,7 @@ Return testsuite execution result template from provided configuration name.
       if duration == '':
          duration = (time.mktime(endTime.timetuple()) - time.mktime(startTime.timetuple()))*1000
 
-      # find nodes to change data 
+      # find nodes to change data
       root         = oTree.getroot()
       nsmap        = root.nsmap
       oTittle      = oTree.find('ns4:title', nsmap)
@@ -1424,7 +1424,7 @@ Return testsuite execution result template from provided configuration name.
       oTittle.text = resultTittle
       oTestsuite.attrib['href'] = testsuiteURL
       oTSER.attrib['href']      = TSERURL
-      # Incase not specify owner in template or input data, 
+      # Incase not specify owner in template or input data,
       # set its value as provided user in cli
       if sOwnerID:
          oOwner.text = sOwnerID
@@ -1451,7 +1451,7 @@ Return testsuite execution result template from provided configuration name.
          sTCResultURL = self.integrationURL('executionresult', lTCResults[idx])
          oExecutionResult.set('href', sTCResultURL)
          root.append(oExecutionResult)
-         
+
       # return xml template as string
       sTSResultxml = etree.tostring(oTree)
       return sTSResultxml
@@ -1491,25 +1491,25 @@ Create new resource with provided data from template by POST method.
    .. code:: python
 
       {
-         'success' : False, 
-         'id': None, 
-         'message': '', 
+         'success' : False,
+         'id': None,
+         'message': '',
          'status_code': ''
       }
 
       """
       returnObj = {
-         'success' : False, 
-         'id': None, 
-         'message': '', 
+         'success' : False,
+         'id': None,
+         'message': '',
          'status_code': ''
       }
       if(self.headers['X-Jazz-CSRF-Prevent'] == ''):
          returnObj['message'] = "JSESSIONID is missing for RQM resource's creation"
          return returnObj
 
-      res = self.session.post(self.integrationURL(resourceType), 
-                              allow_redirects=True, verify=False, 
+      res = self.session.post(self.integrationURL(resourceType),
+                              allow_redirects=True, verify=False,
                               data=content, headers=self.headers)
       returnObj['status_code'] = res.status_code
       # Check whether successful response
@@ -1521,7 +1521,7 @@ Create new resource with provided data from template by POST method.
             returnObj['id'] = res.headers['Content-Location'].replace(sRemove, '')
 
          # On IBM Engineering Test Management Version: 7.0.2
-         # When trying to create new TCER but it is existing for testcase and testplan, 
+         # When trying to create new TCER but it is existing for testcase and testplan,
          # the response is 200 instead of 303 as previous RQM version 6.x.x
          # Below step is trying to get existing TCER ID from response <200>
          elif res.status_code == 200 and res.text:
@@ -1531,11 +1531,11 @@ Create new resource with provided data from template by POST method.
                returnObj['message'] = "Extract ID information from response failed. Reason: %s" % str(error)
       else:
          ### Get new creation ID from response
-         try: 
+         try:
             # try to get the web ID (internalID) from response of POST method
             if res.text and (res.text != ''):
                returnObj['id'] = self.webIDfromResponse(res.text)
-            # The externalID of new resource is responsed in 'Content-Location' 
+            # The externalID of new resource is responsed in 'Content-Location'
             # from response headers
             elif res.headers['Content-Location'] != '':
                returnObj['id'] = res.headers['Content-Location']
@@ -1578,9 +1578,9 @@ Create new build record.
    .. code:: python
 
       {
-         'success' : False, 
-         'id': None, 
-         'message': '', 
+         'success' : False,
+         'id': None,
+         'message': '',
          'status_code': ''
       }
 
@@ -1589,9 +1589,9 @@ Create new build record.
       returnObj = {'success' : False, 'id': None, 'message': '', 'status_code': ''}
       if (sBuildSWVersion not in self.dBuildVersion.values()) or forceCreate:
          sBuildTemplate = self.createBuildRecordTemplate(sBuildSWVersion)
-         returnObj  = self.createResource('buildrecord', sBuildTemplate) 
+         returnObj  = self.createResource('buildrecord', sBuildTemplate)
          if returnObj['success']:
-            # store existing build ID for next verification   
+            # store existing build ID for next verification
             self.dBuildVersion[returnObj['id']] = sBuildSWVersion
       else:
          idx = list(self.dBuildVersion.values()).index(sBuildSWVersion)
@@ -1631,9 +1631,9 @@ Create new configuration - test environment.
    .. code:: python
 
       {
-         'success' : False, 
-         'id': None, 
-         'message': '', 
+         'success' : False,
+         'id': None,
+         'message': '',
          'status_code': ''
       }
 
@@ -1645,7 +1645,7 @@ Create new configuration - test environment.
          sConfTemplate = self.createConfigurationTemplate(sConfigurationName)
          returnObj  = self.createResource('configuration', sConfTemplate)
          if returnObj['success']:
-            # store existing configuration ID for next verification   
+            # store existing configuration ID for next verification
             self.dConfiguation[returnObj['id']] = sConfigurationName
       else:
          idx = list(self.dConfiguation.values()).index(sConfigurationName)
@@ -1712,13 +1712,13 @@ Link list of test cases to provided testplan ID.
    List of testcase(s) to be linked with given testplan.
 
    If not provide, `lTestcaseIDs` property will be used as list of testcase.
-         
+
 **Returns:**
 
 *  ``returnObj``
 
    / *Type*: dict /
-   
+
    Response dictionary which contains status and error message.
 
    Example:
@@ -1726,7 +1726,7 @@ Link list of test cases to provided testplan ID.
    .. code:: python
 
       {
-         'success' : False, 
+         'success' : False,
          'message': ''
       }
 
@@ -1734,13 +1734,13 @@ Link list of test cases to provided testplan ID.
       returnObj = {'success' : False, 'message': ''}
       if lTestcases == None:
          lTestcases = self.lTestcaseIDs
-      if len(lTestcases): 
+      if len(lTestcases):
          resTestplanData = self.getResourceByID('testplan', testplanID)
          oTree = get_xml_tree(BytesIO(str(resTestplanData.text).encode()),bdtd_validation=False)
          # RQM XML response using namespace for nodes
          # use namespace mapping from root for access response XML
          root = oTree.getroot()
-         
+
          for sTCID in lTestcases:
             sTestcaseURL = self.integrationURL('testcase', sTCID)
             oTC = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/}testcase', nsmap=root.nsmap)
@@ -1755,7 +1755,7 @@ Link list of test cases to provided testplan ID.
             returnObj['message'] = str(resUpdateTestplan.reason)
       else:
          returnObj['message'] = "No testcase for linking."
-      return returnObj      
+      return returnObj
 
    def linkListTestcase2Testsuite(self, testsuiteID, lTestcases=None):
       """
@@ -1776,13 +1776,13 @@ Link list of test cases to provided testsuite ID
    List of testcase(s) to be linked with given testplan.
 
    If not provide, `lTestcaseIDs` property will be used as list of testcase.
-         
+
 **Returns:**
 
 *  ``returnObj``
 
    / *Type*: dict /
-   
+
    Response dictionary which contains status and error message.
 
    Example:
@@ -1790,7 +1790,7 @@ Link list of test cases to provided testsuite ID
    .. code:: python
 
       {
-         'success' : False, 
+         'success' : False,
          'message': ''
       }
 
@@ -1798,7 +1798,7 @@ Link list of test cases to provided testsuite ID
       returnObj = {'success' : False, 'message': ''}
       if lTestcases == None:
          lTestcases = self.lTestcaseIDs
-      if len(lTestcases): 
+      if len(lTestcases):
          resTestsuiteData = self.getResourceByID('testsuite', testsuiteID)
          oTree=get_xml_tree(BytesIO(str(resTestsuiteData.text).encode()),bdtd_validation=False)
          # RQM XML response using namespace for nodes

@@ -1,4 +1,4 @@
-.. Copyright 2020-2022 Robert Bosch GmbH
+.. Copyright 2020-2023 Robert Bosch GmbH
 
 .. Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-**RobotLog2RQM** helps to import the Robot result file(s) as ***.xml** format 
+**RobotLog2RQM** helps to import the Robot result file(s) as ***.xml** format
 into IBM® Rational® Quality Manager - RQM resources.
 
-It provides ability (**CRQM Class**) to interact with RQM resources such as test plan, test case, 
+It provides ability (**CRQM Class**) to interact with RQM resources such as test plan, test case,
 build, ... via RqmAPI_ to:
 
 * Get RQM resource: by given ID or all vailable entities of resource type.
@@ -24,7 +24,7 @@ build, ... via RqmAPI_ to:
 
 So that **RobotLog2RQM** tool can:
 
-* Create all required resources (*Test Case Excution Record*, *Test Case 
+* Create all required resources (*Test Case Excution Record*, *Test Case
   Execution Result*, ...) for new testcase on RQM.
 * Link all testcases to provided testplan.
 * Add new test result for existing testcase on RQM.

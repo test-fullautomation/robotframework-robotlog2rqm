@@ -1,4 +1,4 @@
-#  Copyright 2020-2022 Robert Bosch Car Multimedia GmbH
+#  Copyright 2020-2023 Robert Bosch GmbH
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 #
 # This tool is used to parse the robot framework results output.xml
 # then import them into RQM - IBM Rational Quality Manager
-#  
+#
 # History:
-# 
+#
 # 2020-01-08:
 #  - initial version
 #
@@ -142,7 +142,7 @@ Write log message to console/file output.
    / *Condition*: optional / *Type*: int / *Default*: 0 /
 
    Offset indent.
-      
+
 **Returns:**
 
 (*no returns*)
@@ -160,7 +160,7 @@ Write log message to console/file output.
    def log_warning(cls, msg):
       """
 Write warning message to console/file output.
-      
+
 **Arguments:**
 
 *  ``msg``
@@ -210,7 +210,7 @@ def get_from_tags(lTags, reInfo):
    """
 Extract testcase information from tags.
 
-Example: 
+Example:
    TCID-xxxx, FID-xxxx, ...
 
 **Arguments:**
@@ -232,7 +232,7 @@ Example:
 *  ``lInfo``
 
    / *Type*: list /
-   
+
    List of expected information (ID)
    """
    lInfo = []
@@ -266,7 +266,7 @@ Convert time string to datetime.
    tp=re.findall(r"(\d{4})(\d{2})(\d{2})\s(\d+):(\d+):(\d+)\.(\d+)",time)[0]
    tp=list(map(int,tp))
    dt=datetime.datetime(tp[0],tp[1],tp[2],tp[3],tp[4],tp[5],tp[6])
-   return dt 
+   return dt
 
 def __process_commandline():
    """
@@ -300,24 +300,24 @@ Avalable arguments in command line:
 
    cmdParser=argparse.ArgumentParser(prog=PROG_NAME, description=PROG_DESC)
 
-   cmdParser.add_argument('-v', '--version', action='version', 
+   cmdParser.add_argument('-v', '--version', action='version',
                           version=f'v{VERSION} ({VERSION_DATE})',
                           help='Version of the RobotLog2RQM importer.')
-   cmdParser.add_argument('resultxmlfile', type=str, 
+   cmdParser.add_argument('resultxmlfile', type=str,
                           help='absolute or relative path to the xml result file or directory of result files to be imported.')
    cmdParser.add_argument('host', type=str, help='RQM host url.')
    cmdParser.add_argument('project', type=str, help='project on RQM.')
    cmdParser.add_argument('user', type=str, help='user for RQM login.')
    cmdParser.add_argument('password', type=str, help='password for RQM login.')
-   cmdParser.add_argument('testplan', type=str, 
+   cmdParser.add_argument('testplan', type=str,
                           help='testplan ID for this execution.')
-   cmdParser.add_argument('--recursive',action="store_true", 
+   cmdParser.add_argument('--recursive',action="store_true",
                           help='if set, then the path is searched recursively for log files to be imported.')
-   cmdParser.add_argument('--createmissing', action="store_true", 
+   cmdParser.add_argument('--createmissing', action="store_true",
                           help='if set, then all testcases without tcid are created when importing.')
-   cmdParser.add_argument('--updatetestcase', action="store_true", 
+   cmdParser.add_argument('--updatetestcase', action="store_true",
                           help='if set, then testcase information on RQM will be updated bases on robot testfile.')
-   cmdParser.add_argument('--dryrun',action="store_true", 
+   cmdParser.add_argument('--dryrun',action="store_true",
                           help='if set, then verify all input arguments (includes RQM authentication) and show what would be done.')
 
    return cmdParser.parse_args()
@@ -327,7 +327,7 @@ def process_suite_metadata(suite, default_metadata=DEFAULT_METADATA):
 Try to find metadata information from all suite levels.
 
 Metadata at top suite level has a highest priority.
-   
+
 **Arguments:**
 
 *  ``suite``
@@ -357,7 +357,7 @@ Metadata at top suite level has a highest priority.
    # The higher suite level metadata have higher priority
    if suite.metadata != None:
       dMetadata = process_metadata(suite.metadata, dMetadata)
-   
+
    return dMetadata
 
 def process_metadata(metadata, default_metadata=DEFAULT_METADATA):
@@ -381,10 +381,10 @@ Extract metadata from suite result bases on DEFAULT_METADATA.
 **Returns:**
 
 *  ``dMetadata``
-   
+
    / *Type*: dict /
-   
-   Dictionary of Metadata information.   
+
+   Dictionary of Metadata information.
    """
    dMetadata = dict(default_metadata)
    for key in dMetadata.keys():
@@ -414,7 +414,7 @@ Process robot suite for importing to RQM.
 
 **Returns:**
 
-(*no returns*)  
+(*no returns*)
    """
    if len(list(suite.suites)) > 0:
       for subsuite in suite.suites:
@@ -427,7 +427,7 @@ Process robot suite for importing to RQM.
          for key in suite.parent.metadata.keys():
             if key not in suite.metadata:
                suite.metadata[key] = suite.parent.metadata[key]
-      
+
       if len(list(suite.tests)) > 0:
          for test in suite.tests:
             process_test(RQMClient, test)
@@ -452,14 +452,14 @@ Process robot test for importing to RQM.
 
 **Returns:**
 
-(*no returns*)   
+(*no returns*)
    """
    Logger.log(f"Process test: {test.name}")
 
    # Avoid create resources with dryrun
    if Logger.dryrun:
       return
-   
+
    # Parse test case data:
    _tc_fid = ";".join(get_from_tags(test.tags, "fid-(.+)"))
    lTCIDTags = get_from_tags(test.tags, "tcid-(.+)")
@@ -499,9 +499,9 @@ Process robot test for importing to RQM.
       # Create new testcase on RQM
       # Update dMappingTCID (to update *.robot testfile with generated ID - Not implemented yet).
       if _tc_createmissing:
-         oTCTemplate = RQMClient.createTestcaseTemplate( _tc_name, 
+         oTCTemplate = RQMClient.createTestcaseTemplate( _tc_name,
                                                          _tc_desc,
-                                                         _tc_cmpt, 
+                                                         _tc_cmpt,
                                                          _tc_fid,
                                                          _tc_team,
                                                          _tc_link)
@@ -529,9 +529,9 @@ Process robot test for importing to RQM.
       if _tc_update:
          resTC = RQMClient.getResourceByID('testcase', _tc_id)
          if resTC.status_code == 200 and resTC.text:
-            oTCTemplate = RQMClient.createTestcaseTemplate( _tc_name, 
+            oTCTemplate = RQMClient.createTestcaseTemplate( _tc_name,
                                                             _tc_desc,
-                                                            _tc_cmpt, 
+                                                            _tc_cmpt,
                                                             _tc_fid,
                                                             _tc_team,
                                                             _tc_link,
@@ -552,7 +552,7 @@ Process robot test for importing to RQM.
                                                  _tc_config_id,
                                                  _tc_team)
    res = RQMClient.createResource('executionworkitem', oTCERTemplate)
-   _tc_tcer_id = res['id'] 
+   _tc_tcer_id = res['id']
    if res['success']:
       Logger.log(f"Created TCER with ID '{_tc_tcer_id}' successfully.")
    elif (res['status_code'] == 303 or res['status_code'] == 200) and res['id'] != '':
@@ -604,7 +604,7 @@ Flow to import Robot results to RQM:
 1. Process provided arguments from command line
 2. Login Rational Quality Management (RQM)
 3. Parse Robot results
-4. Import results into RQM 
+4. Import results into RQM
 5. Link all executed testcases to provided testplan/testsuite ID
 
 **Arguments:**
@@ -640,7 +640,7 @@ Flow to import Robot results to RQM:
    if os.path.exists(args.resultxmlfile):
       sLogFileType="PATH"
       if os.path.isfile(args.resultxmlfile):
-         sLogFileType="FILE"  
+         sLogFileType="FILE"
    else:
       Logger.log_error(f"Given resultxmlfile is not existing: '{args.resultxmlfile}'.", fatal_error=True)
 
@@ -681,7 +681,7 @@ Flow to import Robot results to RQM:
    except Exception as reason:
       Logger.log_error(f"Could not login to RQM: '{str(reason)}'.")
 
-   # 4. Import results into RQM 
+   # 4. Import results into RQM
    try:
       metadata_info = process_suite_metadata(result.suite)
       if not metadata_info['version_sw']:
@@ -692,9 +692,9 @@ Flow to import Robot results to RQM:
       if args.dryrun:
          metadata_info['version_sw'] = None
          metadata_info['project'] = None
-      RQMClient.config(args.testplan, metadata_info['version_sw'], 
+      RQMClient.config(args.testplan, metadata_info['version_sw'],
                     metadata_info['project'], args.createmissing, args.updatetestcase)
-      # Process suite for importing 
+      # Process suite for importing
       process_suite(RQMClient, result.suite)
 
       # Link all imported testcase ID(s) with testplan
