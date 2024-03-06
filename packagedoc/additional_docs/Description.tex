@@ -1,4 +1,4 @@
-% Copyright 2020-2023 Robert Bosch GmbH
+% Copyright 2020-2024 Robert Bosch GmbH
 
 % Licensed under the Apache License, Version 2.0 (the "License");
 % you may not use this file except in compliance with the License.
@@ -16,22 +16,24 @@
 \section{Get \rfwcore\ XML result}
 \label{description-get-robotframework-xml-result}}
 
-In order to manage test cases and their results with RQM, some traceable
-information such as version, testcase ID, component, ... are required.
+In order to manage test cases and their results Rational Quality Manager (RQM), 
+certain traceable information, such as version, test case ID, component, etc., 
+is required. 
 
-So that the \pkg\ tool can know which importing test results are
-belong to (Test Case) or linked with (Build Record, Test Environment) on RQM.
+This enables the \pkg\ tool to associate the imported test results with 
+specific elements (Test Case) or link them to other entities (Build Record, 
+Test Environment) in RQM.
 
 These information should be provided in\rcode{Metadata}(for the whole
 testsuite/execution info: version, build, ...) and\rcode{{[}Tags{]}}information
-(for specific testcase info: component, testcase ID, requirement ID, ...) of
-\rfwcore\ testcase.
-Then when executing Robot testcase(s), the generated Robot result file (default
-is \emph{output.xml}) will contain all of them and ready for importing.
+(for specific test case info: component, test case ID, requirement ID, ...) of
+\rfwcore\ test case.
+Then when executing \rfwcore\ test case(s), the generated \rfwcore\ result file 
+(default is \emph{output.xml}) will contain all of them and ready for importing.
 
-Sample \rfwcore\ testcase with the neccessary information for importing to RQM:
+Sample \rfwcore\ test case with the neccessary information for importing to RQM:
 
-\begin{robotcode}[caption=Sample \rfwcore\ testcase,
+\begin{robotcode}[caption=Sample \rfwcore\ test case,
                   linebackgroundcolor=\hlcode{2,3,4}]
 *** Settings ***
 Metadata   project      ROBFW             # Test Environment on RQM for linking
@@ -47,20 +49,17 @@ Testcase 01
    Log      This is Testcase 01
 
 Testcase 02
-   [Documentation]  This new testcase will be created if -createmissing argument
+   [Documentation]  This new test case will be created if -createmissing argument
                ...  is provided when importing
    [Tags]   FID-113  robotfile-https://github.com/test-fullautomation
    Log      This is Testcase 02
 \end{robotcode}
 
 \begin{boxhint} {Hint}
-  In case you are using \rfw\ with
-  \href{https://github.com/test-fullautomation/robotframework-testsuitesmanagement}{RobotFramework\_Testsuites}
-  library for executing Robot testcase(s).
-  You do not need to define above highlighted\rcode{Metadata}in your Robot test case.
-
-  These\rcode{Metadata}information will be defined implicitly within the
-  \rcode{Suite Setup} bases on your environment and configuration in *.json file.
+  In case you are using \rfw, above highlighted\rcode{Metadata} definitions are 
+  not required because they have been handled by
+  \href{https://github.com/test-fullautomation/robotframework-testsuitesmanagement}
+  {RobotFramework\_TestsuitesManagement} library within\rcode{Suite Setup}.
 \end{boxhint}
 
 \hypertarget{description-tool-features}{%
@@ -110,7 +109,7 @@ optional arguments:
 
 As above instruction, \pkg\ tool requires 5 positional arguments consists of:
 \begin{itemize}
-  \item The Robot result file/folder\rlog{resultxmlfile}
+  \item The \rfwcore\ result file/folder\rlog{resultxmlfile}
   \item The RQM authentication\rlog{host},\rlog{project},\rlog{user},\rlog{password}
   \item The RQM\rlog{testplan}ID which will contains all importing test results
 \end{itemize}
@@ -128,12 +127,12 @@ When command is executed, the tool will process with following steps:
 \item Login the RQM server with the provided credential, tehn verify the
       existences of given\rlog{project},\rlog{testplan} on RQM
 \item Create RQM \textbf{Build Record} and \textbf{Test Environment} (if already
-      provided in Robot test case and not existing on RQM)
+      provided in \rfwcore\ test case and not existing on RQM)
 \item Create new RQM \textbf{Test Case Execution Record - TCER}
       (if it is not existing) bases on test case ID (defined \rcode{TCID-xxx} in
-      \rcode{[Tags]} of Robot Test Cases) and \rlog{testplan} ID
+      \rcode{[Tags]} of \rfwcore\ Test Cases) and \rlog{testplan} ID
 \item Create new RQM \textbf{Test Case Execution Result} which contents
-      the detail and result state of Robot test case
+      the detail and result state of \rfwcore\ test case
 \item Link all test case(s) to provided \rlog{testplan}
 \end{itemize}
 
@@ -145,20 +144,20 @@ the RQM authentication in arguments are corrected or not, the optional argument
 In the dryrun mode, \pkg\ will not create any resources on RQM, it
 just verify:
 \begin{itemize}
-  \item The given Robot result file/folder is valid or not
+  \item The given \rfwcore\ result file/folder is valid or not
   \item The given RQM authentication is correct or not
   \item The given RQM project and testplan are existing or not
 \end{itemize}
 
 \subsection{Import multiple *.xml result files}
-\pkg\ accepts the first arugment \rlog{resultxmlfile} can be a single file or
-the folder that contains multiple Robot result files.
+\pkg\ accepts the first argument \rlog{resultxmlfile} can be a single file or
+the folder that contains multiple \rfwcore\ result files.
 
 When the folder is used, \pkg\ will only search for \emph{*.xml} file under
 given directory and exclude any file within subdirectories as default.
 
 In case you have result file(s) under the subdirectory of given folder and want
-these result files will also be imported, the optional arugment
+these result files will also be imported, the optional argument
 \rlog{--recursive} should be used when executing \pkg\ command.
 
 When \rlog{--recursive} argument is set, \pkg\ will walk through the given
@@ -191,30 +190,30 @@ logFolder
 \subsection{Create missing Test Case on RQM}
 By default, \pkg\ tool will not touch (create, update) any RQM Test Case.
 
-If the \rcode{TCID-xxx} information is missing in \rcode{[Tags]} of Robot Test
-Case, the error message will be raised for that importing Test Case and process
-with the next Test Cases
+If the \rcode{TCID-xxx} information is missing in \rcode{[Tags]} section of 
+\rfwcore\ Test Case, an error message will be raised for that specific importing 
+Test Case, and the tool will proceed with the next Test Cases accordingly
 \begin{pythonlog}
 ERROR: There is no 'tcid' information for importing test 'Testcase 01'.
 \end{pythonlog}
 
 So that, in order to import those missing \rcode{TCID-xxx} Test Cases, the
-optional arugments \rlog{--createmissing} should be provided in the \pkg\
-arugments.
+optional arguments \rlog{--createmissing} should be provided in the \pkg\
+arguments.
 
 When \rlog{--createmissing} is used, \pkg\ will help to create RQM Test Cases
-bases on the defined information in Robot Test Cases first to get the new
-testcase ID and use it for linking to related RQM resources \textbf{TCER},
-\textbf{Test Case Execution Result} as basic feature.
+bases on the defined information in \rfwcore\ Test Cases.
+It obtains the new Test Case ID and uses it for linking to related RQM resources 
+\textbf{TCER}, \textbf{Test Case Execution Result} as basic feature.
 
-The new testcase IDs for new Test Cases are also printed in the execution log,
-so that you can copy them and update to \rcode{TCID-xxx} information of Robot
-Test Cases for the next Robot execution. Then they will be available in the
-generated \emph{*.xml} result file for importing.
+The new IDs for the created Test Cases are also displayed in the execution log.
+You can copy these IDs and update the \rcode{TCID-xxx} information in \rfwcore\ 
+Test Cases for the next execution. This information will then be available in 
+the generated \emph{*.xml} result file for importing.
 
 Please refer \hyperref[description-robot-testcase-information-on-rqm]
-{Robot Testcase information on RQM} section for the reflections of defined
-information in Robot Test Case on RQM.
+{\rfwcore\ Test Case Information on RQM} section for for details on how the 
+defined information in \rfwcore\ Test Cases is reflected in RQM.
 
 \subsection{Update existing Test Case on RQM}
 In case the Test Case is existing on RQM, but you want to update its attribute(s)
@@ -222,17 +221,18 @@ such as \textbf{Component}, \textbf{Description}, ... the optional argument
 \rlog{--updatetestcase} should be used.
 
 \pkg\ will update RQM Test Case resource bases on the defined information in
-Robot Test Case before creating its result.
+\rfwcore\ Test Case before creating its result.
 
-Please refer \hyperref[description-robot-testcase-information-on-rqm]{Robot Testcase information on RQM}
-section for the reflections of defined information in Robot Test Case on RQM.
+Please refer \hyperref[description-robot-testcase-information-on-rqm]{\rfwcore\ Test Case Information on RQM}
+section for for details on how the defined information in \rfwcore\ Test Cases 
+is reflected in RQM.
 
 \hypertarget{description-robot-testcase-information-on-rqm}{%
-\section{Robot Testcase information onRQM:}
+\section{\rfwcore\ Test Case Information on RQM:}
 \label{description-robot-testcase-information-on-rqm}}
-For more detail about the mapping between the defined information from Robot
-Test Case to Robot result (\emph{output.xml}) file and their reflections on
-RQM WebApp, please refer be mapping table:
+For more detail about the mapping between the defined information from \rfwcore\ 
+Test Case to \rfwcore\ result (\emph{output.xml}) file and their reflections on
+RQM WebApp, please refer below mapping table:
 
 \begin{table}[h]
    \label{table:RobotLog2RQM-mapping}
@@ -287,7 +287,7 @@ RQM WebApp, please refer be mapping table:
                         &Test Plan    &Interaction URL to provided \rlog{testplan} in cli
                                                     &\\
                         \cline{2-4}
-                        &Test Case    &Interaction URL to provided testcase ID:
+                        &Test Case    &Interaction URL to provided test case ID:
                                       provided tcid in \rcode{[Tags]: tcid-xxx} or
                                       generated tcid when using \rlog{-createmissing}
                                                     &\textbf{//suite/test/tags/tag[@text="tcid-xxx"]}\\
@@ -317,7 +317,7 @@ RQM WebApp, please refer be mapping table:
                         &Test Plan    &Interaction URL to provided \rlog{testplan} in cli
                                                     &\\
                         \cline{2-4}
-                        &Test Case    &Interaction URL to provided testcase ID:
+                        &Test Case    &Interaction URL to provided test case ID:
                                       provided tcid in \rcode{[Tags]: tcid-xxx} or
                                       generated tcid when using \rlog{-createmissing}
                                                     &\textbf{//suite/test/tags/tag[@text="tcid-xxx"]}\\
@@ -345,5 +345,5 @@ RQM WebApp, please refer be mapping table:
                         \cline{2-4}
       \hline
    \end{tabular}
-   \caption{RQM data \& \rfwcore\ testcase/output.xml}
+   \caption{RQM data \& \rfwcore\ }
 \end{table}
