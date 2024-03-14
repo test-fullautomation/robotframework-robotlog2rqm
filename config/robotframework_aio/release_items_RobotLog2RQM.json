@@ -48,7 +48,10 @@
                    "0.10." : [
                              ],
                    "0.11." : [
-                              "Enhance package documentation."
+"
+* Enhance package documentation
+* Support for basic authentication as an alternative to access RQM behind SSO system
+"
                              ]
                  }
 }
