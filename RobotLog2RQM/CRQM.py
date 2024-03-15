@@ -166,7 +166,7 @@ Constructor of class ``CRQMClient``.
       self.projectname = project
       self.projectID = urllib.parse.quote_plus(project) # encode URI for project name
       self.session = requests.Session()
-
+      self.session.auth = (self.userID, self.pw)
       # Required request headers for creating new resource
       self.headers = {
                         'Accept'             : 'application/xml',
@@ -214,6 +214,9 @@ Log in RQM by provided user & password.
    Indicates if the computation of the method ``login`` was successful or not.
       """
       bSuccess = False
+      # from requests_kerberos import HTTPKerberosAuth, OPTIONAL
+      # kerberos_auth = HTTPKerberosAuth(mutual_authentication=OPTIONAL)
+      # self.session.auth = (self.userID, self.pw)
       res = self.session.post(self.host + '/qm/j_security_check', allow_redirects=True, verify=False,
                               data={'j_username':self.userID,'j_password':self.pw})
       if res.status_code == 200:
