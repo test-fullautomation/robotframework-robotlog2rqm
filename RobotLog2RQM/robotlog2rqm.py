@@ -41,7 +41,8 @@ from RobotLog2RQM.version import VERSION, VERSION_DATE
 DRESULT_MAPPING = {
    "PASS":  "Passed",
    "FAIL":  "Failed",
-   "UNKNOWN": "Inconclusive"
+   "UNKNOWN": "Inconclusive",
+   "SKIP": "Blocked"
 }
 
 DEFAULT_METADATA = {
