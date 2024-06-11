@@ -52,6 +52,11 @@
 * Enhanced package documentation
 * Support added for basic authentication as an alternative to access RQM behind SSO system
 "
-                             ]
+                             ],
+                   "0.12.1.;0.13.0." : [
+"
+* Fixed issue when importing test case with **SKIP** status
+"
+                   ]
                  }
 }
