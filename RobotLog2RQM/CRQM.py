@@ -195,7 +195,10 @@ Constructor of class ``CRQMClient``.
       self.configuration = None
       self.createmissing = None
       self.updatetestcase= None
-      self.testsuite     = None
+      self.testsuite     = {
+         "id": None,
+         "name": None
+      }
 
    def login(self):
       """
@@ -285,7 +288,7 @@ Disconnect from RQM.
       self.session.close()
 
    def config(self, plan_id, build_name=None, config_name=None,
-              createmissing=False, updatetestcase=False,suite_id=None):
+              createmissing=False, updatetestcase=False, suite_id=None):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
@@ -340,8 +343,9 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
       try:
          self.createmissing = createmissing
          self.updatetestcase = updatetestcase
-         self.testsuite = suite_id
          self.testplan  = plan_id
+         self.testsuite['id'] = suite_id
+
          # Verify testplan ID
          res_plan = self.getResourceByID('testplan', plan_id)
          if res_plan.status_code != 200:
@@ -370,6 +374,14 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             else:
                raise Exception("Cannot create configuration '%s': %s"%
                                (config_name, res_conf['message']))
+
+         # Verify testsuite if given
+         if suite_id != None:
+            res_suite = self.getResourceByID('testsuite', suite_id)
+            if res_suite.status_code != 200:
+               raise Exception('Testsuite with ID %s is not existing!'%str(suite_id))
+            oTestsuite = get_xml_tree(BytesIO(str(res_suite.text).encode()), bdtd_validation=False)
+            self.testsuite['name']  = oTestsuite.find('ns4:title', oTestsuite.getroot().nsmap).text
 
          # get all team-areas for testcase template
          self.getAllTeamAreas()
