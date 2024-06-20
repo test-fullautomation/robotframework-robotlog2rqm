@@ -293,8 +293,7 @@ Avalable arguments in command line:
    - `user` : user for RQM login.
    - `password` : user password for RQM login.
    - `testplan` : RQM testplan ID.
-   - `--testsuite` : RQM testsuite ID.
-   - `--createtestsuite` : if True, then create new testsuite for this execution.
+   - `--testsuite` : RQM testsuite ID. If value is 'new', then create a new testsuite for this execution.
    - `--recursive` : if True, then the path is searched recursively for log files to be imported.
    - `--createmissing` : if True, then all testcases without tcid are created when importing.
    - `--dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
@@ -327,9 +326,7 @@ Avalable arguments in command line:
    cmdParser.add_argument('testplan', type=str,
                           help='testplan ID for this execution.')
    cmdParser.add_argument('--testsuite', type=str, 
-                          help='testsuite ID for this exectuion.')
-   cmdParser.add_argument('--createtestsuite',action="store_true",
-                          help='if set, then create new testsuite for this execution.')
+                          help="testsuite ID for this exectuion. If 'new', then create a new testsuite for this execution.")
    cmdParser.add_argument('--recursive',action="store_true",
                           help='if set, then the path is searched recursively for log files to be imported.')
    cmdParser.add_argument('--createmissing', action="store_true",
@@ -656,8 +653,7 @@ Flow to import Robot results to RQM:
    * `user` : user for RQM login.
    * `password` : user password for RQM login.
    * `testplan` : RQM testplan ID.
-   * `testsuite` : testsuite ID for this exectuion.
-   * `createtestsuite` : if True, create new testsuite for this execution.
+   * `testsuite` : testsuite ID for this execution. If 'new', then create a new testsuite for this execution.
    * `recursive` : if True, then the path is searched recursively for log files to be imported.
    * `createmissing` : if True, then all testcases without tcid are created when importing.
    * `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
@@ -734,44 +730,72 @@ Flow to import Robot results to RQM:
       RQMClient.config(args.testplan, metadata_info['version_sw'],
                     metadata_info['project'], args.createmissing, args.updatetestcase, args.testsuite)
 
+      if args.testsuite == "new":
+         # Create new testsuite
+         if not args.dryrun:
+            testsuite_data = RQMClient.createTestsuiteTemplate(result.suite.name, result.suite.doc)
+            res_testsuite = RQMClient.createResource('testsuite', testsuite_data)
+         else:
+            # for dryrun
+            res_testsuite = {'success': True, 'id': 1111}
+
+         if res_testsuite['success']:
+            _ts_id = res_testsuite['id']
+            Logger.log(f"Create testsuite '{result.suite.name}' with ID '{_ts_id}' successfully!")
+            RQMClient.testsuite['id'] = _ts_id
+            RQMClient.testsuite['name'] = result.suite.name
+         else:
+            Logger.log_error(f"Create testsuite '{result.suite.name}' failed. Reason: {res_testsuite['message']}", fatal_error=True)
+
       # Process suite for importing
       process_suite(RQMClient, result.suite)
 
-      if args.testsuite and not args.dryrun:
-         # Create testsuite execution record if requires
-         testsuite_record_data = RQMClient.createTSERTemplate(args.testsuite, RQMClient.testsuite['name'], args.testplan)
-         res_TSER = RQMClient.createResource('suiteexecutionrecord', testsuite_record_data)
-         sTSERID = res_TSER['id']
-         Logger.log()
-         if res_TSER['success']:
-            Logger.log(f"Create TSER with id {sTSERID} successfully!")
-         elif (res_TSER['status_code'] == 303 or res_TSER['status_code'] == 200) and res_TSER['id'] != '':
-            ### incase executionworkitem is existing, cannot create new one
-            ### Use the existing ID for new result
-            Logger.log_warning(f'TSER for testsuite {args.testsuite} is existing.\nAdd this execution result to existing TSER id: {sTSERID}')
-         else:
-            Logger.log_error(f"Create TSER failed, {res_TSER['message']}")
+      if RQMClient.testsuite['id']:
+         if not args.dryrun:
+            # Create testsuite execution record if requires
+            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite['id'], RQMClient.testsuite['name'], args.testplan)
+            res_TSER = RQMClient.createResource('suiteexecutionrecord', testsuite_record_data)
+            sTSERID = res_TSER['id']
+            Logger.log()
+            if res_TSER['success']:
+               Logger.log(f"Create TSER with id {sTSERID} successfully!")
+            elif (res_TSER['status_code'] == 303 or res_TSER['status_code'] == 200) and res_TSER['id'] != '':
+               ### incase executionworkitem is existing, cannot create new one
+               ### Use the existing ID for new result
+               Logger.log_warning(f"TSER for testsuite {RQMClient.testsuite['id']} is existing.\nAdd this execution result to existing TSER id: {sTSERID}")
+            else:
+               Logger.log_error(f"Create TSER failed, {res_TSER['message']}")
 
-         # Create new testsuite result and link all TCERs
-         testsuite_result_data = RQMClient.createTestsuiteResultTemplate(args.testsuite,
-                                                                         RQMClient.testsuite['name'],
-                                                                         sTSERID,
-                                                                         RQMClient.lTCERIDs,
-                                                                         RQMClient.lTCResultIDs
-                                                                        )
-         res_TSLog = RQMClient.createResource('testsuitelog', testsuite_result_data)
-         sSuiteResultID = res_TSLog['id'] 
-         if res_TSLog['success']:
-            Logger.log(f'Created testsuite result with id {sSuiteResultID} successfully.', indent=2)
+            # Create new testsuite result and link all TCERs
+            testsuite_result_data = RQMClient.createTestsuiteResultTemplate(RQMClient.testsuite['id'],
+                                                                           RQMClient.testsuite['name'],
+                                                                           sTSERID,
+                                                                           RQMClient.lTCERIDs,
+                                                                           RQMClient.lTCResultIDs
+                                                                           )
+            res_TSLog = RQMClient.createResource('testsuitelog', testsuite_result_data)
+            sSuiteResultID = res_TSLog['id'] 
+            if res_TSLog['success']:
+               Logger.log(f"Created testsuite result with id {sSuiteResultID} successfully.", indent=2)
+            else:
+               Logger.log_error(f"Create testsuite result failed, {res_TSLog['message']}", indent=2)
          else:
-            Logger.log_error(f"Create testsuite result failed, {res_TSLog['message']}", indent=2)
+            Logger.log(f"Create TSER")
+            Logger.log(f"Created testsuite result")
 
          # Link all imported testcase ID(s) with testsuite
          try:
-            RQMClient.linkListTestcase2Testsuite(args.testsuite)
-            Logger.log(f"Link all imported test cases with testsuite {args.testsuite} successfully.")
+            RQMClient.linkListTestcase2Testsuite(RQMClient.testsuite['id'])
+            Logger.log(f"Link all imported test cases with testsuite {RQMClient.testsuite['id']} successfully.")
          except Exception as reason:
             Logger.log_error(f"Link all imported test cases with testsuite failed.\nReason: {reason}", fatal_error=True)
+
+         # Add testsuite to given testplan
+         try:
+            RQMClient.addTestsuite2Testplan(args.testplan)
+            Logger.log(f"Add testsuite {RQMClient.testsuite['id']} to testplan {args.testplan} successfully.")
+         except Exception as reason:
+            Logger.log_error(f"Add testsuite to testplan failed.\nReason: {reason}", fatal_error=True)
 
       else:
          # Link all imported testcase ID(s) with testplan
