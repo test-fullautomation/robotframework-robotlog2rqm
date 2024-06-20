@@ -326,7 +326,7 @@ Avalable arguments in command line:
    cmdParser.add_argument('testplan', type=str,
                           help='testplan ID for this execution.')
    cmdParser.add_argument('--testsuite', type=str, 
-                          help="testsuite ID for this exectuion. If 'new', then create a new testsuite for this execution.")
+                          help="testsuite ID for this execution. If 'new', then create a new testsuite for this execution.")
    cmdParser.add_argument('--recursive',action="store_true",
                           help='if set, then the path is searched recursively for log files to be imported.')
    cmdParser.add_argument('--createmissing', action="store_true",
