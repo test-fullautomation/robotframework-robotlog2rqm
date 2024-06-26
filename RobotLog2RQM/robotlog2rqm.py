@@ -771,7 +771,8 @@ Flow to import Robot results to RQM:
                                                                            RQMClient.testsuite['name'],
                                                                            sTSERID,
                                                                            RQMClient.lTCERIDs,
-                                                                           RQMClient.lTCResultIDs
+                                                                           RQMClient.lTCResultIDs,
+                                                                           DRESULT_MAPPING[result.suite.status]
                                                                            )
             res_TSLog = RQMClient.createResource('testsuitelog', testsuite_result_data)
             sSuiteResultID = res_TSLog['id'] 

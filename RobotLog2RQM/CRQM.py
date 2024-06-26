@@ -1335,7 +1335,7 @@ Return testsuite execution record (TSER) template from provided configuration na
       return sTSxml
 
    def createTestsuiteResultTemplate(self, testsuiteID, testsuiteName, TSERID,
-                                     lTCER, lTCResults, startTime='',
+                                     lTCER, lTCResults, resultState, startTime='',
                                      endTime='', duration='', sOwnerID=''):
       """
 Return testsuite execution result template from provided configuration name.
@@ -1407,6 +1407,7 @@ Return testsuite execution result template from provided configuration name.
       sTSResultxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'testsuitelog.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
+      prefixState  = 'com.ibm.rqm.execution.common.state.'
 
       # prepare required data for template
       resultTittle  = 'Testsuite result: ' + testsuiteName
@@ -1450,6 +1451,11 @@ Return testsuite execution result template from provided configuration name.
       oStarttime.text          = str(startTime).replace(' ', 'T')
       oEndtime.text            = str(endTime).replace(' ', 'T')
       oTotalRunTime.text       = str(duration)
+      # set default RQM state as inconclusive
+      oState.text              = prefixState + 'inconclusive'
+      if resultState.lower() in self.RESULT_STATES:
+         oState.text = prefixState +resultState.lower()
+         
       for idx, sTCER in enumerate(lTCER):
          sTCERURL = self.integrationURL('executionworkitem', sTCER)
          oSuiteElem = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/tsl/v0.1/}suiteelement', nsmap=nsmap)

@@ -131,6 +131,9 @@ The usage should be showed as below:
    optional arguments:
    -h, --help        show this help message and exit
    -v, --version     Version of the RobotLog2RQM importer.
+   --testsuite TESTSUITE
+                     testsuite ID for this execution. If 'new', then create a new
+                     testsuite for this execution
    --recursive       if set, then the path is searched recursively for
                      log files to be imported.
    --createmissing   if set, then all testcases without tcid are created
