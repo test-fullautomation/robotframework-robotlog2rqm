@@ -753,7 +753,7 @@ Flow to import Robot results to RQM:
       if RQMClient.testsuite['id']:
          if not args.dryrun:
             # Create testsuite execution record if requires
-            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite['id'], RQMClient.testsuite['name'], args.testplan)
+            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite['id'], RQMClient.testsuite['name'], args.testplan, RQMClient.configuration)
             res_TSER = RQMClient.createResource('suiteexecutionrecord', testsuite_record_data)
             sTSERID = res_TSER['id']
             Logger.log()
