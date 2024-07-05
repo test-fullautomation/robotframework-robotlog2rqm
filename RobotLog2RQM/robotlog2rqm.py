@@ -158,7 +158,7 @@ Write log message to console/file output.
       return
 
    @classmethod
-   def log_warning(cls, msg):
+   def log_warning(cls, msg, indent=0):
       """
 Write warning message to console/file output.
 
@@ -170,14 +170,20 @@ Write warning message to console/file output.
 
    Warning message which is written to output.
 
+*  ``indent``
+
+   / *Condition*: optional / *Type*: int / *Default*: 0 /
+
+   Offset indent.
+
 **Returns:**
 
 (*no returns*)
       """
-      cls.log(cls.prefix_warn+str(msg), cls.color_warn)
+      cls.log(cls.prefix_warn+str(msg), cls.color_warn, indent)
 
    @classmethod
-   def log_error(cls, msg, fatal_error=False):
+   def log_error(cls, msg, fatal_error=False, indent=0):
       """
 Write error message to console/file output.
 
@@ -193,6 +199,12 @@ Write error message to console/file output.
 
    If set, tool will terminate after logging error message.
 
+*  ``indent``
+
+   / *Condition*: optional / *Type*: int / *Default*: 0 /
+
+   Offset indent.
+
 **Returns:**
 
 (*no returns*)
@@ -201,7 +213,7 @@ Write error message to console/file output.
       if fatal_error:
          prefix = cls.prefix_fatalerror
 
-      cls.log(prefix+str(msg), cls.color_error)
+      cls.log(prefix+str(msg), cls.color_error, indent)
       if fatal_error:
          cls.log(f"{sys.argv[0]} has been stopped!", cls.color_error)
          exit(1)
@@ -281,6 +293,7 @@ Avalable arguments in command line:
    - `user` : user for RQM login.
    - `password` : user password for RQM login.
    - `testplan` : RQM testplan ID.
+   - `--testsuite` : RQM testsuite ID. If value is 'new', then create a new testsuite for this execution.
    - `--recursive` : if True, then the path is searched recursively for log files to be imported.
    - `--createmissing` : if True, then all testcases without tcid are created when importing.
    - `--dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
@@ -312,6 +325,8 @@ Avalable arguments in command line:
    cmdParser.add_argument('password', type=str, help='password for RQM login.')
    cmdParser.add_argument('testplan', type=str,
                           help='testplan ID for this execution.')
+   cmdParser.add_argument('--testsuite', type=str, 
+                          help="testsuite ID for this execution. If 'new', then create a new testsuite for this execution.")
    cmdParser.add_argument('--recursive',action="store_true",
                           help='if set, then the path is searched recursively for log files to be imported.')
    cmdParser.add_argument('--createmissing', action="store_true",
@@ -395,7 +410,7 @@ Extract metadata from suite result bases on DEFAULT_METADATA.
 
    return dMetadata
 
-def process_suite(RQMClient, suite):
+def process_suite(RQMClient, suite, log_indent=0):
    """
 Process robot suite for importing to RQM.
 
@@ -413,15 +428,21 @@ Process robot suite for importing to RQM.
 
    Robot suite object.
 
+*  ``log_indent``
+
+   / *Condition*: optional / *Type*: int / *Default*: 0 /
+
+   Indent for logging message.
+
 **Returns:**
 
 (*no returns*)
    """
    if len(list(suite.suites)) > 0:
       for subsuite in suite.suites:
-         process_suite(RQMClient, subsuite)
+         process_suite(RQMClient, subsuite, log_indent=log_indent+2)
    else:
-      Logger.log(f"Process suite: {suite.name}")
+      Logger.log(f"Process suite: {suite.name}", indent=log_indent)
 
       # update missing metadata from parent suite
       if suite.parent and suite.parent.metadata:
@@ -431,9 +452,9 @@ Process robot suite for importing to RQM.
 
       if len(list(suite.tests)) > 0:
          for test in suite.tests:
-            process_test(RQMClient, test)
+            process_test(RQMClient, test, log_indent=log_indent+2)
 
-def process_test(RQMClient, test):
+def process_test(RQMClient, test, log_indent=0):
    """
 Process robot test for importing to RQM.
 
@@ -451,11 +472,17 @@ Process robot test for importing to RQM.
 
    Robot test object.
 
+*  ``log_indent``
+
+   / *Condition*: optional / *Type*: int / *Default*: 0 /
+
+   Indent for logging message.
+
 **Returns:**
 
 (*no returns*)
    """
-   Logger.log(f"Process test: {test.name}")
+   Logger.log(f"Process test: {test.name}", indent=log_indent)
 
    # Avoid create resources with dryrun
    if Logger.dryrun:
@@ -485,7 +512,7 @@ Process robot test for importing to RQM.
    try:
       _tc_result = DRESULT_MAPPING[test.status]
    except Exception:
-      Logger.log_error(f"Invalid Robotframework result state '{test.status}' of test '{_tc_name}'.")
+      Logger.log_error(f"Invalid Robotframework result state '{test.status}' of test '{_tc_name}'.", indent=log_indent)
       return
    _tc_message = test.message
    _tc_start_time = convert_to_datetime(test.starttime)
@@ -509,19 +536,19 @@ Process robot test for importing to RQM.
          res = RQMClient.createResource('testcase', oTCTemplate)
          if res['success']:
             _tc_id = res['id']
-            Logger.log(f"Create testcase '{_tc_name}' with ID '{_tc_id}' successfully!")
+            Logger.log(f"Create testcase '{_tc_name}' with ID '{_tc_id}' successfully!", indent=log_indent)
             RQMClient.dMappingTCID[_tc_id] = _tc_name
          else:
-            Logger.log_error(f"Create testcase '{_tc_name}' failed. Reason: {res['message']}")
+            Logger.log_error(f"Create testcase '{_tc_name}' failed. Reason: {res['message']}", indent=log_indent)
             return
       else:
-         Logger.log_error(f"There is no 'tcid' information for importing test '{_tc_name}'.")
+         Logger.log_error(f"There is no 'tcid' information for importing test '{_tc_name}'.", indent=log_indent)
          return
    else:
       # If more than 1 tcid are defined in [Tags], the first one is used.
       if len(lTCIDTags) > 1:
          _tc_id = lTCIDTags[0]
-         Logger.log_warning(f"More than 1 'tcid-' tags in test '{_tc_name}', '{_tc_id}' is used.")
+         Logger.log_warning(f"More than 1 'tcid-' tags in test '{_tc_name}', '{_tc_id}' is used.", indent=log_indent)
 
       # If --updatetestcase is set. Test case with provided tcid will be updated on RQM:
       # Get existing resource of testcase from RQM.
@@ -538,9 +565,9 @@ Process robot test for importing to RQM.
                                                             _tc_link,
                                                             sTCtemplate=str(resTC.text))
             RQMClient.updateResourceByID('testcase', _tc_id, oTCTemplate)
-            Logger.log(f"Update testcase '{_tc_name}' with ID '{_tc_id}' successfully!")
+            Logger.log(f"Update testcase '{_tc_name}' with ID '{_tc_id}' successfully!", indent=log_indent)
          else:
-            Logger.log_error(f"Update testcase with ID '{_tc_id}' failed. Please check whether it is existing on RQM.")
+            Logger.log_error(f"Update testcase with ID '{_tc_id}' failed. Please check whether it is existing on RQM.", indent=log_indent)
             return
 
    # Create TCER:
@@ -555,11 +582,11 @@ Process robot test for importing to RQM.
    res = RQMClient.createResource('executionworkitem', oTCERTemplate)
    _tc_tcer_id = res['id']
    if res['success']:
-      Logger.log(f"Created TCER with ID '{_tc_tcer_id}' successfully.")
+      Logger.log(f"Created TCER with ID '{_tc_tcer_id}' successfully.", indent=log_indent+2)
    elif (res['status_code'] == 303 or res['status_code'] == 200) and res['id'] != '':
-      Logger.log_warning(f"TCER for testcase '{_tc_id}' and testplan '{_tc_testplan_id}' is existing with ID: '{_tc_tcer_id}'")
+      Logger.log_warning(f"TCER for testcase '{_tc_id}' and testplan '{_tc_testplan_id}' is existing with ID: '{_tc_tcer_id}'", indent=log_indent+2)
    else:
-      Logger.log_error(f"Create TCER failed. Please check whether test case with ID '{_tc_id}' is existing on RQM or not. Reason: {res['message']}.")
+      Logger.log_error(f"Create TCER failed. Please check whether test case with ID '{_tc_id}' is existing on RQM or not. Reason: {res['message']}.", indent=log_indent+2)
       return
 
    if _tc_tcer_id not in RQMClient.lTCERIDs:
@@ -584,10 +611,10 @@ Process robot test for importing to RQM.
                                                                 _tc_team)
    res = RQMClient.createResource('executionresult', oTCResultTemplate)
    if res['success']:
-      Logger.log(f"Create result for test '{_tc_name}' successfully!")
+      Logger.log(f"Create result for test '{_tc_name}' successfully!", indent=log_indent+4)
       _tc_result_id = res['id']
    else:
-      Logger.log_error(f"Create result for test '{_tc_name}' failed. Reason: {res['message']}.")
+      Logger.log_error(f"Create result for test '{_tc_name}' failed. Reason: {res['message']}.", indent=log_indent+4)
       return
    if _tc_result_id not in RQMClient.lTCResultIDs:
       RQMClient.lTCResultIDs.append(_tc_result_id)
@@ -595,6 +622,10 @@ Process robot test for importing to RQM.
    # Append lTestcaseIDs (for linking testplan/testsuite)
    if _tc_id not in RQMClient.lTestcaseIDs:
       RQMClient.lTestcaseIDs.append(_tc_id)
+   
+   # Collect starttime and endtime for testsuite log creation
+   RQMClient.lStartTimes.append(_tc_start_time)
+   RQMClient.lEndTimes.append(_tc_end_time)
 
 def RobotLog2RQM(args=None):
    """
@@ -622,10 +653,12 @@ Flow to import Robot results to RQM:
    * `user` : user for RQM login.
    * `password` : user password for RQM login.
    * `testplan` : RQM testplan ID.
+   * `testsuite` : testsuite ID for this execution. If 'new', then create a new testsuite for this execution.
    * `recursive` : if True, then the path is searched recursively for log files to be imported.
    * `createmissing` : if True, then all testcases without tcid are created when importing.
    * `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
    * `dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
+   
 
 **Returns:**
 
@@ -676,6 +709,7 @@ Flow to import Robot results to RQM:
    try:
       bSuccess = RQMClient.login()
       if bSuccess:
+         Logger.log()
          Logger.log(f"Login RQM as user '{args.user}' successfully!")
       else:
          Logger.log_error("Could not login to RQM: 'Unkown reason'.")
@@ -694,14 +728,84 @@ Flow to import Robot results to RQM:
          metadata_info['version_sw'] = None
          metadata_info['project'] = None
       RQMClient.config(args.testplan, metadata_info['version_sw'],
-                    metadata_info['project'], args.createmissing, args.updatetestcase)
+                    metadata_info['project'], args.createmissing, args.updatetestcase, args.testsuite)
+
+      if args.testsuite == "new":
+         # Create new testsuite
+         if not args.dryrun:
+            testsuite_data = RQMClient.createTestsuiteTemplate(result.suite.name, result.suite.doc)
+            res_testsuite = RQMClient.createResource('testsuite', testsuite_data)
+         else:
+            # for dryrun
+            res_testsuite = {'success': True, 'id': 1111}
+
+         if res_testsuite['success']:
+            _ts_id = res_testsuite['id']
+            Logger.log(f"Create testsuite '{result.suite.name}' with ID '{_ts_id}' successfully!")
+            RQMClient.testsuite['id'] = _ts_id
+            RQMClient.testsuite['name'] = result.suite.name
+         else:
+            Logger.log_error(f"Create testsuite '{result.suite.name}' failed. Reason: {res_testsuite['message']}", fatal_error=True)
+
       # Process suite for importing
       process_suite(RQMClient, result.suite)
 
-      # Link all imported testcase ID(s) with testplan
-      Logger.log("Linking all imported testcase ID(s) with testplan ...")
-      RQMClient.linkListTestcase2Testplan(args.testplan)
+      if RQMClient.testsuite['id']:
+         if not args.dryrun:
+            # Create testsuite execution record if requires
+            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite['id'], RQMClient.testsuite['name'], args.testplan, RQMClient.configuration)
+            res_TSER = RQMClient.createResource('suiteexecutionrecord', testsuite_record_data)
+            sTSERID = res_TSER['id']
+            Logger.log()
+            if res_TSER['success']:
+               Logger.log(f"Create TSER with id {sTSERID} successfully!")
+            elif (res_TSER['status_code'] == 303 or res_TSER['status_code'] == 200) and res_TSER['id'] != '':
+               ### incase executionworkitem is existing, cannot create new one
+               ### Use the existing ID for new result
+               Logger.log_warning(f"TSER for testsuite {RQMClient.testsuite['id']} is existing.\nAdd this execution result to existing TSER id: {sTSERID}")
+            else:
+               Logger.log_error(f"Create TSER failed, {res_TSER['message']}")
 
+            # Create new testsuite result and link all TCERs
+            testsuite_result_data = RQMClient.createTestsuiteResultTemplate(RQMClient.testsuite['id'],
+                                                                           RQMClient.testsuite['name'],
+                                                                           sTSERID,
+                                                                           RQMClient.lTCERIDs,
+                                                                           RQMClient.lTCResultIDs,
+                                                                           DRESULT_MAPPING[result.suite.status]
+                                                                           )
+            res_TSLog = RQMClient.createResource('testsuitelog', testsuite_result_data)
+            sSuiteResultID = res_TSLog['id'] 
+            if res_TSLog['success']:
+               Logger.log(f"Created testsuite result with id {sSuiteResultID} successfully.", indent=2)
+            else:
+               Logger.log_error(f"Create testsuite result failed, {res_TSLog['message']}", indent=2)
+         else:
+            Logger.log(f"Create TSER")
+            Logger.log(f"Created testsuite result")
+
+         # Link all imported testcase ID(s) with testsuite
+         try:
+            RQMClient.linkListTestcase2Testsuite(RQMClient.testsuite['id'])
+            Logger.log(f"Link all imported test cases with testsuite {RQMClient.testsuite['id']} successfully.")
+         except Exception as reason:
+            Logger.log_error(f"Link all imported test cases with testsuite failed.\nReason: {reason}", fatal_error=True)
+
+         # Add testsuite to given testplan
+         try:
+            RQMClient.addTestsuite2Testplan(args.testplan)
+            Logger.log(f"Add testsuite {RQMClient.testsuite['id']} to testplan {args.testplan} successfully.")
+         except Exception as reason:
+            Logger.log_error(f"Add testsuite to testplan failed.\nReason: {reason}", fatal_error=True)
+
+      else:
+         # Link all imported testcase ID(s) with testplan
+         try:
+            RQMClient.linkListTestcase2Testplan(args.testplan)
+            Logger.log(f"Link all imported test cases with testplan {args.testplan} successfully.")
+         except Exception as reason:
+            Logger.log_error(f"Link all imported test cases with testplan failed.\nReason: {reason}", fatal_error=True)
+         
       # Update testcase(s) with generated ID(s)
       # Under developing
 
@@ -710,7 +814,15 @@ Flow to import Robot results to RQM:
 
    # 5. Disconnect from RQM
    RQMClient.disconnect()
-   Logger.log("All test results have been imported to RQM successfully.!")
+
+   testcnt_msg = f"All {len(RQMClient.lTestcaseIDs)}"
+   extended_msg = ""
+   if (len(RQMClient.lTestcaseIDs) > len(RQMClient.lTCResultIDs)):
+      testcnt_msg  = f"{len(RQMClient.lTCResultIDs)} of {len(RQMClient.lTestcaseIDs)}"
+      extended_msg = f" {len(RQMClient.lTestcaseIDs)-len(RQMClient.lTCResultIDs)} test results are skipped because of errors."
+
+   Logger.log()
+   Logger.log(f"{testcnt_msg} test results are imported to RQM successfully.{extended_msg}")
 
 if __name__=="__main__":
    RobotLog2RQM()
