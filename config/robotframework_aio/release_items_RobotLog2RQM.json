@@ -57,6 +57,52 @@
 "
 * Fixed issue when importing test case with **SKIP** status
 "
+                             ],
+                   "0.13.0": [
+"
+**New feature of testsuite**
+
+* New optional argument: *--testsuite <TESTSUITEID>*
+
+  The new --testsuite argument allows you to specify how test results are imported into IBM Rational Quality Manager (RQM). 
+  You can now import test results into an existing test suite or create a new one if needed.
+
+* Usage:
+
+  * Import to existing test suite:
+  
+    To import test results into an existing test suite, simply provide the test suite ID with the *--testsuite* argument.
+
+    .. code-block::
+
+       python -m RobotLog2RQM resultxmlfile <host> <project> <user> <password> <testplan> --testsuite <EXISTING_TESTSUITE_ID>
+
+    This command will import the test results into the test suite specified by <EXISTING_TESTSUITE_ID>.
+
+  * Create a new test suite:
+
+    If you want to create a new test suite and import the test results into it, use the value **new** for the *--testsuite* argument.
+    
+    .. code-block::
+
+       python -m RobotLog2RQM resultxmlfile <host> <project> <user> <password> <testplan> --testsuite new
+
+    This command will create a new test suite in RQM and then import the test results into the newly created test suite.
+
+* Example scenarios:
+  
+  * Import to existing test suite with id **1234**
+
+    .. code-block::
+
+       python -m RobotLog2RQM robot_result.xml https://rqm-host.com My_RQM_Project testuser testpass 123 --testsuite 1234
+
+  * Create and import to new test suite
+
+    .. code-block::
+
+       python -m RobotLog2RQM robot_result.xml https://rqm-host.com My_RQM_Project testuser testpass 123 --testsuite new                   
+"
                    ]
                  }
 }

@@ -195,7 +195,10 @@ Constructor of class ``CRQMClient``.
       self.configuration = None
       self.createmissing = None
       self.updatetestcase= None
-      self.testsuite     = None
+      self.testsuite     = {
+         "id": None,
+         "name": None
+      }
       self.stream        = None
       self.baseline      = None
 
@@ -343,9 +346,9 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
       try:
          self.createmissing = createmissing
          self.updatetestcase = updatetestcase
-         self.testsuite = suite_id
          self.testplan  = plan_id
-
+         self.testsuite['id'] = suite_id
+         
          # Add Configuration-Context header information due to given stream or baseline
          if stream:
             res = self.getAllByResource('stream')
@@ -410,6 +413,14 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             else:
                raise Exception("Cannot create configuration '%s': %s"%
                                (config_name, res_conf['message']))
+
+         # Verify testsuite if given
+         if (suite_id != None) and (suite_id != "new"):
+            res_suite = self.getResourceByID('testsuite', suite_id)
+            if res_suite.status_code != 200:
+               raise Exception('Testsuite with ID %s is not existing!'%str(suite_id))
+            oTestsuite = get_xml_tree(BytesIO(str(res_suite.text).encode()), bdtd_validation=False)
+            self.testsuite['name']  = oTestsuite.find('ns4:title', oTestsuite.getroot().nsmap).text
 
          # get all team-areas for testcase template
          self.getAllTeamAreas()
@@ -1364,7 +1375,7 @@ Return testsuite execution record (TSER) template from provided configuration na
       return sTSxml
 
    def createTestsuiteResultTemplate(self, testsuiteID, testsuiteName, TSERID,
-                                     lTCER, lTCResults, startTime='',
+                                     lTCER, lTCResults, resultState, startTime='',
                                      endTime='', duration='', sOwnerID=''):
       """
 Return testsuite execution result template from provided configuration name.
@@ -1436,6 +1447,7 @@ Return testsuite execution result template from provided configuration name.
       sTSResultxml = ''
       sTemplatePath = os.path.join(self.templatesDir, 'testsuitelog.xml')
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
+      prefixState  = 'com.ibm.rqm.execution.common.state.'
 
       # prepare required data for template
       resultTittle  = 'Testsuite result: ' + testsuiteName
@@ -1479,6 +1491,11 @@ Return testsuite execution result template from provided configuration name.
       oStarttime.text          = str(startTime).replace(' ', 'T')
       oEndtime.text            = str(endTime).replace(' ', 'T')
       oTotalRunTime.text       = str(duration)
+      # set default RQM state as inconclusive
+      oState.text              = prefixState + 'inconclusive'
+      if resultState.lower() in self.RESULT_STATES:
+         oState.text = prefixState +resultState.lower()
+         
       for idx, sTCER in enumerate(lTCER):
          sTCERURL = self.integrationURL('executionworkitem', sTCER)
          oSuiteElem = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/tsl/v0.1/}suiteelement', nsmap=nsmap)
@@ -1500,6 +1517,79 @@ Return testsuite execution result template from provided configuration name.
       sTSResultxml = etree.tostring(oTree)
       return sTSResultxml
 
+   def createTestsuiteTemplate(self, testsuiteName, sDescription='', sOwnerID='', sTStemplate=None):
+      """
+Return testcase template from provided information.
+
+**Arguments:**
+
+*  ``testsuiteName``
+
+   / *Condition*: required / *Type*: str /
+
+   Testsuite name.
+
+*  ``sDescription``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   Testsuite description.
+
+*  ``sOwnerID``
+
+   / *Condition*: optional / *Type*: str / *Default*: '' /
+
+   User ID of testsuite owner.
+
+*  ``sTStemplate``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   Existing testsuite template as xml string.
+
+   If not provided, template file under `RQM_templates` is used as default.
+
+**Returns:**
+
+*  ``sTSxml``
+
+   / *Type*: str /
+
+   The xml testsuite template as string.
+      """
+      sTSxml = ''
+      if not sTStemplate:
+         sTemplatePath = os.path.join(self.templatesDir ,'testsuite.xml')
+         oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
+      else:
+         oTree = get_xml_tree(BytesIO(sTStemplate.encode()),bdtd_validation=False)
+
+      root = oTree.getroot()
+      nsmap = root.nsmap
+
+      # prepare required data for template
+      testerURL    = self.userURL(self.userID)
+
+      # find nodes to change data
+      oTittle      = oTree.find('ns4:title', nsmap)
+      oDescription = oTree.find('ns4:description', nsmap)
+      oOwner       = oTree.find('ns6:owner', nsmap)
+
+      # change nodes's data
+      oTittle.text       = testsuiteName
+      oDescription.text  = sDescription
+
+      # Incase not specify owner in template or input data, set it as provided user in cli
+      if sOwnerID:
+         oOwner.text = sOwnerID
+         oOwner.attrib['{%s}resource' % nsmap['ns1']] = self.userURL(sOwnerID)
+      elif not oOwner.text:
+         oOwner.text = self.userID
+         oOwner.attrib['{%s}resource' % nsmap['ns1']] = testerURL
+
+      # return xml template as string
+      sTSxml = etree.tostring(oTree)
+      return sTSxml
    #
    #  Methods to create RQM resources
    #
@@ -1867,4 +1957,67 @@ Link list of test cases to provided testsuite ID
             returnObj['message'] = str(resUpdateTestsuite.reason)
       else:
          returnObj['message'] = "No testcase for linking."
+      return returnObj
+
+   def addTestsuite2Testplan(self, testplanID, testsuiteID=None):
+      """
+Add testsuite ID to provided testplan ID
+
+**Arguments:**
+
+*  ``testplanID``
+
+   / *Condition*: required / *Type*: str /
+
+   Testplan ID to link given testsuite ID.
+
+*  ``testsuiteID``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   Testsuite to be linked with given testplan.
+
+   If not provide, `testsuite['id']` value will be used as id of testsuite.
+
+**Returns:**
+
+*  ``returnObj``
+
+   / *Type*: dict /
+
+   Response dictionary which contains status and error message.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False,
+         'message': ''
+      }
+
+      """
+      returnObj = {'success' : False, 'message': ''}
+      if testsuiteID == None:
+         testsuiteID = self.testsuite['id']
+      if testsuiteID:
+         resTestplanData = self.getResourceByID('testplan', testplanID)
+         oTree = get_xml_tree(BytesIO(str(resTestplanData.text).encode()),bdtd_validation=False)
+         # RQM XML response using namespace for nodes
+         # use namespace mapping from root for access response XML
+         root = oTree.getroot()
+
+         sTestsuiteURL = self.integrationURL('testsuite', testsuiteID)
+         oTS = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/}testsuite', nsmap=root.nsmap)
+         oTS.set('href', sTestsuiteURL)
+         root.append(oTS)
+
+         # Update test plan data with linked testsuite and PUT to RQM
+         resUpdateTestplan = self.updateResourceByID('testplan', testplanID, etree.tostring(oTree))
+         if resUpdateTestplan.status_code == 200:
+            returnObj['success'] = True
+         else:
+            returnObj['message'] = str(resUpdateTestplan.reason)
+      else:
+         returnObj['message'] = "No testsuite for adding."
       return returnObj
