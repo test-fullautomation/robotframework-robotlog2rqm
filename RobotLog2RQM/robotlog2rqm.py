@@ -335,6 +335,8 @@ Avalable arguments in command line:
                           help='if set, then all testcases without tcid are created when importing.')
    cmdParser.add_argument('--updatetestcase', action="store_true",
                           help='if set, then testcase information on RQM will be updated bases on robot testfile.')
+   cmdParser.add_argument('--config', type=str,
+                          help='configuration json file for naming conventions when creating RQM resources.')
    cmdParser.add_argument('--dryrun',action="store_true",
                           help='if set, then verify all input arguments (includes RQM authentication) and show what would be done.')
    cmdParser.add_argument('--stream', type=str,
@@ -507,9 +509,9 @@ Process robot test for importing to RQM.
    _tc_cmpt    = metadata_info['component']
    _tc_team    = metadata_info['team-area']
    # from RQMClient
-   _tc_testplan_id = RQMClient.testplan
-   _tc_config_id   = RQMClient.configuration
-   _tc_build_id    = RQMClient.build
+   _tc_testplan_id = RQMClient.testplan.id
+   _tc_config_id   = RQMClient.configuration.id
+   _tc_build_id    = RQMClient.build.id
    _tc_createmissing = RQMClient.createmissing
    _tc_update = RQMClient.updatetestcase
    # from robot result object
@@ -747,20 +749,20 @@ Flow to import Robot results to RQM:
             res_testsuite = {'success': True, 'id': 1111}
 
          if res_testsuite['success']:
-            _ts_id = res_testsuite['id']
+            _ts_id = res_testsuite.id
             Logger.log(f"Create testsuite '{result.suite.name}' with ID '{_ts_id}' successfully!")
-            RQMClient.testsuite['id'] = _ts_id
-            RQMClient.testsuite['name'] = result.suite.name
+            RQMClient.testsuite.id = _ts_id
+            RQMClient.testsuite.name = result.suite.name
          else:
             Logger.log_error(f"Create testsuite '{result.suite.name}' failed. Reason: {res_testsuite['message']}", fatal_error=True)
 
       # Process suite for importing
       process_suite(RQMClient, result.suite)
 
-      if RQMClient.testsuite['id']:
+      if RQMClient.testsuite.id:
          if not args.dryrun:
             # Create testsuite execution record if requires
-            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite['id'], RQMClient.testsuite['name'], args.testplan, RQMClient.configuration)
+            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite.id, RQMClient.testsuite.name, args.testplan, RQMClient.configuration)
             res_TSER = RQMClient.createResource('suiteexecutionrecord', testsuite_record_data)
             sTSERID = res_TSER['id']
             Logger.log()
@@ -769,13 +771,13 @@ Flow to import Robot results to RQM:
             elif (res_TSER['status_code'] == 303 or res_TSER['status_code'] == 200) and res_TSER['id'] != '':
                ### incase executionworkitem is existing, cannot create new one
                ### Use the existing ID for new result
-               Logger.log_warning(f"TSER for testsuite {RQMClient.testsuite['id']} is existing.\nAdd this execution result to existing TSER id: {sTSERID}")
+               Logger.log_warning(f"TSER for testsuite {RQMClient.testsuite.id} is existing.\nAdd this execution result to existing TSER id: {sTSERID}")
             else:
                Logger.log_error(f"Create TSER failed, {res_TSER['message']}")
 
             # Create new testsuite result and link all TCERs
-            testsuite_result_data = RQMClient.createTestsuiteResultTemplate(RQMClient.testsuite['id'],
-                                                                           RQMClient.testsuite['name'],
+            testsuite_result_data = RQMClient.createTestsuiteResultTemplate(RQMClient.testsuite.id,
+                                                                           RQMClient.testsuite.name,
                                                                            sTSERID,
                                                                            RQMClient.lTCERIDs,
                                                                            RQMClient.lTCResultIDs,
@@ -793,15 +795,15 @@ Flow to import Robot results to RQM:
 
          # Link all imported testcase ID(s) with testsuite
          try:
-            RQMClient.linkListTestcase2Testsuite(RQMClient.testsuite['id'])
-            Logger.log(f"Link all imported test cases with testsuite {RQMClient.testsuite['id']} successfully.")
+            RQMClient.linkListTestcase2Testsuite(RQMClient.testsuite.id)
+            Logger.log(f"Link all imported test cases with testsuite {RQMClient.testsuite.id} successfully.")
          except Exception as reason:
             Logger.log_error(f"Link all imported test cases with testsuite failed.\nReason: {reason}", fatal_error=True)
 
          # Add testsuite to given testplan
          try:
             RQMClient.addTestsuite2Testplan(args.testplan)
-            Logger.log(f"Add testsuite {RQMClient.testsuite['id']} to testplan {args.testplan} successfully.")
+            Logger.log(f"Add testsuite {RQMClient.testsuite.id} to testplan {args.testplan} successfully.")
          except Exception as reason:
             Logger.log_error(f"Add testsuite to testplan failed.\nReason: {reason}", fatal_error=True)
 

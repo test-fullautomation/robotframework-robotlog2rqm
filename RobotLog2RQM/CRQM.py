@@ -78,6 +78,11 @@ Parse xml object from file.
       exit(1)
    return oTree
 
+class Identifier:
+   def __init__(self, name='', id=None):
+      self.name = name
+      self.id = id
+
 #
 #  IBM Rational Quality Manager
 #
@@ -129,6 +134,18 @@ Resoure type mapping:
       'ns18' : "http://jazz.net/xmlns/alm/qm/v0.1/tsl/v0.1/" ,
       'ns20' : "http://jazz.net/xmlns/alm/qm/styleinfo/v0.1/" ,
       'ns21' : "http://www.w3.org/1999/XSL/Transform"
+   }
+
+   # define the convention for naming new RQM resource
+   NAMING_CONVENTION = {
+      "buildrecord":       "###BUILD_NAME###",
+      "configuration":     "###CONFIGURATION_NAME###",
+      "testcase":          "###TESTCASE_NAME###",
+      "executionworkitem": "TCER: ###TESTCASE_NAME###",
+      "executionresult":   "Execution result: ###TESTCASE_NAME###",
+      "suiteexecutionrecord":"TSER: ###TESTSUITE_NAME###",
+      "testsuitelog":      "Testsuite result: ###TESTSUITE_NAME###",
+      "testsuite":         "###TESTSUITE_NAME###"
    }
 
    def __init__(self, user, password, project, host):
@@ -190,17 +207,17 @@ Constructor of class ``CRQMClient``.
       self.lEndTimes     = list()
 
       # RQM configuration info
-      self.testplan      = None
-      self.build         = None
-      self.configuration = None
       self.createmissing = None
       self.updatetestcase= None
-      self.testsuite     = {
-         "id": None,
-         "name": None
-      }
-      self.stream        = None
-      self.baseline      = None
+      self.testplan      = Identifier()
+      self.build         = Identifier()
+      self.configuration = Identifier()
+      self.testsuite     = Identifier()
+      self.stream        = Identifier()
+      self.baseline      = Identifier()
+
+      # Naming convention
+      self.naming_convention = None
 
    def login(self):
       """
@@ -291,7 +308,7 @@ Disconnect from RQM.
 
    def config(self, plan_id, build_name=None, config_name=None,
               createmissing=False, updatetestcase=False, suite_id=None, 
-              stream=None, baseline=None):
+              stream=None, baseline=None, naming_convention=NAMING_CONVENTION):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
@@ -344,10 +361,11 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 (*no returns*)
       """
       try:
+         self.naming_convention = naming_convention
          self.createmissing = createmissing
          self.updatetestcase = updatetestcase
-         self.testplan  = plan_id
-         self.testsuite['id'] = suite_id
+         self.testplan.id  = plan_id
+         self.testsuite.id = suite_id
          
          # Add Configuration-Context header information due to given stream or baseline
          if stream:
@@ -357,7 +375,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
                bFoundStream = False
                for stream_id, stream_name in dStreams.items():
                   if stream_name == stream:
-                     self.stream = stream_id
+                     self.stream.id = stream_id
+                     self.stream.name = stream_name
                      bFoundStream = True
                      self.headers['Configuration-Context'] = stream_id
                      self.session.headers = self.headers
@@ -374,7 +393,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
                bFoundBaseline = False
                for baseline_id, baseline_name in dBaselines.items():
                   if baseline_name == baseline:
-                     self.baseline = baseline_id
+                     self.baseline.id = baseline_id
+                     self.baseline.name = baseline_name
                      bFoundBaseline = True
                      self.headers['Configuration-Context'] = baseline_id
                      self.session.headers = self.headers
@@ -390,6 +410,9 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
          if res_plan.status_code != 200:
             raise Exception('Testplan with ID %s is not existing!'%str(plan_id))
 
+         oTestplan = get_xml_tree(BytesIO(str(res_plan.text).encode()), bdtd_validation=False)
+         self.testplan.name  = oTestplan.find('ns4:title', oTestplan.getroot().nsmap).text
+
          # Verify and create build version if required
          if build_name != None:
             if build_name == '':
@@ -397,7 +420,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             self.getAllBuildRecords()
             res_build = self.createBuildRecord(build_name)
             if res_build['success'] or res_build['status_code'] == "303":
-               self.build = res_build['id']
+               self.build.id = res_build['id']
+               self.build.name = build_name
             else:
                raise Exception("Cannot create build '%s': %s"%
                                (build_name, res_build['message']))
@@ -409,7 +433,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             self.getAllConfigurations()
             res_conf = self.createConfiguration(config_name)
             if res_conf['success'] or res_conf['status_code'] == "303":
-               self.configuration = res_conf['id']
+               self.configuration.id = res_conf['id']
+               self.configuration.name = config_name
             else:
                raise Exception("Cannot create configuration '%s': %s"%
                                (config_name, res_conf['message']))
@@ -420,7 +445,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             if res_suite.status_code != 200:
                raise Exception('Testsuite with ID %s is not existing!'%str(suite_id))
             oTestsuite = get_xml_tree(BytesIO(str(res_suite.text).encode()), bdtd_validation=False)
-            self.testsuite['name']  = oTestsuite.find('ns4:title', oTestsuite.getroot().nsmap).text
+            self.testsuite.name  = oTestsuite.find('ns4:title', oTestsuite.getroot().nsmap).text
 
          # get all team-areas for testcase template
          self.getAllTeamAreas()
@@ -472,7 +497,7 @@ The provided ID can be internalID (contains only digits) or externalID.
    The ID of given resource.
 
    * If given: the specified url to resource ID is returned.
-   * If ``None``: the url to resource type (to get all entity) is returned.
+   * If ``None``: the url to resource type (to get all Identifier) is returned.
 
 *  ``forceinternalID``
 
@@ -594,6 +619,43 @@ Note:
          else:
             raise Exception("Cannot get web ID of generated testcase!")
       return webID
+
+   def __genResourceName(self, resource, name):
+      dPlaceHolders = {
+         "###TESTPLAN_NAME###": self.testplan.name
+      }
+      testcaseRelevant = ["testcase", "executionworkitem", "executionresult"]
+      testsuiteRelevant = ["testsuite", "suiteexecutionrecord", "testsuitelog"]
+
+      if resource in testcaseRelevant:
+         dPlaceHolders.update({
+            "###BUILD_NAME###": self.build.name,
+            "###CONFIGURATION_NAME###": self.configuration.name,
+            "###TESTSUITE_NAME###": self.testsuite.name,
+            "###TESTCASE_NAME###": name
+         })
+      elif resource in testsuiteRelevant:
+         dPlaceHolders.update({
+            "###BUILD_NAME###": self.build.name,
+            "###CONFIGURATION_NAME###": self.configuration.name,
+            "###TESTSUITE_NAME###": name,
+         })
+      elif resource == "buildrecord":
+         dPlaceHolders.update({
+            "###BUILD_NAME###": name
+         })
+      elif resource == "buildrecord":
+         dPlaceHolders.update({
+            "###CONFIGURATION_NAME###": name
+         })
+
+      try:
+         resourceName = self.naming_convention[resource]
+         for placeHolder, val in dPlaceHolders.items():
+            resourceName = resourceName.replace(placeHolder, val)
+         return resourceName
+      except:
+         raise Exception(f"Failed to generate name for {resource} '{name}'")
 
    #
    #  Methods to get resources
@@ -897,7 +959,7 @@ Return testcase template from provided information.
       root         = oTree.getroot()
       nsmap        = root.nsmap
       # prepare required data for template
-      testcaseTittle  = testcaseName
+      testcaseTittle  = self.__genResourceName('testcase', testcaseName)
 
       # find nodes to change data
       oTittle      = oTree.find(f'{{{self.NAMESPACES["ns3"]}}}title')
@@ -1010,7 +1072,8 @@ Return testcase execution record template from provided information.
       root = oTree.getroot()
       nsmap = root.nsmap
       # prepare required data for template
-      TCERTittle  = 'TCER: '+testcaseName
+      TCERTittle  = self.__genResourceName('executionworkitem', testcaseName)
+      
 
       # Check tcid is internalid or externalid
       testcaseURL = self.integrationURL('testcase', testcaseID)
@@ -1156,7 +1219,7 @@ Return testcase execution result template from provided information.
       nsmap = root.nsmap
       # prepare required data for template
       prefixState  = 'com.ibm.rqm.execution.common.state.'
-      resultTittle = 'Execution result: '+testcaseName
+      resultTittle = self.__genResourceName('executionresult', testcaseName)
       testcaseURL  = self.integrationURL('testcase', testcaseID)
       testplanURL  = self.integrationURL('testplan', testplanID)
       TCERURL      = self.integrationURL('executionworkitem', TCERID)
@@ -1252,7 +1315,7 @@ Return build record template from provided build name.
 
       nsmap        = oTree.getroot().nsmap
       oTittle      = oTree.find('ns3:title', nsmap)
-      oTittle.text = buildName
+      oTittle.text = self.__genResourceName('buildrecord', buildName)
 
       sBuildxml = etree.tostring(oTree)
       return sBuildxml
@@ -1283,7 +1346,7 @@ Return configuration - Test Environment template from provided configuration nam
 
       nsmap        = oTree.getroot().nsmap
       oTittle      = oTree.find('ns3:title', nsmap)
-      oTittle.text = confName
+      oTittle.text = self.__genResourceName('configuration', confName)
 
       sEnvironmentxml = etree.tostring(oTree)
       return sEnvironmentxml
@@ -1339,7 +1402,7 @@ Return testsuite execution record (TSER) template from provided configuration na
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       root = oTree.getroot()
       # prepare required data for template
-      TSERTittle   = 'TSER: ' + testsuiteName
+      TSERTittle   = self.__genResourceName('suiteexecutionrecord', testsuiteName)
       testsuiteURL = self.integrationURL('testsuite', testsuiteID)
       testplanURL  = self.integrationURL('testplan', testplanID)
       testerURL    = self.userURL(self.userID)
@@ -1450,7 +1513,7 @@ Return testsuite execution result template from provided configuration name.
       prefixState  = 'com.ibm.rqm.execution.common.state.'
 
       # prepare required data for template
-      resultTittle  = 'Testsuite result: ' + testsuiteName
+      resultTittle  = self.__genResourceName('testsuitelog', testsuiteName)
       testsuiteURL  = self.integrationURL('testsuite', testsuiteID)
       TSERURL       = self.integrationURL('suiteexecutionrecord', TSERID)
       testerURL    = self.userURL(self.userID)
@@ -1576,7 +1639,7 @@ Return testcase template from provided information.
       oOwner       = oTree.find('ns6:owner', nsmap)
 
       # change nodes's data
-      oTittle.text       = testsuiteName
+      oTittle.text       = self.__genResourceName('testsuite', testsuiteName)
       oDescription.text  = sDescription
 
       # Incase not specify owner in template or input data, set it as provided user in cli
@@ -1977,7 +2040,7 @@ Add testsuite ID to provided testplan ID
 
    Testsuite to be linked with given testplan.
 
-   If not provide, `testsuite['id']` value will be used as id of testsuite.
+   If not provide, `testsuite.id` value will be used as id of testsuite.
 
 **Returns:**
 
@@ -1999,7 +2062,7 @@ Add testsuite ID to provided testplan ID
       """
       returnObj = {'success' : False, 'message': ''}
       if testsuiteID == None:
-         testsuiteID = self.testsuite['id']
+         testsuiteID = self.testsuite.id
       if testsuiteID:
          resTestplanData = self.getResourceByID('testplan', testplanID)
          oTree = get_xml_tree(BytesIO(str(resTestplanData.text).encode()),bdtd_validation=False)
