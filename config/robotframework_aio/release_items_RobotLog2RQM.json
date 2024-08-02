@@ -101,7 +101,34 @@
 
     .. code-block::
 
-       python -m RobotLog2RQM robot_result.xml https://rqm-host.com My_RQM_Project testuser testpass 123 --testsuite new                   
+       python -m RobotLog2RQM robot_result.xml https://rqm-host.com My_RQM_Project testuser testpass 123 --testsuite new
+
+
+**New feature to support project which enable Configuration Management (CM)**
+
+* New optional arguments: 
+
+  When Configuration Management (CM) is enabled for the project area, it is necessary to specify the 
+  project stream or baseline when executing import tool to interact with the proper stream/baseline resources.
+
+  The following arguments are used to provide this information:
+
+  * *--stream <STREAM>*: A project stream represents a branch of work within a project area.
+  * *--baseline <BASELINE>*: A baseline captures the state of project artifacts at a particular point in time.
+
+* Example usages:
+
+  * Using stream ``Develop_stream`` for importing test execution results:
+
+    .. code-block::
+
+       python -m RobotLog2RQM output.xml https://sample-rqm-host.com ROBFW-AIO test_user test_pw 720 --stream 'Develop_stream'
+
+  * Using baseline ``Baseline_v1`` for importing test execution results:
+
+    .. code-block::
+
+       python -m RobotLog2RQM output.xml https://sample-rqm-host.com ROBFW-AIO test_user test_pw 720 --baseline 'Baseline_v1'
 "
                    ]
                  }
