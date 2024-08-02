@@ -199,6 +199,8 @@ Constructor of class ``CRQMClient``.
          "id": None,
          "name": None
       }
+      self.stream        = None
+      self.baseline      = None
 
    def login(self):
       """
@@ -288,7 +290,8 @@ Disconnect from RQM.
       self.session.close()
 
    def config(self, plan_id, build_name=None, config_name=None,
-              createmissing=False, updatetestcase=False, suite_id=None):
+              createmissing=False, updatetestcase=False, suite_id=None, 
+              stream=None, baseline=None):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
@@ -345,6 +348,42 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
          self.updatetestcase = updatetestcase
          self.testplan  = plan_id
          self.testsuite['id'] = suite_id
+         
+         # Add Configuration-Context header information due to given stream or baseline
+         if stream:
+            res = self.getAllByResource('stream')
+            if res['success']:
+               dStreams = res['data']
+               bFoundStream = False
+               for stream_id, stream_name in dStreams.items():
+                  if stream_name == stream:
+                     self.stream = stream_id
+                     bFoundStream = True
+                     self.headers['Configuration-Context'] = stream_id
+                     self.session.headers = self.headers
+                     break
+               
+               if not bFoundStream:
+                  raise Exception(f"Cannot found given stream '{stream}'")
+            else:
+               raise Exception("Get all streams failed. Reason: %s"%res['message'])
+         elif baseline:
+            res = self.getAllByResource('baseline')
+            if res['success']:
+               dBaselines = res['data']
+               bFoundBaseline = False
+               for baseline_id, baseline_name in dBaselines.items():
+                  if baseline_name == baseline:
+                     self.baseline = baseline_id
+                     bFoundBaseline = True
+                     self.headers['Configuration-Context'] = baseline_id
+                     self.session.headers = self.headers
+                     break
+               
+               if not bFoundBaseline:
+                  raise Exception(f"Cannot found given baseline '{baseline}'")
+            else:
+               raise Exception("Get all baselines failed. Reason: %s"%res['message'])
 
          # Verify testplan ID
          res_plan = self.getResourceByID('testplan', plan_id)
@@ -385,6 +424,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
          # get all team-areas for testcase template
          self.getAllTeamAreas()
+         
 
       except Exception as error:
          raise Exception('Configure RQMClient failed: %s'%error)

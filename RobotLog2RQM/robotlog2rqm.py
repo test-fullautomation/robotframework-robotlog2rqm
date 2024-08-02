@@ -297,6 +297,8 @@ Avalable arguments in command line:
    - `--recursive` : if True, then the path is searched recursively for log files to be imported.
    - `--createmissing` : if True, then all testcases without tcid are created when importing.
    - `--dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
+   - `--stream` : project stream. Note, requires Configuration Management (CM) to be enabled for the project area.
+   - `--baseline` : project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.
 
 **Arguments:**
 
@@ -335,6 +337,10 @@ Avalable arguments in command line:
                           help='if set, then testcase information on RQM will be updated bases on robot testfile.')
    cmdParser.add_argument('--dryrun',action="store_true",
                           help='if set, then verify all input arguments (includes RQM authentication) and show what would be done.')
+   cmdParser.add_argument('--stream', type=str,
+                          help='project stream. Note, requires Configuration Management (CM) to be enabled for the project area.')
+   cmdParser.add_argument('--baseline', type=str,
+                          help='project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.')
 
    return cmdParser.parse_args()
 
@@ -658,8 +664,8 @@ Flow to import Robot results to RQM:
    * `createmissing` : if True, then all testcases without tcid are created when importing.
    * `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
    * `dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
-   
-
+   * `stream` : project stream. Note, requires Configuration Management (CM) to be enabled for the project area.
+   * `baseline` : project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.
 **Returns:**
 
 (*no returns*)
@@ -728,7 +734,8 @@ Flow to import Robot results to RQM:
          metadata_info['version_sw'] = None
          metadata_info['project'] = None
       RQMClient.config(args.testplan, metadata_info['version_sw'],
-                    metadata_info['project'], args.createmissing, args.updatetestcase, args.testsuite)
+                    metadata_info['project'], args.createmissing, args.updatetestcase, 
+                    args.testsuite, stream=args.stream, baseline=args.baseline)
 
       if args.testsuite == "new":
          # Create new testsuite
