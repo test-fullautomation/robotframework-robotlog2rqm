@@ -79,6 +79,9 @@ Parse xml object from file.
    return oTree
 
 class Identifier:
+   """
+Identifier class used to identify RQM resource with name and id
+   """
    def __init__(self, name='', id=None):
       self.name = name
       self.id = id
@@ -137,17 +140,14 @@ Resoure type mapping:
    }
 
    # define the convention for naming new RQM resource
-   SUPPORTED_PLACEHOLDER = ["TESTPLAN_NAME", "BUILD_NAME", "CONFIGURATION_NAME", 
-                            "TESTSUITE_NAME", "TESTCASE_NAME"]
+   SUPPORTED_PLACEHOLDER = ["testplan", "build", "environment", "testsuite", "testcase"]
    NAMING_CONVENTION = {
-      "buildrecord":       "###BUILD_NAME###",
-      "configuration":     "###CONFIGURATION_NAME###",
-      "testcase":          "###TESTCASE_NAME###",
-      "executionworkitem": "TCER: ###TESTCASE_NAME###",
-      "executionresult":   "Execution result: ###TESTCASE_NAME###",
-      "testsuite":         "###TESTSUITE_NAME###",
-      "suiteexecutionrecord":"TSER: ###TESTSUITE_NAME###",
-      "testsuitelog":      "Testsuite result: ###TESTSUITE_NAME###"  
+      "testcase"    : "{testcase}",
+      "tcer"        : "TCER: {testcase}",
+      "testresult"  : "Execution result: {testcase}",
+      "testsuite"   : "{testsuite}",
+      "tser"        : "TSER: {testsuite}",
+      "suiteresult" : "Testsuite result: {testsuite}"  
    }
 
    def __init__(self, user, password, project, host):
@@ -626,32 +626,50 @@ Note:
       return webID
 
    def __genResourceName(self, resource, name):
-      dPlaceHolders = {
-         "###TESTPLAN_NAME###": self.testplan.name
-      }
-      testcaseRelevant = ["testcase", "executionworkitem", "executionresult"]
-      testsuiteRelevant = ["testsuite", "suiteexecutionrecord", "testsuitelog"]
+      """
+Return the name for given resource bases on the naming convention
 
+**Arguments:**
+
+*  ``resource``
+
+   / *Condition*: required / *Type*: str /
+
+   The RQM resource type.
+
+*  ``name``
+
+   / *Condition*: required / *Type*: str /
+
+   Relevant resource name.
+
+**Returns:**
+
+*  ``resourceName``
+
+   / *Type*: str /
+
+   Resource name after replacing bases on naming convention.
+      """
+      dPlaceHolders = {
+         "{testplan}": self.testplan.name
+      }
+      testcaseRelevant = ["testcase", "tcer", "testresult"]
+      testsuiteRelevant = ["testsuite", "tser", "suiteresult"]
+
+      # Define scope of place holders
       if resource in testcaseRelevant:
          dPlaceHolders.update({
-            "###BUILD_NAME###": self.build.name,
-            "###CONFIGURATION_NAME###": self.configuration.name,
-            "###TESTSUITE_NAME###": self.testsuite.name,
-            "###TESTCASE_NAME###": name
+            "{build}": self.build.name,
+            "{environment}": self.configuration.name,
+            "{testsuite}": self.testsuite.name,
+            "{testcase}": name
          })
       elif resource in testsuiteRelevant:
          dPlaceHolders.update({
-            "###BUILD_NAME###": self.build.name,
-            "###CONFIGURATION_NAME###": self.configuration.name,
-            "###TESTSUITE_NAME###": name,
-         })
-      elif resource == "buildrecord":
-         dPlaceHolders.update({
-            "###BUILD_NAME###": name
-         })
-      elif resource == "buildrecord":
-         dPlaceHolders.update({
-            "###CONFIGURATION_NAME###": name
+            "{build}": self.build.name,
+            "{environment}": self.configuration.name,
+            "{testsuite}": name,
          })
 
       try:
@@ -1077,7 +1095,7 @@ Return testcase execution record template from provided information.
       root = oTree.getroot()
       nsmap = root.nsmap
       # prepare required data for template
-      TCERTittle  = self.__genResourceName('executionworkitem', testcaseName)
+      TCERTittle  = self.__genResourceName('tcer', testcaseName)
       
 
       # Check tcid is internalid or externalid
@@ -1224,7 +1242,7 @@ Return testcase execution result template from provided information.
       nsmap = root.nsmap
       # prepare required data for template
       prefixState  = 'com.ibm.rqm.execution.common.state.'
-      resultTittle = self.__genResourceName('executionresult', testcaseName)
+      resultTittle = self.__genResourceName('testresult', testcaseName)
       testcaseURL  = self.integrationURL('testcase', testcaseID)
       testplanURL  = self.integrationURL('testplan', testplanID)
       TCERURL      = self.integrationURL('executionworkitem', TCERID)
@@ -1320,7 +1338,7 @@ Return build record template from provided build name.
 
       nsmap        = oTree.getroot().nsmap
       oTittle      = oTree.find('ns3:title', nsmap)
-      oTittle.text = self.__genResourceName('buildrecord', buildName)
+      oTittle.text = buildName
 
       sBuildxml = etree.tostring(oTree)
       return sBuildxml
@@ -1351,7 +1369,7 @@ Return configuration - Test Environment template from provided configuration nam
 
       nsmap        = oTree.getroot().nsmap
       oTittle      = oTree.find('ns3:title', nsmap)
-      oTittle.text = self.__genResourceName('configuration', confName)
+      oTittle.text = confName
 
       sEnvironmentxml = etree.tostring(oTree)
       return sEnvironmentxml
@@ -1407,7 +1425,7 @@ Return testsuite execution record (TSER) template from provided configuration na
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       root = oTree.getroot()
       # prepare required data for template
-      TSERTittle   = self.__genResourceName('suiteexecutionrecord', testsuiteName)
+      TSERTittle   = self.__genResourceName('tser', testsuiteName)
       testsuiteURL = self.integrationURL('testsuite', testsuiteID)
       testplanURL  = self.integrationURL('testplan', testplanID)
       testerURL    = self.userURL(self.userID)
@@ -1518,7 +1536,7 @@ Return testsuite execution result template from provided configuration name.
       prefixState  = 'com.ibm.rqm.execution.common.state.'
 
       # prepare required data for template
-      resultTittle  = self.__genResourceName('testsuitelog', testsuiteName)
+      resultTittle  = self.__genResourceName('suiteresult', testsuiteName)
       testsuiteURL  = self.integrationURL('testsuite', testsuiteID)
       TSERURL       = self.integrationURL('suiteexecutionrecord', TSERID)
       testerURL    = self.userURL(self.userID)
