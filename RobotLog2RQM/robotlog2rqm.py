@@ -27,6 +27,7 @@
 #
 # ******************************************************************************
 
+import json
 import re
 import argparse
 import os
@@ -62,6 +63,17 @@ DEFAULT_METADATA = {
    "component"    :  "unknown",
    "tags"         :  "",
    "team-area"    :  "",
+}
+
+NAMING_CONVENTION_SCHEMA = {
+   "buildrecord"        : str,
+   "configuration"      : str,
+   "testcase"           : str,
+   "executionworkitem"  : str,
+   "executionresult"    : str,
+   "suiteexecutionrecord":str,
+   "testsuitelog"       : str,
+   "testsuite"          : str
 }
 
 #
@@ -281,6 +293,110 @@ Convert time string to datetime.
    dt=datetime.datetime(tp[0],tp[1],tp[2],tp[3],tp[4],tp[5],tp[6])
    return dt
 
+def process_config_file(path_file):
+   """
+Parse and validate content of configuration file
+
+**Arguments:**
+
+*  ``path_file``
+
+   / *Condition*: required / *Type*: str /
+
+   Path to the configuration json file.
+
+**Returns:**
+
+*  ``dConfig``
+
+   / *Type*: dict /
+
+   Content of json file.
+   """
+   with open(path_file, encoding='utf-8') as f:
+      try:
+         dConfig = json.load(f)
+      except Exception as reason:
+         Logger.log_error(f"Cannot parse the json file '{path_file}'. Reason: {reason}",
+                          fatal_error=True)
+
+   if not is_valid_config(dConfig, bExitOnFail=False):
+      Logger.log_error(f"Error in naming configuration file '{path_file}'.", 
+                       fatal_error=True)
+   return dConfig
+
+def is_valid_config(dConfig, dSchema=NAMING_CONVENTION_SCHEMA, bExitOnFail=True):
+   """
+Validate the json configuration base on given schema.
+
+Default schema supports below information:
+
+.. code:: python
+
+   NAMING_CONVENTION_SCHEMA = {
+      "buildrecord"        : str,
+      "configuration"      : str,
+      "testcase"           : str,
+      "executionworkitem"  : str,
+      "executionresult"    : str,
+      "suiteexecutionrecord":str,
+      "testsuitelog"       : str,
+      "testsuite"          : str
+   }
+
+**Arguments:**
+
+*  ``dConfig``
+
+   / *Condition*: required / *Type*: dict /
+
+   Json configuration object to be verified.
+
+*  ``dSchema``
+
+   / *Condition*: optional / *Type*: dict / *Default*: CONFIG_SCHEMA /
+
+   Schema for the validation.
+
+*  ``bExitOnFail``
+
+   / *Condition*: optional / *Type*: bool / *Default*: True /
+
+   If True, exit tool in case the validation is fail.
+
+**Returns:**
+
+*  ``bValid``
+
+   / *Type*: bool /
+
+   True if the given json configuration data is valid.
+   """
+   bValid = True
+   for key in dConfig:
+      if key in dSchema.keys():
+         if type(dConfig[key]) != dSchema[key]:
+            bValid = False
+            Logger.log_error(f"Value of '{key}' has wrong type '{type(dConfig[key])}' in configuration json file.",
+                             fatal_error=bExitOnFail)
+            break
+
+         # TESTCASE_NAME is not available for non-testcase relevant resources
+         # TESTSUITE_NAME is not available for `buildrecord` and `configuration` resources
+         # Warning user for using wrong place holders
+         oMatch = re.search(".*###(.*)###.*", dConfig[key])
+         if oMatch:
+            if oMatch.group(1) not in CRQMClient.SUPPORTED_PLACEHOLDER:
+               Logger.log_warning(f"Place holder ###{oMatch.group(1)}### is not supported, it will not be replaced when generating {key} resource")
+
+      else:
+         bValid = False
+         Logger.log_error(f"resource '{key}' is not supported in naming conventions json file.",
+                          fatal_error=bExitOnFail)
+         break
+
+   return bValid
+
 def __process_commandline():
    """
 Process provided argument(s) from command line.
@@ -335,7 +451,7 @@ Avalable arguments in command line:
                           help='if set, then all testcases without tcid are created when importing.')
    cmdParser.add_argument('--updatetestcase', action="store_true",
                           help='if set, then testcase information on RQM will be updated bases on robot testfile.')
-   cmdParser.add_argument('--config', type=str,
+   cmdParser.add_argument('--config_name', type=str,
                           help='configuration json file for naming conventions when creating RQM resources.')
    cmdParser.add_argument('--dryrun',action="store_true",
                           help='if set, then verify all input arguments (includes RQM authentication) and show what would be done.')
@@ -712,6 +828,15 @@ Flow to import Robot results to RQM:
    result = ExecutionResult(*sources)
    result.configure()
 
+   # verify given configuration file
+   dNamingConvention = None
+   if args.config_name != None:
+      if os.path.isfile(args.config_name):
+         dNamingConvention = process_config_file(args.config_name)
+      else:
+         Logger.log_error(f"The given naming configuration file is not existing: '{args.config_name}'",
+                          fatal_error=True)
+
    # 3. Login Rational Quality Management (RQM)
    RQMClient = CRQMClient(args.user, args.password, args.project, args.host)
    try:
@@ -737,7 +862,8 @@ Flow to import Robot results to RQM:
          metadata_info['project'] = None
       RQMClient.config(args.testplan, metadata_info['version_sw'],
                     metadata_info['project'], args.createmissing, args.updatetestcase, 
-                    args.testsuite, stream=args.stream, baseline=args.baseline)
+                    args.testsuite, stream=args.stream, baseline=args.baseline,
+                    naming_convention=dNamingConvention)
 
       if args.testsuite == "new":
          # Create new testsuite

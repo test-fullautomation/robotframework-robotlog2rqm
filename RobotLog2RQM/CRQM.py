@@ -137,15 +137,17 @@ Resoure type mapping:
    }
 
    # define the convention for naming new RQM resource
+   SUPPORTED_PLACEHOLDER = ["TESTPLAN_NAME", "BUILD_NAME", "CONFIGURATION_NAME", 
+                            "TESTSUITE_NAME", "TESTCASE_NAME"]
    NAMING_CONVENTION = {
       "buildrecord":       "###BUILD_NAME###",
       "configuration":     "###CONFIGURATION_NAME###",
       "testcase":          "###TESTCASE_NAME###",
       "executionworkitem": "TCER: ###TESTCASE_NAME###",
       "executionresult":   "Execution result: ###TESTCASE_NAME###",
+      "testsuite":         "###TESTSUITE_NAME###",
       "suiteexecutionrecord":"TSER: ###TESTSUITE_NAME###",
-      "testsuitelog":      "Testsuite result: ###TESTSUITE_NAME###",
-      "testsuite":         "###TESTSUITE_NAME###"
+      "testsuitelog":      "Testsuite result: ###TESTSUITE_NAME###"  
    }
 
    def __init__(self, user, password, project, host):
@@ -308,7 +310,7 @@ Disconnect from RQM.
 
    def config(self, plan_id, build_name=None, config_name=None,
               createmissing=False, updatetestcase=False, suite_id=None, 
-              stream=None, baseline=None, naming_convention=NAMING_CONVENTION):
+              stream=None, baseline=None, naming_convention=None):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
@@ -361,7 +363,10 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 (*no returns*)
       """
       try:
-         self.naming_convention = naming_convention
+         self.naming_convention = self.NAMING_CONVENTION
+         if naming_convention:
+            self.naming_convention.update(naming_convention)
+
          self.createmissing = createmissing
          self.updatetestcase = updatetestcase
          self.testplan.id  = plan_id
