@@ -15,7 +15,7 @@
 #
 # File: CRQM.py
 #
-# Initialy created by Tran Duy Ngoan(RBVH/ECM11) / January 2021
+# Initially created by Tran Duy Ngoan(RBVH/ECM11) / January 2021
 #
 # This is CRQMClient class which is used to interact with RQM via RQM REST APIs
 #
@@ -95,7 +95,7 @@ class CRQMClient():
 CRQMClient class uses RQM REST APIs to get, create and update resources
 (testplan, testcase, test result, ...) on RQM - Rational Quality Manager
 
-Resoure type mapping:
+Resource type mapping:
 
 * buildrecord:          Build Record
 * configuration:        Test Environment
@@ -194,7 +194,7 @@ Constructor of class ``CRQMClient``.
                         'OSLC-Core-Version'  : '2.0'
                      }
 
-      # Templates location which is uesd for importing
+      # Templates location which is used for importing
       self.templatesDir = os.path.join(os.path.dirname(__file__),'RQM_templates')
 
       # Data for mapping and linking
@@ -484,7 +484,7 @@ Return interaction URL of provided userID
 
    def integrationURL(self, resourceType, id=None, forceinternalID=False):
       """
-Return interaction URL of provided reource and ID.
+Return interaction URL of provided resource and ID.
 The provided ID can be internalID (contains only digits) or externalID.
 
 **Arguments:**
@@ -502,7 +502,7 @@ The provided ID can be internalID (contains only digits) or externalID.
    The ID of given resource.
 
    * If given: the specified url to resource ID is returned.
-   * If ``None``: the url to resource type (to get all Identifier) is returned.
+   * If ``None``: the url to resource type (to get all entity) is returned.
 
 *  ``forceinternalID``
 
@@ -516,7 +516,7 @@ The provided ID can be internalID (contains only digits) or externalID.
 
    / *Type*: str /
 
-   The interaction URL of provided reource and ID.
+   The interaction URL of provided resource and ID.
       """
       integrationURL = self.host + "/qm/service/com.ibm.rqm.integration.service.IIntegrationService/resources/" + \
                        self.projectID + '/' + resourceType
@@ -568,7 +568,7 @@ Note:
          raise Exception("Cannot get ID from response. Reason: %s"%str(error))
       return resultId
 
-   def webIDfromGeneratedID(self, resourrceType, generateID):
+   def webIDfromGeneratedID(self, resourceType, generateID):
       """
 Return web ID (ns2:webId) from generate ID by get resource data from RQM.
 
@@ -579,7 +579,7 @@ Note:
 
 **Arguments:**
 
-*  ``resourrceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
@@ -613,8 +613,8 @@ Note:
                               'testscript',
                               'testsuite',
                               'testsuitelog']
-      if resourrceType in lSupportedResources:
-         resResource = self.getResourceByID(resourrceType, generateID)
+      if resourceType in lSupportedResources:
+         resResource = self.getResourceByID(resourceType, generateID)
          if resResource.status_code == 200:
             oResource = get_xml_tree(BytesIO(str(resResource.text).encode()),
                                      bdtd_validation=False)
@@ -690,7 +690,7 @@ Return data of provided resource and ID by GET method
 
 **Arguments:**
 
-*  ``resourrceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
@@ -720,7 +720,7 @@ Return all entries (in all pages) of provided resource by GET method.
 
 **Arguments:**
 
-*  ``resourrceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
@@ -1860,7 +1860,6 @@ Create new configuration - test environment.
       """
       returnObj = {'success' : False, 'id': None, 'message': '', 'status_code': ''}
       # check existing build record in this executioon
-      sConfID = ''
       if (sConfigurationName not in self.dConfiguation.values()) or forceCreate:
          sConfTemplate = self.createConfigurationTemplate(sConfigurationName)
          returnObj  = self.createResource('configuration', sConfTemplate)
