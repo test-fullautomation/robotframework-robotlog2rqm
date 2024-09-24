@@ -408,6 +408,8 @@ Avalable arguments in command line:
    - `--testsuite` : RQM testsuite ID. If value is 'new', then create a new testsuite for this execution.
    - `--recursive` : if True, then the path is searched recursively for log files to be imported.
    - `--createmissing` : if True, then all testcases without tcid are created when importing.
+   - `--updatetestcase` : if set, then testcase information on RQM will be updated bases on robot testfile.
+   - `--naming_config` : configuration json file for naming conventions when creating RQM resources.
    - `--dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
    - `--stream` : project stream. Note, requires Configuration Management (CM) to be enabled for the project area.
    - `--baseline` : project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.
@@ -447,7 +449,7 @@ Avalable arguments in command line:
                           help='if set, then all testcases without tcid are created when importing.')
    cmdParser.add_argument('--updatetestcase', action="store_true",
                           help='if set, then testcase information on RQM will be updated bases on robot testfile.')
-   cmdParser.add_argument('--config_name', type=str,
+   cmdParser.add_argument('--naming_config', type=str,
                           help='configuration json file for naming conventions when creating RQM resources.')
    cmdParser.add_argument('--dryrun',action="store_true",
                           help='if set, then verify all input arguments (includes RQM authentication) and show what would be done.')
@@ -777,6 +779,7 @@ Flow to import Robot results to RQM:
    * `recursive` : if True, then the path is searched recursively for log files to be imported.
    * `createmissing` : if True, then all testcases without tcid are created when importing.
    * `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
+   * `naming_config` : configuration json file for naming conventions when creating RQM resources.
    * `dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
    * `stream` : project stream. Note, requires Configuration Management (CM) to be enabled for the project area.
    * `baseline` : project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.
@@ -826,11 +829,11 @@ Flow to import Robot results to RQM:
 
    # verify given configuration file
    dNamingConvention = None
-   if args.config_name != None:
-      if os.path.isfile(args.config_name):
-         dNamingConvention = process_config_file(args.config_name)
+   if args.naming_config != None:
+      if os.path.isfile(args.naming_config):
+         dNamingConvention = process_config_file(args.naming_config)
       else:
-         Logger.log_error(f"The given naming configuration file is not existing: '{args.config_name}'",
+         Logger.log_error(f"The given naming configuration file is not existing: '{args.naming_config}'",
                           fatal_error=True)
 
    # 3. Login Rational Quality Management (RQM)
@@ -871,7 +874,7 @@ Flow to import Robot results to RQM:
             res_testsuite = {'success': True, 'id': 1111}
 
          if res_testsuite['success']:
-            _ts_id = res_testsuite.id
+            _ts_id = res_testsuite['id']
             Logger.log(f"Create testsuite '{result.suite.name}' with ID '{_ts_id}' successfully!")
             RQMClient.testsuite.id = _ts_id
             RQMClient.testsuite.name = result.suite.name
@@ -884,7 +887,7 @@ Flow to import Robot results to RQM:
       if RQMClient.testsuite.id:
          if not args.dryrun:
             # Create testsuite execution record if requires
-            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite.id, RQMClient.testsuite.name, args.testplan, RQMClient.configuration)
+            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite.id, RQMClient.testsuite.name, args.testplan, RQMClient.configuration.id)
             res_TSER = RQMClient.createResource('suiteexecutionrecord', testsuite_record_data)
             sTSERID = res_TSER['id']
             Logger.log()

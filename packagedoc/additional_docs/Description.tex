@@ -304,6 +304,59 @@ The following arguments are used to provide this information:
   If both options are provided, the\rcode{--stream}option will take precedence.
 \end{boxhint}
 
+\subsection{Naming convention of generated resources}
+This feature provides flexibility in defining how new resources such as test 
+execution results, test cases, and test suite are named, allowing users to 
+customize the naming of resources generated during the import of test results to 
+RQM.
+
+The optional argument \rcode{--naming_config} is used to provide the user's 
+definitions. It takes a path to a JSON file as value.
+The JSON file specifies the format and structure of the names for different 
+types of resources using predefined placeholders \rcode{\{resource_type\}}. 
+
+Supported placeholders:
+\begin{itemize}
+  \item \textbf{\{testplan\}}: Name of the test plan.
+  \item \textbf{\{build\}}: Name of the build record.
+  \item \textbf{\{environment\}}: Name of the test environment.
+  \item \textbf{\{testsuite\}}: Name of the test suite (if \rcode{--testsuite} is used).
+  \item \textbf{\{testcase\}}: Name of the test case, only available for test case relevant 
+        resources: \textbf{testcase}, \textbf{tcer} and \textbf{testresult}
+\end{itemize}
+
+Example JSON file (\rlog{naming_convention.json}):
+\begin{pythoncode}
+{
+  "testcase": "{testcase} (imported by RobotLog2RQM tool)", // customize test case name
+  "tcer": "{testcase}_{environment}", // Name TCER with environment as suffix
+  "testresult": "{testcase}_{build}", // Name Test result with build as suffix
+  "testsuite": "{testplan}_{testsuite}",  // Name testsuite with test plan as prefix
+  "tser": "{testsuite}_{environment}",
+  "suiteresult": "{testsuite}_{environment}_{build}"
+}
+\end{pythoncode}
+
+Example Usage:
+\begin{robotlog}
+  RobotLog2RQM output.xml https://sample-rqm-host.com ROBFW-AIO test_user test_pw 720 --naming_config path/to/naming_convention.json
+\end{robotlog}
+
+\begin{boxhint} {Default Behavior:}
+If the \rcode{--naming_config} argument is not used, the tool will use default 
+naming convention as defined by the \pkg\ tool:
+\begin{pythoncode}
+{
+  "testcase"    : "{testcase}",
+  "tcer"        : "TCER: {testcase}",
+  "testresult"  : "Execution result: {testcase}",
+  "testsuite"   : "{testsuite}",
+  "tser"        : "TSER: {testsuite}",
+  "suiteresult" : "Testsuite result: {testsuite}"  
+ }
+\end{pythoncode}
+\end{boxhint}
+
 \hypertarget{description-robot-testcase-information-on-rqm}{%
 \section{\rfwcore\ Test Case Information on RQM:}
 \label{description-robot-testcase-information-on-rqm}}
