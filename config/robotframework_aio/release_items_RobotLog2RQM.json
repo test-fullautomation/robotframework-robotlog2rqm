@@ -130,6 +130,45 @@ Fixed issue when importing test case with **SKIP** status
 
        python -m RobotLog2RQM output.xml https://sample-rqm-host.com ROBFW-AIO test_user test_pw 720 --baseline 'Baseline_v1'
 "
+                   ],
+                   "0.13.1": [
+"
+**New feature of naming convention**
+
+* New optional argument: ``--naming_config <NAMING_CONFIG>``
+
+  The new ``--naming_config`` argument allows you to customize the naming of resources generated during the import of test results to RQM.
+
+  The value ``<NAMING_CONFIG>`` is the path to a JSON file that defines the naming conventions for resources (``testcase``, ``tcer``, ``testresult``, ...) generated during the import.
+  
+  The following predefined placeholders are supported and will be replaced with corresponding values in the resource names when executing the import tool:
+  
+  * *{testplan}*
+  * *{build}*
+  * *{environment}*
+  * *{testsuite}*
+  * *{testcase}*
+
+* Example usage:
+  
+  * Definition of naming convention as JSON file ``naming_convention.json``
+
+    |   ``{``
+    |     ``'testcase': '{testcase} (imported by RobotLog2RQM tool)',`` // customize test case name
+    |     ``'tcer': '{testcase}_{environment}',`` // Name TCER with environment as suffix
+    |     ``'testresult': '{testcase}_{build}',`` // Name Test result with build as suffix
+    |     ``'testsuite': '{testplan}_{testsuite}',``  // Name testsuite with test plan as prefix
+    |     ``'tser': '{testsuite}_{environment}',``
+    |     ``'suiteresult': '{testsuite}_{environment}_{build}'``
+    |   ``}``
+       
+
+  * Import robot framework result to RQM with above JSON file
+
+    .. code-block::
+
+       python -m RobotLog2RQM robot_result.xml https://rqm-host.com My_RQM_Project testuser testpass 123 --naming_config path/to/naming_convention.json
+"
                    ]
                  }
 }

@@ -27,6 +27,7 @@
 #
 # ******************************************************************************
 
+import json
 import re
 import argparse
 import os
@@ -62,6 +63,15 @@ DEFAULT_METADATA = {
    "component"    :  "unknown",
    "tags"         :  "",
    "team-area"    :  "",
+}
+
+NAMING_CONVENTION_SCHEMA = {
+   "testcase"    : str,
+   "tcer"        : str,
+   "testresult"  : str,
+   "testsuite"   : str,
+   "tser"        : str,
+   "suiteresult" : str
 }
 
 #
@@ -281,6 +291,108 @@ Convert time string to datetime.
    dt=datetime.datetime(tp[0],tp[1],tp[2],tp[3],tp[4],tp[5],tp[6])
    return dt
 
+def process_config_file(path_file):
+   """
+Parse and validate content of configuration file
+
+**Arguments:**
+
+*  ``path_file``
+
+   / *Condition*: required / *Type*: str /
+
+   Path to the configuration json file.
+
+**Returns:**
+
+*  ``dConfig``
+
+   / *Type*: dict /
+
+   Content of json file.
+   """
+   with open(path_file, encoding='utf-8') as f:
+      try:
+         dConfig = json.load(f)
+      except Exception as reason:
+         Logger.log_error(f"Cannot parse the json file '{path_file}'. Reason: {reason}",
+                          fatal_error=True)
+
+   if not is_valid_config(dConfig, bExitOnFail=False):
+      Logger.log_error(f"Error in naming configuration file '{path_file}'.", 
+                       fatal_error=True)
+   return dConfig
+
+def is_valid_config(dConfig, dSchema=NAMING_CONVENTION_SCHEMA, bExitOnFail=True):
+   """
+Validate the json configuration base on given schema.
+
+Default schema supports below information:
+
+.. code:: python
+
+   NAMING_CONVENTION_SCHEMA = {
+      "testcase"    : str,
+      "tcer"        : str,
+      "testresult"  : str,
+      "testsuite"   : str,
+      "tser"        : str,
+      "suiteresult" : str
+   }
+
+**Arguments:**
+
+*  ``dConfig``
+
+   / *Condition*: required / *Type*: dict /
+
+   Json configuration object to be verified.
+
+*  ``dSchema``
+
+   / *Condition*: optional / *Type*: dict / *Default*: CONFIG_SCHEMA /
+
+   Schema for the validation.
+
+*  ``bExitOnFail``
+
+   / *Condition*: optional / *Type*: bool / *Default*: True /
+
+   If True, exit tool in case the validation is fail.
+
+**Returns:**
+
+*  ``bValid``
+
+   / *Type*: bool /
+
+   True if the given json configuration data is valid.
+   """
+   bValid = True
+   for key in dConfig:
+      if key in dSchema.keys():
+         if type(dConfig[key]) != dSchema[key]:
+            bValid = False
+            Logger.log_error(f"Value of '{key}' has wrong type '{type(dConfig[key])}' in configuration json file.",
+                             fatal_error=bExitOnFail)
+            break
+
+         # TESTCASE_NAME is not available for non-testcase relevant resources
+         # TESTSUITE_NAME is not available for `buildrecord` and `configuration` resources
+         # Warning user for using wrong place holders
+         oMatch = re.search(".*\{(.*)\}.*", dConfig[key])
+         if oMatch:
+            if oMatch.group(1) not in CRQMClient.SUPPORTED_PLACEHOLDER:
+               Logger.log_warning(f"Place holder '{{{oMatch.group(1)}}}' is not supported, it will not be replaced when generating {key} resource")
+
+      else:
+         bValid = False
+         Logger.log_error(f"resource '{key}' is not supported in naming conventions json file.",
+                          fatal_error=bExitOnFail)
+         break
+
+   return bValid
+
 def __process_commandline():
    """
 Process provided argument(s) from command line.
@@ -296,6 +408,8 @@ Avalable arguments in command line:
    - `--testsuite` : RQM testsuite ID. If value is 'new', then create a new testsuite for this execution.
    - `--recursive` : if True, then the path is searched recursively for log files to be imported.
    - `--createmissing` : if True, then all testcases without tcid are created when importing.
+   - `--updatetestcase` : if set, then testcase information on RQM will be updated bases on robot testfile.
+   - `--naming_config` : configuration json file for naming conventions when creating RQM resources.
    - `--dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
    - `--stream` : project stream. Note, requires Configuration Management (CM) to be enabled for the project area.
    - `--baseline` : project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.
@@ -335,6 +449,8 @@ Avalable arguments in command line:
                           help='if set, then all testcases without tcid are created when importing.')
    cmdParser.add_argument('--updatetestcase', action="store_true",
                           help='if set, then testcase information on RQM will be updated bases on robot testfile.')
+   cmdParser.add_argument('--naming_config', type=str,
+                          help='configuration json file for naming conventions when creating RQM resources.')
    cmdParser.add_argument('--dryrun',action="store_true",
                           help='if set, then verify all input arguments (includes RQM authentication) and show what would be done.')
    cmdParser.add_argument('--stream', type=str,
@@ -507,9 +623,9 @@ Process robot test for importing to RQM.
    _tc_cmpt    = metadata_info['component']
    _tc_team    = metadata_info['team-area']
    # from RQMClient
-   _tc_testplan_id = RQMClient.testplan
-   _tc_config_id   = RQMClient.configuration
-   _tc_build_id    = RQMClient.build
+   _tc_testplan_id = RQMClient.testplan.id
+   _tc_config_id   = RQMClient.configuration.id
+   _tc_build_id    = RQMClient.build.id
    _tc_createmissing = RQMClient.createmissing
    _tc_update = RQMClient.updatetestcase
    # from robot result object
@@ -663,6 +779,7 @@ Flow to import Robot results to RQM:
    * `recursive` : if True, then the path is searched recursively for log files to be imported.
    * `createmissing` : if True, then all testcases without tcid are created when importing.
    * `updatetestcase` : if True, then testcases information on RQM will be updated bases on robot testfile.
+   * `naming_config` : configuration json file for naming conventions when creating RQM resources.
    * `dryrun` : if True, then verify all input arguments (includes RQM authentication) and show what would be done.
    * `stream` : project stream. Note, requires Configuration Management (CM) to be enabled for the project area.
    * `baseline` : project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.
@@ -710,6 +827,15 @@ Flow to import Robot results to RQM:
    result = ExecutionResult(*sources)
    result.configure()
 
+   # verify given configuration file
+   dNamingConvention = None
+   if args.naming_config != None:
+      if os.path.isfile(args.naming_config):
+         dNamingConvention = process_config_file(args.naming_config)
+      else:
+         Logger.log_error(f"The given naming configuration file is not existing: '{args.naming_config}'",
+                          fatal_error=True)
+
    # 3. Login Rational Quality Management (RQM)
    RQMClient = CRQMClient(args.user, args.password, args.project, args.host)
    try:
@@ -735,7 +861,8 @@ Flow to import Robot results to RQM:
          metadata_info['project'] = None
       RQMClient.config(args.testplan, metadata_info['version_sw'],
                     metadata_info['project'], args.createmissing, args.updatetestcase, 
-                    args.testsuite, stream=args.stream, baseline=args.baseline)
+                    args.testsuite, stream=args.stream, baseline=args.baseline,
+                    naming_convention=dNamingConvention)
 
       if args.testsuite == "new":
          # Create new testsuite
@@ -749,18 +876,18 @@ Flow to import Robot results to RQM:
          if res_testsuite['success']:
             _ts_id = res_testsuite['id']
             Logger.log(f"Create testsuite '{result.suite.name}' with ID '{_ts_id}' successfully!")
-            RQMClient.testsuite['id'] = _ts_id
-            RQMClient.testsuite['name'] = result.suite.name
+            RQMClient.testsuite.id = _ts_id
+            RQMClient.testsuite.name = result.suite.name
          else:
             Logger.log_error(f"Create testsuite '{result.suite.name}' failed. Reason: {res_testsuite['message']}", fatal_error=True)
 
       # Process suite for importing
       process_suite(RQMClient, result.suite)
 
-      if RQMClient.testsuite['id']:
+      if RQMClient.testsuite.id:
          if not args.dryrun:
             # Create testsuite execution record if requires
-            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite['id'], RQMClient.testsuite['name'], args.testplan, RQMClient.configuration)
+            testsuite_record_data = RQMClient.createTSERTemplate(RQMClient.testsuite.id, RQMClient.testsuite.name, args.testplan, RQMClient.configuration.id)
             res_TSER = RQMClient.createResource('suiteexecutionrecord', testsuite_record_data)
             sTSERID = res_TSER['id']
             Logger.log()
@@ -769,13 +896,13 @@ Flow to import Robot results to RQM:
             elif (res_TSER['status_code'] == 303 or res_TSER['status_code'] == 200) and res_TSER['id'] != '':
                ### incase executionworkitem is existing, cannot create new one
                ### Use the existing ID for new result
-               Logger.log_warning(f"TSER for testsuite {RQMClient.testsuite['id']} is existing.\nAdd this execution result to existing TSER id: {sTSERID}")
+               Logger.log_warning(f"TSER for testsuite {RQMClient.testsuite.id} is existing.\nAdd this execution result to existing TSER id: {sTSERID}")
             else:
                Logger.log_error(f"Create TSER failed, {res_TSER['message']}")
 
             # Create new testsuite result and link all TCERs
-            testsuite_result_data = RQMClient.createTestsuiteResultTemplate(RQMClient.testsuite['id'],
-                                                                           RQMClient.testsuite['name'],
+            testsuite_result_data = RQMClient.createTestsuiteResultTemplate(RQMClient.testsuite.id,
+                                                                           RQMClient.testsuite.name,
                                                                            sTSERID,
                                                                            RQMClient.lTCERIDs,
                                                                            RQMClient.lTCResultIDs,
@@ -793,15 +920,15 @@ Flow to import Robot results to RQM:
 
          # Link all imported testcase ID(s) with testsuite
          try:
-            RQMClient.linkListTestcase2Testsuite(RQMClient.testsuite['id'])
-            Logger.log(f"Link all imported test cases with testsuite {RQMClient.testsuite['id']} successfully.")
+            RQMClient.linkListTestcase2Testsuite(RQMClient.testsuite.id)
+            Logger.log(f"Link all imported test cases with testsuite {RQMClient.testsuite.id} successfully.")
          except Exception as reason:
             Logger.log_error(f"Link all imported test cases with testsuite failed.\nReason: {reason}", fatal_error=True)
 
          # Add testsuite to given testplan
          try:
             RQMClient.addTestsuite2Testplan(args.testplan)
-            Logger.log(f"Add testsuite {RQMClient.testsuite['id']} to testplan {args.testplan} successfully.")
+            Logger.log(f"Add testsuite {RQMClient.testsuite.id} to testplan {args.testplan} successfully.")
          except Exception as reason:
             Logger.log_error(f"Add testsuite to testplan failed.\nReason: {reason}", fatal_error=True)
 

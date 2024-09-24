@@ -15,7 +15,7 @@
 #
 # File: CRQM.py
 #
-# Initialy created by Tran Duy Ngoan(RBVH/ECM11) / January 2021
+# Initially created by Tran Duy Ngoan(RBVH/ECM11) / January 2021
 #
 # This is CRQMClient class which is used to interact with RQM via RQM REST APIs
 #
@@ -78,6 +78,14 @@ Parse xml object from file.
       exit(1)
    return oTree
 
+class Identifier:
+   """
+Identifier class used to identify RQM resource with name and id
+   """
+   def __init__(self, name='', id=None):
+      self.name = name
+      self.id = id
+
 #
 #  IBM Rational Quality Manager
 #
@@ -87,7 +95,7 @@ class CRQMClient():
 CRQMClient class uses RQM REST APIs to get, create and update resources
 (testplan, testcase, test result, ...) on RQM - Rational Quality Manager
 
-Resoure type mapping:
+Resource type mapping:
 
 * buildrecord:          Build Record
 * configuration:        Test Environment
@@ -129,6 +137,17 @@ Resoure type mapping:
       'ns18' : "http://jazz.net/xmlns/alm/qm/v0.1/tsl/v0.1/" ,
       'ns20' : "http://jazz.net/xmlns/alm/qm/styleinfo/v0.1/" ,
       'ns21' : "http://www.w3.org/1999/XSL/Transform"
+   }
+
+   # define the convention for naming new RQM resource
+   SUPPORTED_PLACEHOLDER = ["testplan", "build", "environment", "testsuite", "testcase"]
+   NAMING_CONVENTION = {
+      "testcase"    : "{testcase}",
+      "tcer"        : "TCER: {testcase}",
+      "testresult"  : "Execution result: {testcase}",
+      "testsuite"   : "{testsuite}",
+      "tser"        : "TSER: {testsuite}",
+      "suiteresult" : "Testsuite result: {testsuite}"  
    }
 
    def __init__(self, user, password, project, host):
@@ -175,7 +194,7 @@ Constructor of class ``CRQMClient``.
                         'OSLC-Core-Version'  : '2.0'
                      }
 
-      # Templates location which is uesd for importing
+      # Templates location which is used for importing
       self.templatesDir = os.path.join(os.path.dirname(__file__),'RQM_templates')
 
       # Data for mapping and linking
@@ -190,17 +209,17 @@ Constructor of class ``CRQMClient``.
       self.lEndTimes     = list()
 
       # RQM configuration info
-      self.testplan      = None
-      self.build         = None
-      self.configuration = None
       self.createmissing = None
       self.updatetestcase= None
-      self.testsuite     = {
-         "id": None,
-         "name": None
-      }
-      self.stream        = None
-      self.baseline      = None
+      self.testplan      = Identifier()
+      self.build         = Identifier()
+      self.configuration = Identifier()
+      self.testsuite     = Identifier()
+      self.stream        = Identifier()
+      self.baseline      = Identifier()
+
+      # Naming convention
+      self.naming_convention = None
 
    def login(self):
       """
@@ -291,7 +310,7 @@ Disconnect from RQM.
 
    def config(self, plan_id, build_name=None, config_name=None,
               createmissing=False, updatetestcase=False, suite_id=None, 
-              stream=None, baseline=None):
+              stream=None, baseline=None, naming_convention=None):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
@@ -344,10 +363,14 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 (*no returns*)
       """
       try:
+         self.naming_convention = self.NAMING_CONVENTION
+         if naming_convention:
+            self.naming_convention.update(naming_convention)
+
          self.createmissing = createmissing
          self.updatetestcase = updatetestcase
-         self.testplan  = plan_id
-         self.testsuite['id'] = suite_id
+         self.testplan.id  = plan_id
+         self.testsuite.id = suite_id
          
          # Add Configuration-Context header information due to given stream or baseline
          if stream:
@@ -357,7 +380,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
                bFoundStream = False
                for stream_id, stream_name in dStreams.items():
                   if stream_name == stream:
-                     self.stream = stream_id
+                     self.stream.id = stream_id
+                     self.stream.name = stream_name
                      bFoundStream = True
                      self.headers['Configuration-Context'] = stream_id
                      self.session.headers = self.headers
@@ -374,7 +398,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
                bFoundBaseline = False
                for baseline_id, baseline_name in dBaselines.items():
                   if baseline_name == baseline:
-                     self.baseline = baseline_id
+                     self.baseline.id = baseline_id
+                     self.baseline.name = baseline_name
                      bFoundBaseline = True
                      self.headers['Configuration-Context'] = baseline_id
                      self.session.headers = self.headers
@@ -390,6 +415,9 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
          if res_plan.status_code != 200:
             raise Exception('Testplan with ID %s is not existing!'%str(plan_id))
 
+         oTestplan = get_xml_tree(BytesIO(str(res_plan.text).encode()), bdtd_validation=False)
+         self.testplan.name  = oTestplan.find('ns4:title', oTestplan.getroot().nsmap).text
+
          # Verify and create build version if required
          if build_name != None:
             if build_name == '':
@@ -397,7 +425,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             self.getAllBuildRecords()
             res_build = self.createBuildRecord(build_name)
             if res_build['success'] or res_build['status_code'] == "303":
-               self.build = res_build['id']
+               self.build.id = res_build['id']
+               self.build.name = build_name
             else:
                raise Exception("Cannot create build '%s': %s"%
                                (build_name, res_build['message']))
@@ -409,7 +438,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             self.getAllConfigurations()
             res_conf = self.createConfiguration(config_name)
             if res_conf['success'] or res_conf['status_code'] == "303":
-               self.configuration = res_conf['id']
+               self.configuration.id = res_conf['id']
+               self.configuration.name = config_name
             else:
                raise Exception("Cannot create configuration '%s': %s"%
                                (config_name, res_conf['message']))
@@ -420,7 +450,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             if res_suite.status_code != 200:
                raise Exception('Testsuite with ID %s is not existing!'%str(suite_id))
             oTestsuite = get_xml_tree(BytesIO(str(res_suite.text).encode()), bdtd_validation=False)
-            self.testsuite['name']  = oTestsuite.find('ns4:title', oTestsuite.getroot().nsmap).text
+            self.testsuite.name  = oTestsuite.find('ns4:title', oTestsuite.getroot().nsmap).text
 
          # get all team-areas for testcase template
          self.getAllTeamAreas()
@@ -454,7 +484,7 @@ Return interaction URL of provided userID
 
    def integrationURL(self, resourceType, id=None, forceinternalID=False):
       """
-Return interaction URL of provided reource and ID.
+Return interaction URL of provided resource and ID.
 The provided ID can be internalID (contains only digits) or externalID.
 
 **Arguments:**
@@ -486,7 +516,7 @@ The provided ID can be internalID (contains only digits) or externalID.
 
    / *Type*: str /
 
-   The interaction URL of provided reource and ID.
+   The interaction URL of provided resource and ID.
       """
       integrationURL = self.host + "/qm/service/com.ibm.rqm.integration.service.IIntegrationService/resources/" + \
                        self.projectID + '/' + resourceType
@@ -538,7 +568,7 @@ Note:
          raise Exception("Cannot get ID from response. Reason: %s"%str(error))
       return resultId
 
-   def webIDfromGeneratedID(self, resourrceType, generateID):
+   def webIDfromGeneratedID(self, resourceType, generateID):
       """
 Return web ID (ns2:webId) from generate ID by get resource data from RQM.
 
@@ -549,7 +579,7 @@ Note:
 
 **Arguments:**
 
-*  ``resourrceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
@@ -583,8 +613,8 @@ Note:
                               'testscript',
                               'testsuite',
                               'testsuitelog']
-      if resourrceType in lSupportedResources:
-         resResource = self.getResourceByID(resourrceType, generateID)
+      if resourceType in lSupportedResources:
+         resResource = self.getResourceByID(resourceType, generateID)
          if resResource.status_code == 200:
             oResource = get_xml_tree(BytesIO(str(resResource.text).encode()),
                                      bdtd_validation=False)
@@ -594,6 +624,61 @@ Note:
          else:
             raise Exception("Cannot get web ID of generated testcase!")
       return webID
+
+   def __genResourceName(self, resource, name):
+      """
+Return the name for given resource bases on the naming convention
+
+**Arguments:**
+
+*  ``resource``
+
+   / *Condition*: required / *Type*: str /
+
+   The RQM resource type.
+
+*  ``name``
+
+   / *Condition*: required / *Type*: str /
+
+   Relevant resource name.
+
+**Returns:**
+
+*  ``resourceName``
+
+   / *Type*: str /
+
+   Resource name after replacing bases on naming convention.
+      """
+      dPlaceHolders = {
+         "{testplan}": self.testplan.name
+      }
+      testcaseRelevant = ["testcase", "tcer", "testresult"]
+      testsuiteRelevant = ["testsuite", "tser", "suiteresult"]
+
+      # Define scope of place holders
+      if resource in testcaseRelevant:
+         dPlaceHolders.update({
+            "{build}": self.build.name,
+            "{environment}": self.configuration.name,
+            "{testsuite}": self.testsuite.name,
+            "{testcase}": name
+         })
+      elif resource in testsuiteRelevant:
+         dPlaceHolders.update({
+            "{build}": self.build.name,
+            "{environment}": self.configuration.name,
+            "{testsuite}": name,
+         })
+
+      try:
+         resourceName = self.naming_convention[resource]
+         for placeHolder, val in dPlaceHolders.items():
+            resourceName = resourceName.replace(placeHolder, val)
+         return resourceName
+      except:
+         raise Exception(f"Failed to generate name for {resource} '{name}'")
 
    #
    #  Methods to get resources
@@ -605,7 +690,7 @@ Return data of provided resource and ID by GET method
 
 **Arguments:**
 
-*  ``resourrceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
@@ -635,7 +720,7 @@ Return all entries (in all pages) of provided resource by GET method.
 
 **Arguments:**
 
-*  ``resourrceType``
+*  ``resourceType``
 
    / *Condition*: required / *Type*: str /
 
@@ -897,7 +982,7 @@ Return testcase template from provided information.
       root         = oTree.getroot()
       nsmap        = root.nsmap
       # prepare required data for template
-      testcaseTittle  = testcaseName
+      testcaseTittle  = self.__genResourceName('testcase', testcaseName)
 
       # find nodes to change data
       oTittle      = oTree.find(f'{{{self.NAMESPACES["ns3"]}}}title')
@@ -1010,7 +1095,8 @@ Return testcase execution record template from provided information.
       root = oTree.getroot()
       nsmap = root.nsmap
       # prepare required data for template
-      TCERTittle  = 'TCER: '+testcaseName
+      TCERTittle  = self.__genResourceName('tcer', testcaseName)
+      
 
       # Check tcid is internalid or externalid
       testcaseURL = self.integrationURL('testcase', testcaseID)
@@ -1156,7 +1242,7 @@ Return testcase execution result template from provided information.
       nsmap = root.nsmap
       # prepare required data for template
       prefixState  = 'com.ibm.rqm.execution.common.state.'
-      resultTittle = 'Execution result: '+testcaseName
+      resultTittle = self.__genResourceName('testresult', testcaseName)
       testcaseURL  = self.integrationURL('testcase', testcaseID)
       testplanURL  = self.integrationURL('testplan', testplanID)
       TCERURL      = self.integrationURL('executionworkitem', TCERID)
@@ -1339,7 +1425,7 @@ Return testsuite execution record (TSER) template from provided configuration na
       oTree         = get_xml_tree(sTemplatePath, bdtd_validation=False)
       root = oTree.getroot()
       # prepare required data for template
-      TSERTittle   = 'TSER: ' + testsuiteName
+      TSERTittle   = self.__genResourceName('tser', testsuiteName)
       testsuiteURL = self.integrationURL('testsuite', testsuiteID)
       testplanURL  = self.integrationURL('testplan', testplanID)
       testerURL    = self.userURL(self.userID)
@@ -1450,7 +1536,7 @@ Return testsuite execution result template from provided configuration name.
       prefixState  = 'com.ibm.rqm.execution.common.state.'
 
       # prepare required data for template
-      resultTittle  = 'Testsuite result: ' + testsuiteName
+      resultTittle  = self.__genResourceName('suiteresult', testsuiteName)
       testsuiteURL  = self.integrationURL('testsuite', testsuiteID)
       TSERURL       = self.integrationURL('suiteexecutionrecord', TSERID)
       testerURL    = self.userURL(self.userID)
@@ -1576,7 +1662,7 @@ Return testcase template from provided information.
       oOwner       = oTree.find('ns6:owner', nsmap)
 
       # change nodes's data
-      oTittle.text       = testsuiteName
+      oTittle.text       = self.__genResourceName('testsuite', testsuiteName)
       oDescription.text  = sDescription
 
       # Incase not specify owner in template or input data, set it as provided user in cli
@@ -1774,7 +1860,6 @@ Create new configuration - test environment.
       """
       returnObj = {'success' : False, 'id': None, 'message': '', 'status_code': ''}
       # check existing build record in this executioon
-      sConfID = ''
       if (sConfigurationName not in self.dConfiguation.values()) or forceCreate:
          sConfTemplate = self.createConfigurationTemplate(sConfigurationName)
          returnObj  = self.createResource('configuration', sConfTemplate)
@@ -1977,7 +2062,7 @@ Add testsuite ID to provided testplan ID
 
    Testsuite to be linked with given testplan.
 
-   If not provide, `testsuite['id']` value will be used as id of testsuite.
+   If not provide, `testsuite.id` value will be used as id of testsuite.
 
 **Returns:**
 
@@ -1999,7 +2084,7 @@ Add testsuite ID to provided testplan ID
       """
       returnObj = {'success' : False, 'message': ''}
       if testsuiteID == None:
-         testsuiteID = self.testsuite['id']
+         testsuiteID = self.testsuite.id
       if testsuiteID:
          resTestplanData = self.getResourceByID('testplan', testplanID)
          oTree = get_xml_tree(BytesIO(str(resTestplanData.text).encode()),bdtd_validation=False)
