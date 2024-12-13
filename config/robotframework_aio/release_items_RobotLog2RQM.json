@@ -1,6 +1,6 @@
 # **************************************************************************************************************
 #
-# Copyright 2020-2023 Robert Bosch GmbH
+# Copyright 2020-2024 Robert Bosch GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -133,7 +133,9 @@ Fixed issue when importing test case with **SKIP** status
                    ],
                    "0.13.1": [
 "
-**New feature of naming convention**
+**Naming convention for resources**
+
+The names of resources can be customized by a new configuration file in JSON format.
 
 * New optional argument: ``--naming_config <NAMING_CONFIG>``
 
@@ -153,17 +155,20 @@ Fixed issue when importing test case with **SKIP** status
   
   * Definition of naming convention as JSON file ``naming_convention.json``
 
-    |   ``{``
-    |     ``'testcase': '{testcase} (imported by RobotLog2RQM tool)',`` // customize test case name
-    |     ``'tcer': '{testcase}_{environment}',`` // Name TCER with environment as suffix
-    |     ``'testresult': '{testcase}_{build}',`` // Name Test result with build as suffix
-    |     ``'testsuite': '{testplan}_{testsuite}',``  // Name testsuite with test plan as prefix
-    |     ``'tser': '{testsuite}_{environment}',``
-    |     ``'suiteresult': '{testsuite}_{environment}_{build}'``
-    |   ``}``
-       
+    Meaning: The values of the left hand side of the colon will be replaced by the values of the right hand side
+    of the colon:
 
-  * Import robot framework result to RQM with above JSON file
+    | ``{``
+    | ``\u00a0\u00a0\"testcase\"\u00a0\u00a0\u00a0\u00a0: \"{testcase} (imported by RobotLog2RQM tool)\",``
+    | ``\u00a0\u00a0\"tcer\"\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0: \"{testcase}_{environment}\",``
+    | ``\u00a0\u00a0\"testresult\"\u00a0\u00a0: \"{testcase}_{build}\",``
+    | ``\u00a0\u00a0\"testsuite\"\u00a0\u00a0\u00a0: \"{testplan}_{testsuite}\",``
+    | ``\u00a0\u00a0\"tser\"\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0: \"{testsuite}_{environment}\",``
+    | ``\u00a0\u00a0\"suiteresult\"\u00a0: \"{testsuite}_{environment}_{build}\"``
+    | ``}``
+
+
+  * Import Robot Framework results to RQM with above JSON file
 
     .. code-block::
 
