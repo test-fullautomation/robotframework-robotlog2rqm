@@ -319,7 +319,7 @@ Parse and validate content of configuration file
                           fatal_error=True)
 
    if not is_valid_config(dConfig, bExitOnFail=False):
-      Logger.log_error(f"Error in naming configuration file '{path_file}'.", 
+      Logger.log_error(f"Error in naming configuration file '{path_file}'.",
                        fatal_error=True)
    return dConfig
 
@@ -441,7 +441,7 @@ Avalable arguments in command line:
    cmdParser.add_argument('password', type=str, help='password for RQM login.')
    cmdParser.add_argument('testplan', type=str,
                           help='testplan ID for this execution.')
-   cmdParser.add_argument('--testsuite', type=str, 
+   cmdParser.add_argument('--testsuite', type=str,
                           help="testsuite ID for this execution. If 'new', then create a new testsuite for this execution.")
    cmdParser.add_argument('--recursive',action="store_true",
                           help='if set, then the path is searched recursively for log files to be imported.')
@@ -744,7 +744,7 @@ Process robot test for importing to RQM.
    # Append lTestcaseIDs (for linking testplan/testsuite)
    if _tc_id not in RQMClient.lTestcaseIDs:
       RQMClient.lTestcaseIDs.append(_tc_id)
-   
+
    # Collect starttime and endtime for testsuite log creation
    RQMClient.lStartTimes.append(_tc_start_time)
    RQMClient.lEndTimes.append(_tc_end_time)
@@ -844,7 +844,7 @@ Flow to import Robot results to RQM:
          Logger.log()
          Logger.log(f"Login RQM as user '{args.user}' successfully!")
       else:
-         Logger.log_error("Could not login to RQM: 'Unkown reason'.")
+         Logger.log_error("Could not login to RQM: 'Unknown reason'.")
    except Exception as reason:
       Logger.log_error(f"Could not login to RQM: '{str(reason)}'.")
 
@@ -860,7 +860,7 @@ Flow to import Robot results to RQM:
          metadata_info['version_sw'] = None
          metadata_info['project'] = None
       RQMClient.config(args.testplan, metadata_info['version_sw'],
-                    metadata_info['project'], args.createmissing, args.updatetestcase, 
+                    metadata_info['project'], args.createmissing, args.updatetestcase,
                     args.testsuite, stream=args.stream, baseline=args.baseline,
                     naming_convention=dNamingConvention)
 
@@ -906,10 +906,11 @@ Flow to import Robot results to RQM:
                                                                            sTSERID,
                                                                            RQMClient.lTCERIDs,
                                                                            RQMClient.lTCResultIDs,
-                                                                           DRESULT_MAPPING[result.suite.status]
+                                                                           DRESULT_MAPPING[result.suite.status],
+                                                                           buildrecordID=RQMClient.build.id
                                                                            )
             res_TSLog = RQMClient.createResource('testsuitelog', testsuite_result_data)
-            sSuiteResultID = res_TSLog['id'] 
+            sSuiteResultID = res_TSLog['id']
             if res_TSLog['success']:
                Logger.log(f"Created testsuite result with id {sSuiteResultID} successfully.", indent=2)
             else:
@@ -939,7 +940,7 @@ Flow to import Robot results to RQM:
             Logger.log(f"Link all imported test cases with testplan {args.testplan} successfully.")
          except Exception as reason:
             Logger.log_error(f"Link all imported test cases with testplan failed.\nReason: {reason}", fatal_error=True)
-         
+
       # Update testcase(s) with generated ID(s)
       # Under developing
 

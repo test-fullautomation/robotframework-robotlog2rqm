@@ -147,7 +147,7 @@ Resource type mapping:
       "testresult"  : "Execution result: {testcase}",
       "testsuite"   : "{testsuite}",
       "tser"        : "TSER: {testsuite}",
-      "suiteresult" : "Testsuite result: {testsuite}"  
+      "suiteresult" : "Testsuite result: {testsuite}"
    }
 
    def __init__(self, user, password, project, host):
@@ -309,7 +309,7 @@ Disconnect from RQM.
       self.session.close()
 
    def config(self, plan_id, build_name=None, config_name=None,
-              createmissing=False, updatetestcase=False, suite_id=None, 
+              createmissing=False, updatetestcase=False, suite_id=None,
               stream=None, baseline=None, naming_convention=None):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
@@ -371,7 +371,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
          self.updatetestcase = updatetestcase
          self.testplan.id  = plan_id
          self.testsuite.id = suite_id
-         
+
          # Add Configuration-Context header information due to given stream or baseline
          if stream:
             res = self.getAllByResource('stream')
@@ -386,7 +386,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
                      self.headers['Configuration-Context'] = stream_id
                      self.session.headers = self.headers
                      break
-               
+
                if not bFoundStream:
                   raise Exception(f"Cannot found given stream '{stream}'")
             else:
@@ -404,7 +404,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
                      self.headers['Configuration-Context'] = baseline_id
                      self.session.headers = self.headers
                      break
-               
+
                if not bFoundBaseline:
                   raise Exception(f"Cannot found given baseline '{baseline}'")
             else:
@@ -454,7 +454,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
          # get all team-areas for testcase template
          self.getAllTeamAreas()
-         
+
 
       except Exception as error:
          raise Exception('Configure RQMClient failed: %s'%error)
@@ -1096,7 +1096,7 @@ Return testcase execution record template from provided information.
       nsmap = root.nsmap
       # prepare required data for template
       TCERTittle  = self.__genResourceName('tcer', testcaseName)
-      
+
 
       # Check tcid is internalid or externalid
       testcaseURL = self.integrationURL('testcase', testcaseID)
@@ -1462,7 +1462,7 @@ Return testsuite execution record (TSER) template from provided configuration na
 
    def createTestsuiteResultTemplate(self, testsuiteID, testsuiteName, TSERID,
                                      lTCER, lTCResults, resultState, startTime='',
-                                     endTime='', duration='', sOwnerID=''):
+                                     endTime='', duration='', sOwnerID='', buildrecordID=''):
       """
 Return testsuite execution result template from provided configuration name.
 
@@ -1581,7 +1581,7 @@ Return testsuite execution result template from provided configuration name.
       oState.text              = prefixState + 'inconclusive'
       if resultState.lower() in self.RESULT_STATES:
          oState.text = prefixState +resultState.lower()
-         
+
       for idx, sTCER in enumerate(lTCER):
          sTCERURL = self.integrationURL('executionworkitem', sTCER)
          oSuiteElem = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/tsl/v0.1/}suiteelement', nsmap=nsmap)
@@ -1598,6 +1598,12 @@ Return testsuite execution result template from provided configuration name.
          sTCResultURL = self.integrationURL('executionresult', lTCResults[idx])
          oExecutionResult.set('href', sTCResultURL)
          root.append(oExecutionResult)
+
+      if buildrecordID:
+         oBuildRecord = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/}buildrecord', nsmap=nsmap)
+         buildrecordURL = self.integrationURL('buildrecord', buildrecordID)
+         oBuildRecord.set('href', buildrecordURL)
+         root.append(oBuildRecord)
 
       # return xml template as string
       sTSResultxml = etree.tostring(oTree)
