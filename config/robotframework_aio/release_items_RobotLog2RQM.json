@@ -20,12 +20,12 @@
 #
 # Basically this component is stand-alone, but can also be used as part of an automation framework called
 # RobotFramework AIO. More information about this framework you can find here:
-# 
+#
 # https://github.com/test-fullautomation/RobotFramework_AIO
-# 
+#
 # This JSON file contains component specific release information for the RobotFramework AIO.
 # In case you use the component stand-alone only, you can ignore this file.
-# 
+#
 # --------------------------------------------------------------------------------------------------------------
 #
 # Format: extended JSON format with the possibility to comment out lines (by '#' at the beginning of the line).
@@ -64,13 +64,13 @@ Fixed issue when importing test case with **SKIP** status
 
 * New optional argument: *--testsuite <TESTSUITEID>*
 
-  The new --testsuite argument allows you to specify how test results are imported into IBM Rational Quality Manager (RQM). 
+  The new --testsuite argument allows you to specify how test results are imported into IBM Rational Quality Manager (RQM).
   You can now import test results into an existing test suite or create a new one if needed.
 
 * Usage:
 
   * Import to existing test suite:
-  
+
     To import test results into an existing test suite, simply provide the test suite ID with the *--testsuite* argument.
 
     .. code-block::
@@ -82,7 +82,7 @@ Fixed issue when importing test case with **SKIP** status
   * Create a new test suite:
 
     If you want to create a new test suite and import the test results into it, use the value **new** for the *--testsuite* argument.
-    
+
     .. code-block::
 
        python -m RobotLog2RQM resultxmlfile <host> <project> <user> <password> <testplan> --testsuite new
@@ -90,7 +90,7 @@ Fixed issue when importing test case with **SKIP** status
     This command will create a new test suite in RQM and then import the test results into the newly created test suite.
 
 * Example scenarios:
-  
+
   * Import to existing test suite with id **1234**
 
     .. code-block::
@@ -106,9 +106,9 @@ Fixed issue when importing test case with **SKIP** status
 
 **New feature to support project which enable Configuration Management (CM)**
 
-* New optional arguments: 
+* New optional arguments:
 
-  When Configuration Management (CM) is enabled for the project area, it is necessary to specify the 
+  When Configuration Management (CM) is enabled for the project area, it is necessary to specify the
   project stream or baseline when executing import tool to interact with the proper stream/baseline resources.
 
   The following arguments are used to provide this information:
@@ -131,7 +131,7 @@ Fixed issue when importing test case with **SKIP** status
        python -m RobotLog2RQM output.xml https://sample-rqm-host.com ROBFW-AIO test_user test_pw 720 --baseline 'Baseline_v1'
 "
                    ],
-                   "0.13.1": [
+                   "0.13.1.;0.14.0.": [
 "
 **Naming convention for resources**
 
@@ -142,9 +142,9 @@ The names of resources can be customized by a new configuration file in JSON for
   The new ``--naming_config`` argument allows you to customize the naming of resources generated during the import of test results to RQM.
 
   The value ``<NAMING_CONFIG>`` is the path to a JSON file that defines the naming conventions for resources (``testcase``, ``tcer``, ``testresult``, ...) generated during the import.
-  
+
   The following predefined placeholders are supported and will be replaced with corresponding values in the resource names when executing the import tool:
-  
+
   * *{testplan}*
   * *{build}*
   * *{environment}*
@@ -152,7 +152,7 @@ The names of resources can be customized by a new configuration file in JSON for
   * *{testcase}*
 
 * Example usage:
-  
+
   * Definition of naming convention as JSON file ``naming_convention.json``
 
     Meaning: The values of the left hand side of the colon will be replaced by the values of the right hand side
@@ -173,6 +173,11 @@ The names of resources can be customized by a new configuration file in JSON for
     .. code-block::
 
        python -m RobotLog2RQM robot_result.xml https://rqm-host.com My_RQM_Project testuser testpass 123 --naming_config path/to/naming_convention.json
+"
+                   ],
+                   "0.13.2.;0.14.0.": [
+"
+Fixed issue of missing build information when creating the testsuite result
 "
                    ]
                  }
