@@ -131,12 +131,6 @@ Validate and normalize command line arguments.
 
    ArgumentParser object.
    """
-   # if arguments.format:
-   #    if arguments.format.lower() not in OUTPUT_FORMATS:
-   #       raise ValueError(
-   #          f"Unsupported output format '{arguments.format}'. "
-   #          f"Please use one of the following: {', '.join(OUTPUT_FORMATS)}."
-   #       )
    artifact_types = arguments.types
    if isinstance(artifact_types, str):
       artifact_types = [x.strip().lower() for x in artifact_types.split(',')]

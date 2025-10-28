@@ -27,6 +27,7 @@
 # ******************************************************************************
 import sys
 import colorama as col
+import os
 
 class Logger():
    """
