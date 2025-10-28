@@ -291,25 +291,26 @@ Main entry point for RQMTool CLI.
    except Exception as reason:
       Logger.log_error(f"Could not login to RQM: '{str(reason)}'.")
 
-   testplan_data = RQMClient.getTestsFromTestplan(args.testplan, args.types)
+   if not args.dryrun:
+      testplan_data = RQMClient.getTestsFromTestplan(args.testplan, args.types)
 
-   basename_with_id = f"{args.basename}_{args.testplan}"
+      basename_with_id = f"{args.basename}_{args.testplan}"
 
-   write_output_file(
-      testplan_data,
-      output_dir=args.output_dir,
-      basename=basename_with_id,
-      extension=args.format,
-      artifact_types=args.types
-   )
+      write_output_file(
+         testplan_data,
+         output_dir=args.output_dir,
+         basename=basename_with_id,
+         extension=args.format,
+         artifact_types=args.types
+      )
 
-   for artifact_type in args.types:
-      items = testplan_data.get(artifact_type, [])
-      Logger.log(f"Found {len(items)} {artifact_type}(s)")
-      cnt = 1
-      for item in items:
-         Logger.log(f"{cnt:>3}. {item['id']} - {item['name']}", indent=2)
-         cnt += 1
+      for artifact_type in args.types:
+         items = testplan_data.get(artifact_type, [])
+         Logger.log(f"Found {len(items)} {artifact_type}(s)")
+         cnt = 1
+         for item in items:
+            Logger.log(f"{cnt:>3}. {item['id']} - {item['name']}", indent=2)
+            cnt += 1
 
 if __name__ == "__main__":
    RQMTool()

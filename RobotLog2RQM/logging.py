@@ -109,11 +109,11 @@ Write log message to console/file output.
 
 (*no returns*)
       """
-      if color==None:
+      if color is None:
          color = cls.color_normal
       if cls.output_console:
          print(cls.prefix_all + cls.color_reset + color + " "*indent + msg + cls.color_reset)
-      if cls.output_logfile!=None and os.path.isfile(cls.output_logfile):
+      if cls.output_logfile is not None and os.path.isfile(cls.output_logfile):
          with open(cls.output_logfile, 'a') as f:
             f.write(" "*indent + msg)
       return
