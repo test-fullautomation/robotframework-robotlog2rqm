@@ -13,7 +13,7 @@
 #  limitations under the License.
 # ******************************************************************************
 #
-# File: robotlog2rqm.py
+# File: logging.py
 #
 # Initially created by Tran Duy Ngoan(RBVH/EMC51) / October 2025
 #
