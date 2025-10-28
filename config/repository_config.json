@@ -16,5 +16,5 @@
    "INSTALLREQUIRES" : ["lxml","requests","colorama","robotframework"],
    "PACKAGEDATA" : ["RQM_templates/*.xml", "*.pdf"],
    "PACKAGEDOC" : "./packagedoc",
-   "CONSOLESCRIPTS" : ["RobotLog2RQM = RobotLog2RQM.robotlog2rqm:RobotLog2RQM"]
+   "CONSOLESCRIPTS" : ["RobotLog2RQM = RobotLog2RQM.robotlog2rqm:RobotLog2RQM", "RQMTool = RobotLog2RQM.rqmtool:RQMTool"]
 }
