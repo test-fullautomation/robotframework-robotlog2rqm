@@ -849,6 +849,62 @@ Example:
       else:
          raise Exception(f"Could not get 'team-areas' of project '{self.projectname}'.")
 
+   def getTestsFromTestplan(self, testplan_id, artifact_types):
+      """
+      Get all test cases and test suites associated with a given test plan.
+
+      Returns:
+         dict: {
+            'testcase': [{'id': ..., 'name': ..., 'url': ...}, ...],
+            'testsuite': [{'id': ..., 'name': ..., 'url': ...}, ...]
+         }
+      """
+      ALLOW_ARTIFACT_TYPES = ['testcase', 'testsuite']
+      result = {}
+
+      if isinstance(artifact_types, str):
+         artifact_types = [artifact_types]
+      elif not isinstance(artifact_types, (list, tuple)):
+         raise TypeError(
+               f"Invalid type for 'artifact_types': expected str or list, got {type(artifact_types).__name__}."
+         )
+
+      for item in artifact_types:
+         artifact_type = item.lower()
+         if artifact_type not in ALLOW_ARTIFACT_TYPES:
+            raise ValueError(
+               f"Unsupported artifact type '{artifact_type}'. "
+               f"Please use one of the following: {', '.join(ALLOW_ARTIFACT_TYPES)}."
+            )
+         result[artifact_type] = []
+
+      res = self.getResourceByID('testplan', testplan_id)
+      if res.status_code != 200:
+         raise Exception(f"Failed to get testplan {testplan_id}: {res.reason}")
+
+      oTree = get_xml_tree(BytesIO(str(res.text).encode()), bdtd_validation=False)
+      root = oTree.getroot()
+      nsmap = root.nsmap
+
+      for item in artifact_types:
+         artifact_type = item.lower()
+         # Find all linked test artifact
+         for oTest in root.findall(f'.//ns2:{artifact_type}', nsmap):
+            href = oTest.attrib.get('href')
+            if href:
+               test_id = href.split('/')[-1]
+               # Get testcase name
+               test_res = self.getResourceByID(artifact_type, test_id)
+               if test_res.status_code == 200:
+                  test_tree = get_xml_tree(BytesIO(str(test_res.text).encode()), bdtd_validation=False)
+                  test_name = test_tree.find('ns4:title', test_tree.getroot().nsmap)
+                  test_web_id = test_tree.find('ns2:webId', test_tree.getroot().nsmap)
+                  test_url = test_tree.find('ns4:identifier', test_tree.getroot().nsmap)
+                  result[artifact_type].append({'id': test_web_id.text,
+                                                'name': test_name.text if test_name is not None else '',
+                                                'url': test_url.text})
+
+      return result
 
    #
    #  Methods to create XML template for resources

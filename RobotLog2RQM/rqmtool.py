@@ -1,0 +1,191 @@
+#  Copyright 2020-2023 Robert Bosch GmbH
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# ******************************************************************************
+#
+# File: rqmtool.py
+#
+# Initially created by Tran Duy Ngoan(RBVH/EMC51) / October 2025
+#
+# This tool is used to fetch RQM resources
+#
+# History:
+#
+# 2025-10-20:
+#  - initial version
+#
+# ******************************************************************************
+
+import argparse
+import os
+import csv
+import json
+
+from RobotLog2RQM.CRQM import CRQMClient
+from RobotLog2RQM.logging import Logger
+from RobotLog2RQM.version import VERSION, VERSION_DATE
+
+OUTPUT_FORMATS = ['json', 'csv']
+ARTIFACT_TYPES = ['testcase', 'testsuite']
+
+def __process_commandline():
+   parser = argparse.ArgumentParser(
+      prog="RQMTool",
+      description="Fetch RQM resources."
+   )
+
+   parser.add_argument(
+      '-v', '--version',
+      action='version',
+      version=f'v{VERSION} ({VERSION_DATE})',
+      help='Version of the RQMTool.'
+   )
+   parser.add_argument(
+      "--host",
+      required=True,
+      help="RQM server URL."
+   )
+   parser.add_argument(
+      "--project",
+      required=True,
+      help="RQM project."
+   )
+   parser.add_argument(
+      "--user",
+      required=True,
+      help="RQM username."
+   )
+   parser.add_argument(
+      "--password",
+      required=True,
+      help="RQM password."
+   )
+   parser.add_argument(
+      "--testplan",
+      required=True,
+      help="RQM testplan ID."
+   )
+   parser.add_argument(
+      "--dryrun",
+      action="store_true",
+      help='if set, then verify all input arguments (includes RQM authentication) and show what would be done.')
+   parser.add_argument(
+      "--format",
+      default="csv",
+      choices=OUTPUT_FORMATS,
+      help="Output format (csv or json). Default is csv.")
+   parser.add_argument(
+      "--types",
+      default="testcase,testsuite",
+      help="Comma-separated list of artifact types to fetch. Allowed: testcase, testsuite.")
+   parser.add_argument(
+      "--output-dir",
+      default=".",
+      help="Directory to save output files.")
+   parser.add_argument(
+      "--basename",
+      default="testplan_export",
+      help="Base name for output files.")
+   return parser.parse_args()
+
+def __validate_arguments(arguments):
+   # if arguments.format:
+   #    if arguments.format.lower() not in OUTPUT_FORMATS:
+   #       raise ValueError(
+   #          f"Unsupported output format '{arguments.format}'. "
+   #          f"Please use one of the following: {', '.join(OUTPUT_FORMATS)}."
+   #       )
+   artifact_types = arguments.types
+   if isinstance(artifact_types, str):
+      artifact_types = [x.strip().lower() for x in artifact_types.split(',')]
+   elif isinstance(artifact_types, (list, tuple)):
+      artifact_types = [x.lower() for x in artifact_types]
+   else:
+      raise TypeError(f"Invalid type for '--types': {type(artifact_types).__name__}, expected str or list.")
+
+   for t in artifact_types:
+      if t not in ARTIFACT_TYPES:
+         raise ValueError(
+               f"Invalid artifact type '{t}'. Allowed: {', '.join(ARTIFACT_TYPES)}."
+         )
+   arguments.types = artifact_types
+
+   return arguments
+
+def write_json_file(file_name, data):
+   with open(file_name, 'w', encoding='utf-8') as f:
+      json.dump(data, f, indent=2, ensure_ascii=False)
+   Logger.log(f"Exported data to: {file_name}")
+
+def write_csv_file(file_name, data, artifact_type):
+   artifact_data = data.get(artifact_type, [])
+   if not artifact_data:
+      Logger.log_warning(f"No data for '{artifact_type}', skipping CSV export.")
+      return
+
+   fieldnames = list(data[artifact_type][0].keys()) if data[artifact_type] else ["id", "name"]
+   with open(file_name, mode="w", newline='', encoding="utf-8") as f:
+      writer = csv.DictWriter(f, fieldnames=fieldnames)
+      writer.writeheader()
+      for row in data[artifact_type]:
+         writer.writerow(row)
+   Logger.log(f"Exported {artifact_type} to: {file_name}")
+
+def write_output_file(data, output_dir=".", basename="testplan_export", extension="csv", artifact_types=None):
+   if extension == 'json':
+      file_name = os.path.join(output_dir, f"{basename}.json")
+      write_json_file(file_name, data)
+   else:
+      # CSV export: one file per artifact_type
+      for artifact_type in (artifact_types or ARTIFACT_TYPES):
+         file_name = os.path.join(output_dir, f"{basename}_{artifact_type}s.csv")
+         write_csv_file(file_name, data, artifact_type)
+
+def RQMTool():
+   args = __process_commandline()
+   __validate_arguments(args)
+   Logger.config(dryrun=args.dryrun)
+
+   RQMClient = CRQMClient(args.user, args.password, args.project, args.host)
+   try:
+      bSuccess = RQMClient.login()
+      if bSuccess:
+         Logger.log()
+         Logger.log(f"Login RQM as user '{args.user}' successfully!")
+      else:
+         Logger.log_error("Could not login to RQM: 'Unknown reason'.")
+   except Exception as reason:
+      Logger.log_error(f"Could not login to RQM: '{str(reason)}'.")
+
+   testplan_data = RQMClient.getTestsFromTestplan(args.testplan, args.types)
+
+   basename_with_id = f"{args.basename}_{args.testplan}"
+
+   write_output_file(
+      testplan_data,
+      output_dir=args.output_dir,
+      basename=basename_with_id,
+      extension=args.format,
+      artifact_types=args.types
+   )
+
+   for artifact_type in args.types:
+      items = testplan_data.get(artifact_type, [])
+      Logger.log(f"Found {len(items)} {artifact_type}(s)")
+      cnt = 1
+      for item in items:
+         Logger.log(f"{cnt:>3}. {item['id']} - {item['name']}", indent=2)
+         cnt += 1
+
+if __name__ == "__main__":
+   RQMTool()
