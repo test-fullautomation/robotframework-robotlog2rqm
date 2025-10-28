@@ -32,7 +32,7 @@ import csv
 import json
 
 from RobotLog2RQM.CRQM import CRQMClient
-from RobotLog2RQM.logging import Logger
+from RobotLog2RQM.logger import Logger
 from RobotLog2RQM.version import VERSION, VERSION_DATE
 
 OUTPUT_FORMATS = ['json', 'csv']

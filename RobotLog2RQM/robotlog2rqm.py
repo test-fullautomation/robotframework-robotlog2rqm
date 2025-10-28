@@ -36,7 +36,7 @@ import datetime
 from robot.api import ExecutionResult
 from RobotLog2RQM.CRQM import CRQMClient
 from RobotLog2RQM.version import VERSION, VERSION_DATE
-from RobotLog2RQM.logging import Logger
+from RobotLog2RQM.logger import Logger
 
 DRESULT_MAPPING = {
    "PASS":  "Passed",
