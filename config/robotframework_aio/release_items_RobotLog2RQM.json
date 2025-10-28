@@ -179,6 +179,30 @@ The names of resources can be customized by a new configuration file in JSON for
 "
 Fixed issue of missing build information when creating the testsuite result
 "
+                   ],
+                   "0.14.2.;0.15.0.": [
+"
+** Introducing RQMTool - fetch RQM test plan **
+
+* RQMTool is a CLI utility to retrieve test cases and test suites from IBM RQM test plans
+
+* Supports fetching selected artifact types (*testcase* or *testsuite*) and exporting them in CSV or JSON format.
+
+* Usage:
+
+  .. code-block::
+
+     python -m RobotLog2RQM.rqmtool --host <RQM_SERVER_URL> \
+                                    --project <PROJECT_AREA> \
+                                    --user <USERNAME> \
+                                    --password <PASSWORD> \
+                                    --testplan <TESTPLAN_ID> \
+                                    [--types <artifact_types>] \
+                                    [--format <csv|json>] \
+                                    [--output-dir <DIR>] \
+                                    [--basename <BASENAME>] \
+                                    [--dryrun]
+"
                    ]
                  }
 }

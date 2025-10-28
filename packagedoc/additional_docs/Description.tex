@@ -16,19 +16,19 @@
 \section{Get \rfwcore\ XML result}
 \label{description-get-robotframework-xml-result}}
 
-In order to manage test cases and their results Rational Quality Manager (RQM), 
-certain traceable information, such as version, test case ID, component, etc., 
-is required. 
+In order to manage test cases and their results Rational Quality Manager (RQM),
+certain traceable information, such as version, test case ID, component, etc.,
+is required.
 
-This enables the \pkg\ tool to associate the imported test results with 
-specific elements (Test Case) or link them to other entities (Build Record, 
+This enables the \pkg\ tool to associate the imported test results with
+specific elements (Test Case) or link them to other entities (Build Record,
 Test Environment) in RQM.
 
 These information should be provided in\rcode{Metadata}(for the whole
 testsuite/execution info: version, build, ...) and\rcode{{[}Tags{]}}information
 (for specific test case info: component, test case ID, requirement ID, ...) of
 \rfwcore\ test case.
-Then when executing \rfwcore\ test case(s), the generated \rfwcore\ result file 
+Then when executing \rfwcore\ test case(s), the generated \rfwcore\ result file
 (default is \emph{output.xml}) will contain all of them and ready for importing.
 
 Sample \rfwcore\ test case with the necessary information for importing to RQM:
@@ -56,7 +56,7 @@ Testcase 02
 \end{robotcode}
 
 \begin{boxhint} {Hint}
-  In case you are using \rfw, above highlighted\rcode{Metadata} definitions are 
+  In case you are using \rfw, above highlighted\rcode{Metadata} definitions are
   not required because they have been handled by
   \href{https://github.com/test-fullautomation/robotframework-testsuitesmanagement}
   {RobotFramework\_TestsuitesManagement} library within\rcode{Suite Setup}.
@@ -189,8 +189,8 @@ logFolder
 \subsection{Create missing Test Case on RQM}
 By default, \pkg\ tool will not touch (create, update) any RQM Test Case.
 
-If the \rcode{TCID-xxx} information is missing in \rcode{[Tags]} section of 
-\rfwcore\ Test Case, an error message will be raised for that specific importing 
+If the \rcode{TCID-xxx} information is missing in \rcode{[Tags]} section of
+\rfwcore\ Test Case, an error message will be raised for that specific importing
 Test Case, and the tool will proceed with the next Test Cases accordingly
 \begin{pythonlog}
 ERROR: There is no 'tcid' information for importing test 'Testcase 01'.
@@ -202,16 +202,16 @@ arguments.
 
 When \rlog{--createmissing} is used, \pkg\ will help to create RQM Test Cases
 bases on the defined information in \rfwcore\ Test Cases.
-It obtains the new Test Case ID and uses it for linking to related RQM resources 
+It obtains the new Test Case ID and uses it for linking to related RQM resources
 \textbf{TCER}, \textbf{Test Case Execution Result} as basic feature.
 
 The new IDs for the created Test Cases are also displayed in the execution log.
-You can copy these IDs and update the \rcode{TCID-xxx} information in \rfwcore\ 
-Test Cases for the next execution. This information will then be available in 
+You can copy these IDs and update the \rcode{TCID-xxx} information in \rfwcore\
+Test Cases for the next execution. This information will then be available in
 the generated \emph{*.xml} result file for importing.
 
 Please refer \hyperref[description-robot-testcase-information-on-rqm]
-{\rfwcore\ Test Case Information on RQM} section for for details on how the 
+{\rfwcore\ Test Case Information on RQM} section for for details on how the
 defined information in \rfwcore\ Test Cases is reflected in RQM.
 
 \subsection{Update existing Test Case on RQM}
@@ -223,20 +223,20 @@ such as \textbf{Component}, \textbf{Description}, ... the optional argument
 \rfwcore\ Test Case before creating its result.
 
 Please refer \hyperref[description-robot-testcase-information-on-rqm]{\rfwcore\ Test Case Information on RQM}
-section for for details on how the defined information in \rfwcore\ Test Cases 
+section for for details on how the defined information in \rfwcore\ Test Cases
 is reflected in RQM.
 
 \subsection{Test suite feature}
-In addition to managing the imported test results by testplan, the \pkg\ tool 
-also supports the use of testsuite with the optional argument 
+In addition to managing the imported test results by testplan, the \pkg\ tool
+also supports the use of testsuite with the optional argument
 \rcode{--testsuite TESTSUITE}.
 
 This argument provides two main features:
 
 \begin{itemize}
   \item \textbf{Importing to an existing testsuite:}
-        If you specify the ID of an existing testsuite using the 
-        \rcode{--testsuite TESTSUITE} argument, the tool will import the 
+        If you specify the ID of an existing testsuite using the
+        \rcode{--testsuite TESTSUITE} argument, the tool will import the
         test results directly into that testsuite.
 
         Example: testsuite with id \rcode{1234} is already existing
@@ -245,17 +245,17 @@ RobotLog2RQM output.xml https://sample-rqm-host.com ROBFW-AIO test_user test_pw 
         \end{robotlog}
 
   \item \textbf{Creating a new testsuite and then importing:}
-        If you set the value to \rcode{new} using the \rcode{--testsuite new} 
-        argument, the tool will create a new testsuite and then import the 
+        If you set the value to \rcode{new} using the \rcode{--testsuite new}
+        argument, the tool will create a new testsuite and then import the
         test results into this newly created testsuite.
-    
-        Example: 
+
+        Example:
         \begin{robotlog}
 RobotLog2RQM output.xml https://sample-rqm-host.com ROBFW-AIO test_user test_pw 720 --testsuite new
         \end{robotlog}
 \end{itemize}
 
-When using the \rcode{--testsuite} argument, the tool will follow these 
+When using the \rcode{--testsuite} argument, the tool will follow these
 additional steps besides the basic steps which is described in above
 \hyperref[basic-features]{Basic import feature} section.
 \begin{itemize}
@@ -268,8 +268,8 @@ additional steps besides the basic steps which is described in above
 \end{itemize}
 
 \subsection{Project with Configuration Management (CM)}
-When Configuration Management (CM) is enabled for the project area, 
-it is necessary to specify the project stream or baseline when executing import 
+When Configuration Management (CM) is enabled for the project area,
+it is necessary to specify the project stream or baseline when executing import
 tool to interact with the proper stream/baseline resources.
 
 Otherwise, the tool will not be able to correctly associate the imported test results.
@@ -281,8 +281,8 @@ Configuration Management (CM) is only enabled by Project Administrator as below 
 The following arguments are used to provide this information:
 \begin{itemize}
   \item \rcode{--stream STREAM}: specifies the project \rcode{STREAM}.\\
-        A project stream represents a branch of work within a project area. 
-        When CM is enabled, it is crucial to provide this option to correctly associate the imported 
+        A project stream represents a branch of work within a project area.
+        When CM is enabled, it is crucial to provide this option to correctly associate the imported
         test results with the appropriate stream.\\
         Example:
 \begin{robotlog}
@@ -290,8 +290,8 @@ The following arguments are used to provide this information:
 \end{robotlog}
 
   \item \rcode{--baseline BASELINE}: specifies the project \rcode{BASELINE}.\\
-        A baseline captures the state of project artifacts at a particular point in time. 
-        When CM or Baselines Only is enabled, this option is required to ensure that the 
+        A baseline captures the state of project artifacts at a particular point in time.
+        When CM or Baselines Only is enabled, this option is required to ensure that the
         test results are linked to the correct baseline.\\
         Example:
 \begin{robotlog}
@@ -305,15 +305,15 @@ The following arguments are used to provide this information:
 \end{boxhint}
 
 \subsection{Naming convention of generated resources}
-This feature provides flexibility in defining how new resources such as test 
-execution results, test cases, and test suite are named, allowing users to 
-customize the naming of resources generated during the import of test results to 
+This feature provides flexibility in defining how new resources such as test
+execution results, test cases, and test suite are named, allowing users to
+customize the naming of resources generated during the import of test results to
 RQM.
 
-The optional argument \rcode{--naming_config} is used to provide the user's 
+The optional argument \rcode{--naming_config} is used to provide the user's
 definitions. It takes a path to a JSON file as value.
-The JSON file specifies the format and structure of the names for different 
-types of resources using predefined placeholders \rcode{\{resource_type\}}. 
+The JSON file specifies the format and structure of the names for different
+types of resources using predefined placeholders \rcode{\{resource_type\}}.
 
 Supported placeholders:
 \begin{itemize}
@@ -321,7 +321,7 @@ Supported placeholders:
   \item \textbf{\{build\}}: Name of the build record.
   \item \textbf{\{environment\}}: Name of the test environment.
   \item \textbf{\{testsuite\}}: Name of the test suite (if \rcode{--testsuite} is used).
-  \item \textbf{\{testcase\}}: Name of the test case, only available for test case relevant 
+  \item \textbf{\{testcase\}}: Name of the test case, only available for test case relevant
         resources: \textbf{testcase}, \textbf{tcer} and \textbf{testresult}
 \end{itemize}
 
@@ -343,7 +343,7 @@ Example Usage:
 \end{robotlog}
 
 \begin{boxhint} {Default Behavior:}
-If the \rcode{--naming_config} argument is not used, the tool will use default 
+If the \rcode{--naming_config} argument is not used, the tool will use default
 naming convention as defined by the \pkg\ tool:
 \begin{pythoncode}
 {
@@ -352,7 +352,7 @@ naming convention as defined by the \pkg\ tool:
   "testresult"  : "Execution result: {testcase}",
   "testsuite"   : "{testsuite}",
   "tser"        : "TSER: {testsuite}",
-  "suiteresult" : "Testsuite result: {testsuite}"  
+  "suiteresult" : "Testsuite result: {testsuite}"
 }
 \end{pythoncode}
 \end{boxhint}
@@ -360,12 +360,15 @@ naming convention as defined by the \pkg\ tool:
 \hypertarget{description-robot-testcase-information-on-rqm}{%
 \section{\rfwcore\ Test Case Information on RQM:}
 \label{description-robot-testcase-information-on-rqm}}
-For more detail about the mapping between the defined information from \rfwcore\ 
+For more detail about the mapping between the defined information from \rfwcore\
 Test Case to \rfwcore\ result (\emph{output.xml}) file and their reflections on
 RQM WebApp, please refer below mapping table:
 
-\begin{table}[h]
-  \label{table:RobotLog2RQM-mapping}
+% \begin{table}[h]
+%   \label{table:RobotLog2RQM-mapping}
+\noindent
+\textbf{Table: Mapping RQM - Robot}
+\begin{center}
   \begin{tabular}{|p{0.115\linewidth}|p{0.12\linewidth}|p{0.31\linewidth}|p{0.45\linewidth}|}
     \hline
     \multicolumn{2}{|c|}{\textbf{RQM data}}
@@ -475,5 +478,89 @@ RQM WebApp, please refer below mapping table:
             \cline{2-4}
     \hline
   \end{tabular}
-  \caption{RQM data \& \rfwcore\ }
-\end{table}
+\end{center}
+  % \caption{RQM data \& \rfwcore\ }
+% \end{table}
+
+
+\hypertarget{description-rqmtool-documentation}{%
+\section{Additional Tool: RQMTool}
+\label{description-rqmtool-documentation}}
+
+The \pkg\ package now includes the **RQMTool** submodule, which provides a standalone CLI
+for fetching test cases and test suites from IBM Rational Quality Manager (RQM) test plans.
+
+\subsection{Purpose}
+RQMTool enables:
+
+\begin{itemize}
+  \item Fetching test cases and/or test suites from a given RQM test plan.
+  \item Exporting fetched artifacts as CSV or JSON.
+  \item Performing dry-run validation of inputs and RQM connectivity without fetching.
+\end{itemize}
+
+\subsection{Usage}
+The RQMTool can be executed as a Python module:
+
+\begin{robotlog}
+python -m RobotLog2RQM.rqmtool --host <\textless{}>RQM_SERVER_URL<\textgreater{}> --project <\textless{}>PROJECT_AREA<\textgreater{}> \
+                               --user <\textless{}>USERNAME<\textgreater{}> --password <\textless{}>PASSWORD<\textgreater{}> \
+                               --testplan <\textless{}>TESTPLAN_ID<\textgreater{}> [--types <\textless{}>artifact_types<\textgreater{}>] \
+                               [--format <\textless{}>csv|json<\textgreater{}>] [--output-dir <\textless{}>DIR<\textgreater{}>] \
+                               [--basename <\textless{}>BASENAME<\textgreater{}>] [--dryrun]
+\end{robotlog}
+
+Arguments description:
+
+\begin{itemize}
+  \item \textbf{--host (required)}: Base URL of the RQM server.
+  \item \textbf{--project (required)}: Name of the RQM project area.
+  \item \textbf{--user (required)}: RQM username.
+  \item \textbf{--password (required)}: RQM password.
+  \item \textbf{--testplan (required)}: ID of the test plan to fetch.
+  \item \textbf{--types (optional)}: Comma-separated list of artifact types to fetch
+        (\rcode{testcase}, \rcode{testsuite}). Default: both.
+  \item \textbf{--format (optional)}: Output format: \rcode{csv} or \rcode{json}. Default: \rcode{csv}.
+  \item \textbf{--output-dir (optional)}: Directory to save exported files. Default: current directory.
+  \item \textbf{--basename (optional)}: Base name for output files. Default: \rcode{testplan_export}.
+  \item \textbf{--dryrun (optional)}: Validate inputs and RQM connection without performing fetch.
+\end{itemize}
+
+\subsection{Examples}
+
+Fetch all test cases and test suites from test plan ID 720 and export to CSV:
+
+\begin{robotlog}
+python -m RobotLog2RQM.rqmtool --host https://sample-rqm-host.com \
+                               --project ROBFW-AIO \
+                               --user test_user \
+                               --password test_pw \
+                               --testplan 720 \
+                               --types testcase,testsuite \
+                               --format csv
+\end{robotlog}
+
+Perform a dry-run to check connection and arguments:
+
+\begin{robotlog}
+python -m RobotLog2RQM.rqmtool --host https://sample-rqm-host.com \
+                               --project ROBFW-AIO \
+                               --user test_user \
+                               --password test_pw \
+                               --testplan 720 \
+                               --dryrun
+\end{robotlog}
+
+\subsection{Notes}
+\begin{itemize}
+  \item CSV export automatically generates filenames including test plan ID.
+  \item JSON export contains only selected artifact types.
+  \item Dry-run mode does not fetch or save any data, only validates arguments and RQM access.
+\end{itemize}
+
+\begin{boxhint}{Tip}
+  RQMTool can be used independently to fetch test cases from a testplan
+  and even execute them selectively, or it can be combined with the main
+  \pkg\ import tool to retrieve test case information before importing
+  Robot Framework results into RQM.
+\end{boxhint}
