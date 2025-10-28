@@ -851,13 +851,34 @@ Example:
 
    def getTestsFromTestplan(self, testplan_id, artifact_types):
       """
-      Get all test cases and test suites associated with a given test plan.
+Get all test cases and test suites associated with a given test plan.
 
-      Returns:
-         dict: {
-            'testcase': [{'id': ..., 'name': ..., 'url': ...}, ...],
-            'testsuite': [{'id': ..., 'name': ..., 'url': ...}, ...]
-         }
+**Arguments:**
+
+*  ``testplan_id``
+
+   / *Condition*: required / *Type*: str /
+
+   The RQM test plan to get test artifact(s).
+
+*  ``artifact_types``
+
+   / *Condition*: required / *Type*: list /
+
+   List of artifact types (`testcase`, `testsuite`) for fetching.
+
+**Returns:**
+
+* / *Type*: dict /
+
+  A dictionary containing fetched artifacts:
+
+  .. code:: python
+
+     {
+        'testcase': [{'id': ..., 'name': ..., 'url': ...}, ...],
+        'testsuite': [{'id': ..., 'name': ..., 'url': ...}, ...]
+     }
       """
       ALLOW_ARTIFACT_TYPES = ['testcase', 'testsuite']
       result = {}

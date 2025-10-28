@@ -39,6 +39,19 @@ OUTPUT_FORMATS = ['json', 'csv']
 ARTIFACT_TYPES = ['testcase', 'testsuite']
 
 def __process_commandline():
+   """
+Process provided argument(s) from command line.
+
+**Arguments:**
+
+(*no arguments*)
+
+**Returns:**
+
+   / *Type*: `ArgumentParser` object /
+
+   ArgumentParser object.
+   """
    parser = argparse.ArgumentParser(
       prog="RQMTool",
       description="Fetch RQM resources."
@@ -99,6 +112,25 @@ def __process_commandline():
    return parser.parse_args()
 
 def __validate_arguments(arguments):
+   """
+Validate and normalize command line arguments.
+
+**Arguments:**
+
+*  ``arguments``
+
+   / *Condition*: required / *Type*: `ArgumentParser` object  /
+
+   Parsed arguments from __process_commandline().
+
+**Returns:**
+
+*  ``arguments``
+
+   / *Type*: `ArgumentParser` object /
+
+   ArgumentParser object.
+   """
    # if arguments.format:
    #    if arguments.format.lower() not in OUTPUT_FORMATS:
    #       raise ValueError(
@@ -123,11 +155,59 @@ def __validate_arguments(arguments):
    return arguments
 
 def write_json_file(file_name, data):
+   """
+Write data to a JSON file.
+
+**Arguments:**
+
+*  ``file_name``
+
+   / *Condition*: required / *Type*: str /
+
+   Path of the JSON file to write.
+
+*  ``data``
+
+   / *Condition*: required / *Type*: dict /
+
+   Data to export.
+
+**Returns:**
+
+(*no returns*)
+   """
    with open(file_name, 'w', encoding='utf-8') as f:
       json.dump(data, f, indent=2, ensure_ascii=False)
    Logger.log(f"Exported data to: {file_name}")
 
 def write_csv_file(file_name, data, artifact_type):
+   """
+Write data to a CSV file for a specific artifact type.
+
+**Arguments:**
+
+*  ``file_name``
+
+   / *Condition*: required / *Type*: str /
+
+   Path of the CSV file to write.
+
+*  ``data``
+
+   / *Condition*: required / *Type*: dict /
+
+   Data dictionary containing artifacts.
+
+* ``artifact_type``
+
+   / *Condition*: required / *Type*: str /
+
+   Artifact type (`testcase` or `testsuite`) to export.
+
+**Returns:**
+
+(*no returns*)
+   """
    artifact_data = data.get(artifact_type, [])
    if not artifact_data:
       Logger.log_warning(f"No data for '{artifact_type}', skipping CSV export.")
@@ -142,6 +222,45 @@ def write_csv_file(file_name, data, artifact_type):
    Logger.log(f"Exported {artifact_type} to: {file_name}")
 
 def write_output_file(data, output_dir=".", basename="testplan_export", extension="csv", artifact_types=None):
+   """
+Write data to output files (JSON or CSV) according to specified options.
+
+**Arguments:**
+
+*  ``data``
+
+   / *Condition*: required / *Type*: dict /
+
+   Data dictionary containing artifacts.
+
+*  ``output_dir``
+
+   / *Condition*: optional / *Type*: str /
+
+   Directory to save output files. Default is current directory.
+
+*  ``basename``
+
+   / *Condition*: optional / *Type*: str /
+
+   Base name for output files. Default is "testplan_export".
+
+*  ``extension``
+
+   / *Condition*: optional / *Type*: str /
+
+   Output format: `json` or `csv`. Default is `csv`.
+
+*  ``artifact_types``
+
+   / *Condition*: optional / *Type*: list /
+
+   Artifact types to export. Default is all supported types.
+
+**Returns:**
+
+(*no returns*)
+   """
    if extension == 'json':
       file_name = os.path.join(output_dir, f"{basename}.json")
       write_json_file(file_name, data)
@@ -152,6 +271,17 @@ def write_output_file(data, output_dir=".", basename="testplan_export", extensio
          write_csv_file(file_name, data, artifact_type)
 
 def RQMTool():
+   """
+Main entry point for RQMTool CLI.
+
+**Arguments:**
+
+(*no arguments*)
+
+**Returns:**
+
+(*no returns*)
+   """
    args = __process_commandline()
    __validate_arguments(args)
    Logger.config(dryrun=args.dryrun)
