@@ -182,7 +182,7 @@ Fixed issue of missing build information when creating the testsuite result
                    ],
                    "0.14.2.;0.15.0.": [
 "
-** Introducing RQMTool - fetch RQM test plan **
+**Introducing RQMTool - fetch RQM test plan**
 
 * RQMTool is a CLI utility to retrieve test cases and test suites from IBM RQM test plans
 
