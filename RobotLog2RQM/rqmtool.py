@@ -89,6 +89,16 @@ Process provided argument(s) from command line.
       help="RQM testplan ID."
    )
    parser.add_argument(
+      "--stream",
+      type=str,
+      help="project stream. Note, requires Configuration Management (CM) to be enabled for the project area."
+   )
+   parser.add_argument(
+      '--baseline',
+      type=str,
+      help='project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.'
+   )
+   parser.add_argument(
       "--dryrun",
       action="store_true",
       help='if set, then verify all input arguments (includes RQM authentication) and show what would be done.')
@@ -331,6 +341,7 @@ Main entry point for RQMTool CLI.
    Logger.config(dryrun=args.dryrun)
 
    RQMClient = CRQMClient(args.user, args.password, args.project, args.host)
+   RQMClient.config(stream=args.stream, baseline=args.baseline)
    try:
       bSuccess = RQMClient.login()
       if bSuccess:
