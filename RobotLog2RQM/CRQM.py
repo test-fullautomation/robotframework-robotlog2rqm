@@ -921,9 +921,20 @@ Get all test cases and test suites associated with a given test plan.
                   test_name = test_tree.find('ns4:title', test_tree.getroot().nsmap)
                   test_web_id = test_tree.find('ns2:webId', test_tree.getroot().nsmap)
                   test_url = test_tree.find('ns4:identifier', test_tree.getroot().nsmap)
-                  result[artifact_type].append({'id': test_web_id.text,
+                  test_category = test_tree.findall('ns2:category', test_tree.getroot().nsmap)
+                  test_custom_attr = test_tree.findall('.//ns2:customAttribute', test_tree.getroot().nsmap)
+                  test_data = {'id': test_web_id.text,
                                                 'name': test_name.text if test_name is not None else '',
-                                                'url': test_url.text})
+                                                'url': test_url.text}
+                  for item in test_category:
+                     test_data[item.attrib.get('term')] = item.attrib.get('value')
+                  for attr in test_custom_attr:
+                     try:
+                        test_data[attr.find("ns2:name", nsmap).text] = attr.find("ns2:value", nsmap).text
+                     except:
+                        pass
+
+                  result[artifact_type].append(test_data)
 
       return result
 

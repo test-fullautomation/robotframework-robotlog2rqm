@@ -264,6 +264,56 @@ Write data to output files (JSON or CSV) according to specified options.
          file_name = os.path.join(output_dir, f"{basename}_{artifact_type}s.csv")
          write_csv_file(file_name, data, artifact_type)
 
+def normalize_custom_attributes(data, artifact_types):
+   """
+Ensure all artifacts across projects have consistent keys.
+Missing custom attributes will be filled with empty strings.
+
+**Arguments:**
+
+*  ``data``
+
+   / *Condition*: required / *Type*: dict /
+
+   Dictionary containing artifact data fetched from RQM, where each key represents
+   an artifact type (e.g., ``testcase``, ``testsuite``) and the value is a list
+   of dictionaries holding artifact details.
+
+*  ``artifact_types``
+
+   / *Condition*: required / *Type*: list /
+
+   List of artifact types to process (e.g., ``['testcase', 'testsuite']``).
+   Each type key in ``data`` will be normalized to ensure all items have the same set of attributes.
+
+**Returns:**
+
+*  ``data``
+
+   / *Type*: dict /
+
+   Normalized dictionary with consistent keys across all artifacts.
+   Any missing custom attributes are added with an empty string ("") as value.
+   """
+   for artifact_type in artifact_types:
+      artifacts = data.get(artifact_type, [])
+      if not artifacts:
+         continue
+
+      # Collect all keys (standard + custom attributes)
+      all_keys = set()
+      for item in artifacts:
+         all_keys.update(item.keys())
+
+      # Fill missing attributes with empty string
+      for item in artifacts:
+         for key in all_keys:
+               if key not in item:
+                  item[key] = ""
+
+   return data
+
+
 def RQMTool():
    """
 Main entry point for RQMTool CLI.
@@ -293,7 +343,7 @@ Main entry point for RQMTool CLI.
 
    if not args.dryrun:
       testplan_data = RQMClient.getTestsFromTestplan(args.testplan, args.types)
-
+      testplan_data = normalize_custom_attributes(testplan_data, args.types)
       basename_with_id = f"{args.basename}_{args.testplan}"
 
       write_output_file(
