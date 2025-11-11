@@ -225,7 +225,7 @@ Default schema supports below information:
          # TESTCASE_NAME is not available for non-testcase relevant resources
          # TESTSUITE_NAME is not available for `buildrecord` and `configuration` resources
          # Warning user for using wrong place holders
-         oMatch = re.search(".*\{(.*)\}.*", dConfig[key])
+         oMatch = re.search(r".*\{(.*)\}.*", dConfig[key])
          if oMatch:
             if oMatch.group(1) not in CRQMClient.SUPPORTED_PLACEHOLDER:
                Logger.log_warning(f"Place holder '{{{oMatch.group(1)}}}' is not supported, it will not be replaced when generating {key} resource")

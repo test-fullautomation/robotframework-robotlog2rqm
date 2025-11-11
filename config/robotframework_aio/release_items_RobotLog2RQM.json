@@ -182,7 +182,7 @@ Fixed issue of missing build information when creating the testsuite result
                    ],
                    "0.14.2.;0.15.0.": [
 "
-** Introducing RQMTool - fetch RQM test plan **
+**Introducing RQMTool - fetch RQM test plan**
 
 * RQMTool is a CLI utility to retrieve test cases and test suites from IBM RQM test plans
 
@@ -200,6 +200,30 @@ Fixed issue of missing build information when creating the testsuite result
   |                                ``[--output-dir <DIR>] \\``
   |                                ``[--basename <BASENAME>] \\``
   |                                ``[--dryrun]``
+"
+                   ],
+                   "0.14.3.;0.15.0.": [
+"
+**Update RQMTool - fetch RQM test plan/suite**
+
+* Update to get all available custom attributes from test case.
+
+* Support Configuration Management (multiple streams, baselines)
+
+  The following optional arguments added:
+
+  * *--stream <STREAM>*: A project stream represents a branch of work within a project area.
+  * *--baseline <BASELINE>*: A baseline captures the state of project artifacts at a particular point in time.
+
+* Support for fetching test cases from a given test suite
+
+  Example usage to get test case data from test suite ID *123*:
+
+  | ``python -m RobotLog2RQM.rqmtool --host https://sample-rqm-host.com \\``
+  |                                ``--project ROBFW-AIO \\``
+  |                                ``--user test_user \\``
+  |                                ``--password test_pw \\``
+  |                                ``--testsuite 123``
 "
                    ]
                  }

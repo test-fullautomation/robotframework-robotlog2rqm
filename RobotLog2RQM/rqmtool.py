@@ -83,10 +83,15 @@ Process provided argument(s) from command line.
       required=True,
       help="RQM password."
    )
-   parser.add_argument(
+   # exclusive group to provive only --testsuite or --testplan
+   group = parser.add_mutually_exclusive_group(required=True)
+   group.add_argument(
       "--testplan",
-      required=True,
       help="RQM testplan ID."
+   )
+   group.add_argument(
+      "--testsuite",
+      help="RQM testsuite ID."
    )
    parser.add_argument(
       "--stream",
@@ -341,9 +346,9 @@ Main entry point for RQMTool CLI.
    Logger.config(dryrun=args.dryrun)
 
    RQMClient = CRQMClient(args.user, args.password, args.project, args.host)
-   RQMClient.config(stream=args.stream, baseline=args.baseline)
    try:
       bSuccess = RQMClient.login()
+      RQMClient.config(stream=args.stream, baseline=args.baseline)
       if bSuccess:
          Logger.log()
          Logger.log(f"Login RQM as user '{args.user}' successfully!")
@@ -353,12 +358,22 @@ Main entry point for RQMTool CLI.
       Logger.log_error(f"Could not login to RQM: '{str(reason)}'.")
 
    if not args.dryrun:
-      testplan_data = RQMClient.getTestsFromTestplan(args.testplan, args.types)
-      testplan_data = normalize_custom_attributes(testplan_data, args.types)
-      basename_with_id = f"{args.basename}_{args.testplan}"
+      if args.testplan:
+         artifact_types = args.types
+         basename_with_id = f"{args.basename}_{args.testplan}"
+         test_data = RQMClient.getTestArtifactsFromResource('testplan', args.testplan, args.types)
+         test_data = normalize_custom_attributes(test_data, artifact_types)
+      elif args.testsuite:
+         artifact_types = ['testcase']
+         if args.basename == "testplan_export":
+            basename_with_id = f"testsuite_export_{args.testsuite}"
+         else:
+            basename_with_id = f"{args.basename}_{args.testsuite}"
+         test_data = RQMClient.getTestArtifactsFromResource('testsuite', args.testsuite, artifact_types)
+         test_data = normalize_custom_attributes(test_data, artifact_types)
 
       write_output_file(
-         testplan_data,
+         test_data,
          output_dir=args.output_dir,
          basename=basename_with_id,
          extension=args.format,
@@ -366,7 +381,7 @@ Main entry point for RQMTool CLI.
       )
 
       for artifact_type in args.types:
-         items = testplan_data.get(artifact_type, [])
+         items = test_data.get(artifact_type, [])
          Logger.log(f"Found {len(items)} {artifact_type}(s)")
          cnt = 1
          for item in items:
