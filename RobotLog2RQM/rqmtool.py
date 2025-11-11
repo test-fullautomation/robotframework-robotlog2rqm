@@ -83,10 +83,25 @@ Process provided argument(s) from command line.
       required=True,
       help="RQM password."
    )
-   parser.add_argument(
+   # exclusive group to provdve only --testsuite or --testplan
+   group = parser.add_mutually_exclusive_group(required=True)
+   group.add_argument(
       "--testplan",
-      required=True,
       help="RQM testplan ID."
+   )
+   group.add_argument(
+      "--testsuite",
+      help="RQM testsuite ID."
+   )
+   parser.add_argument(
+      "--stream",
+      type=str,
+      help="project stream. Note, requires Configuration Management (CM) to be enabled for the project area."
+   )
+   parser.add_argument(
+      '--baseline',
+      type=str,
+      help='project baseline. Note, requires Configuration Management (CM), or Baselines Only to be enabled for the project area.'
    )
    parser.add_argument(
       "--dryrun",
@@ -264,6 +279,56 @@ Write data to output files (JSON or CSV) according to specified options.
          file_name = os.path.join(output_dir, f"{basename}_{artifact_type}s.csv")
          write_csv_file(file_name, data, artifact_type)
 
+def normalize_custom_attributes(data, artifact_types):
+   """
+Ensure all artifacts across projects have consistent keys.
+Missing custom attributes will be filled with empty strings.
+
+**Arguments:**
+
+*  ``data``
+
+   / *Condition*: required / *Type*: dict /
+
+   Dictionary containing artifact data fetched from RQM, where each key represents
+   an artifact type (e.g., ``testcase``, ``testsuite``) and the value is a list
+   of dictionaries holding artifact details.
+
+*  ``artifact_types``
+
+   / *Condition*: required / *Type*: list /
+
+   List of artifact types to process (e.g., ``['testcase', 'testsuite']``).
+   Each type key in ``data`` will be normalized to ensure all items have the same set of attributes.
+
+**Returns:**
+
+*  ``data``
+
+   / *Type*: dict /
+
+   Normalized dictionary with consistent keys across all artifacts.
+   Any missing custom attributes are added with an empty string ("") as value.
+   """
+   for artifact_type in artifact_types:
+      artifacts = data.get(artifact_type, [])
+      if not artifacts:
+         continue
+
+      # Collect all keys (standard + custom attributes)
+      all_keys = set()
+      for item in artifacts:
+         all_keys.update(item.keys())
+
+      # Fill missing attributes with empty string
+      for item in artifacts:
+         for key in all_keys:
+               if key not in item:
+                  item[key] = ""
+
+   return data
+
+
 def RQMTool():
    """
 Main entry point for RQMTool CLI.
@@ -283,6 +348,7 @@ Main entry point for RQMTool CLI.
    RQMClient = CRQMClient(args.user, args.password, args.project, args.host)
    try:
       bSuccess = RQMClient.login()
+      RQMClient.config(stream=args.stream, baseline=args.baseline)
       if bSuccess:
          Logger.log()
          Logger.log(f"Login RQM as user '{args.user}' successfully!")
@@ -292,20 +358,30 @@ Main entry point for RQMTool CLI.
       Logger.log_error(f"Could not login to RQM: '{str(reason)}'.")
 
    if not args.dryrun:
-      testplan_data = RQMClient.getTestsFromTestplan(args.testplan, args.types)
-
-      basename_with_id = f"{args.basename}_{args.testplan}"
+      if args.testplan:
+         artifact_types = args.types
+         basename_with_id = f"{args.basename}_{args.testplan}"
+         test_data = RQMClient.getTestArtifactsFromResource('testplan', args.testplan, args.types)
+         test_data = normalize_custom_attributes(test_data, artifact_types)
+      elif args.testsuite:
+         artifact_types = ['testcase']
+         if args.basename == "testplan_export":
+            basename_with_id = f"testsuite_export_{args.testsuite}"
+         else:
+            basename_with_id = f"{args.basename}_{args.testsuite}"
+         test_data = RQMClient.getTestArtifactsFromResource('testsuite', args.testsuite, artifact_types)
+         test_data = normalize_custom_attributes(test_data, artifact_types)
 
       write_output_file(
-         testplan_data,
+         test_data,
          output_dir=args.output_dir,
          basename=basename_with_id,
          extension=args.format,
-         artifact_types=args.types
+         artifact_types=artifact_types
       )
 
-      for artifact_type in args.types:
-         items = testplan_data.get(artifact_type, [])
+      for artifact_type in artifact_types:
+         items = test_data.get(artifact_type, [])
          Logger.log(f"Found {len(items)} {artifact_type}(s)")
          cnt = 1
          for item in items:

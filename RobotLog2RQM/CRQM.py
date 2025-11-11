@@ -308,9 +308,9 @@ Disconnect from RQM.
       """
       self.session.close()
 
-   def config(self, plan_id, build_name=None, config_name=None,
+   def config(self, plan_id=None, build_name=None, config_name=None,
               createmissing=False, updatetestcase=False, suite_id=None,
-              stream=None, baseline=None, naming_convention=None):
+              stream=None, baseline=None, naming_convention=None, fetch_team_areas=True):
       """
 Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
@@ -322,7 +322,7 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
 *  ``plan_id``
 
-   / *Condition*: required / *Type*: str /
+   / *Condition*: optional / *Type*: str /
 
    Testplan ID of RQM project for importing result(s).
 
@@ -352,11 +352,35 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
 
    If `True`, the information of testcase on RQM will be updated bases on robot testfile.
 
-*  ``suite_id (optional)``
+*  ``suite_id``
 
    / *Condition*: optional / *Type*: str / *Default*: None /
 
    Testsuite ID of RQM project for importing result(s).
+
+*  ``stream``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   Project stream which is enabled in Configuration Management (CM).
+
+*  ``baseline``
+
+   / *Condition*: optional / *Type*: str / *Default*: None /
+
+   Project baseline which is enabled in Configuration Management (CM).
+
+*  ``naming_convention``
+
+   / *Condition*: optional / *Type*: dict / *Default*: None /
+
+   Naming convention for the creating new resources (testcase, TCER, ...).
+
+*  ``fetch_team_areas``
+
+   / *Condition*: optional / *Type*: bool / *Default*: True /
+
+   If `True`, fetch team-areas information for further process.
 
 **Returns:**
 
@@ -411,12 +435,13 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
                raise Exception("Get all baselines failed. Reason: %s"%res['message'])
 
          # Verify testplan ID
-         res_plan = self.getResourceByID('testplan', plan_id)
-         if res_plan.status_code != 200:
-            raise Exception('Testplan with ID %s is not existing!'%str(plan_id))
+         if plan_id != None:
+            res_plan = self.getResourceByID('testplan', plan_id)
+            if res_plan.status_code != 200:
+               raise Exception('Testplan with ID %s is not existing!'%str(plan_id))
 
-         oTestplan = get_xml_tree(BytesIO(str(res_plan.text).encode()), bdtd_validation=False)
-         self.testplan.name  = oTestplan.find('ns4:title', oTestplan.getroot().nsmap).text
+            oTestplan = get_xml_tree(BytesIO(str(res_plan.text).encode()), bdtd_validation=False)
+            self.testplan.name  = oTestplan.find('ns4:title', oTestplan.getroot().nsmap).text
 
          # Verify and create build version if required
          if build_name != None:
@@ -453,7 +478,8 @@ Configure RQMClient with testplan ID, build, configuration, createmissing, ...
             self.testsuite.name  = oTestsuite.find('ns4:title', oTestsuite.getroot().nsmap).text
 
          # get all team-areas for testcase template
-         self.getAllTeamAreas()
+         if fetch_team_areas:
+            self.getAllTeamAreas()
 
 
       except Exception as error:
@@ -680,6 +706,54 @@ Return the name for given resource bases on the naming convention
       except:
          raise Exception(f"Failed to generate name for {resource} '{name}'")
 
+   def __parse_test_artifact(self, xml_data):
+      """
+Parse XML test case response and extract its data.
+
+**Arguments:**
+
+*  ``xml_data``
+
+   / *Condition*: required / *Type*: str /
+
+   The response text from request to get test case as xml string.
+
+**Returns:**
+
+* / *Type*: dict /
+
+  The dictionary which contains the parsed data from given xml.
+
+  .. code:: python
+
+      {
+         'id': ...,
+         'name': ...,
+         'url': ...,
+         ...
+      }
+
+      """
+      test_tree = get_xml_tree(BytesIO(str(xml_data).encode()), bdtd_validation=False)
+      nsmap = test_tree.getroot().nsmap
+
+      test_name = test_tree.find('ns4:title', test_tree.getroot().nsmap)
+      test_web_id = test_tree.find('ns2:webId', test_tree.getroot().nsmap)
+      test_url = test_tree.find('ns4:identifier', test_tree.getroot().nsmap)
+      test_category = test_tree.findall('ns2:category', test_tree.getroot().nsmap)
+      test_custom_attr = test_tree.findall('.//ns2:customAttribute', test_tree.getroot().nsmap)
+      test_data = {'id': test_web_id.text,
+                                    'name': test_name.text if test_name is not None else '',
+                                    'url': test_url.text}
+      for item in test_category:
+         test_data[item.attrib.get('term')] = item.attrib.get('value')
+      for attr in test_custom_attr:
+         try:
+            test_data[attr.find("ns2:name", nsmap).text] = attr.find("ns2:value", nsmap).text
+         except:
+            pass
+
+      return test_data
    #
    #  Methods to get resources
    #
@@ -849,17 +923,23 @@ Example:
       else:
          raise Exception(f"Could not get 'team-areas' of project '{self.projectname}'.")
 
-   def getTestsFromTestplan(self, testplan_id, artifact_types):
+   def getTestArtifactsFromResource(self, resource_type, resource_id, artifact_types):
       """
 Get all test cases and test suites associated with a given test plan.
 
 **Arguments:**
 
-*  ``testplan_id``
+*  ``resource_type``
 
    / *Condition*: required / *Type*: str /
 
-   The RQM test plan to get test artifact(s).
+   The RQM test resource (`testplan` or `testsuite`) to get test artifact(s).
+
+*  ``resource_id``
+
+   / *Condition*: required / *Type*: str /
+
+   The RQM test plan/suite to get test artifact(s).
 
 *  ``artifact_types``
 
@@ -880,8 +960,15 @@ Get all test cases and test suites associated with a given test plan.
         'testsuite': [{'id': ..., 'name': ..., 'url': ...}, ...]
      }
       """
+      ALLOW_RESOURCE_TYPES = ['testplan', 'testsuite']
       ALLOW_ARTIFACT_TYPES = ['testcase', 'testsuite']
       result = {}
+
+      if resource_type not in ALLOW_RESOURCE_TYPES:
+         raise ValueError(
+            f"Unsupported resource type '{resource_type}'. "
+            f"Please use one of the following: {', '.join(ALLOW_RESOURCE_TYPES)}."
+         )
 
       if isinstance(artifact_types, str):
          artifact_types = [artifact_types]
@@ -899,9 +986,9 @@ Get all test cases and test suites associated with a given test plan.
             )
          result[artifact_type] = []
 
-      res = self.getResourceByID('testplan', testplan_id)
+      res = self.getResourceByID(resource_type, resource_id)
       if res.status_code != 200:
-         raise Exception(f"Failed to get testplan {testplan_id}: {res.reason}")
+         raise Exception(f"Failed to get {resource_type} {resource_id}: {res.reason}")
 
       oTree = get_xml_tree(BytesIO(str(res.text).encode()), bdtd_validation=False)
       root = oTree.getroot()
@@ -914,16 +1001,11 @@ Get all test cases and test suites associated with a given test plan.
             href = oTest.attrib.get('href')
             if href:
                test_id = href.split('/')[-1]
-               # Get testcase name
+               # Get testcase/testsuite by ID
                test_res = self.getResourceByID(artifact_type, test_id)
                if test_res.status_code == 200:
-                  test_tree = get_xml_tree(BytesIO(str(test_res.text).encode()), bdtd_validation=False)
-                  test_name = test_tree.find('ns4:title', test_tree.getroot().nsmap)
-                  test_web_id = test_tree.find('ns2:webId', test_tree.getroot().nsmap)
-                  test_url = test_tree.find('ns4:identifier', test_tree.getroot().nsmap)
-                  result[artifact_type].append({'id': test_web_id.text,
-                                                'name': test_name.text if test_name is not None else '',
-                                                'url': test_url.text})
+                  test_data = self.__parse_test_artifact(test_res.text)
+                  result[artifact_type].append(test_data)
 
       return result
 
