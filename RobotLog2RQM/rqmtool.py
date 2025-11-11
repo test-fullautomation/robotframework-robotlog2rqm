@@ -83,7 +83,7 @@ Process provided argument(s) from command line.
       required=True,
       help="RQM password."
    )
-   # exclusive group to provive only --testsuite or --testplan
+   # exclusive group to provdve only --testsuite or --testplan
    group = parser.add_mutually_exclusive_group(required=True)
    group.add_argument(
       "--testplan",
@@ -377,10 +377,10 @@ Main entry point for RQMTool CLI.
          output_dir=args.output_dir,
          basename=basename_with_id,
          extension=args.format,
-         artifact_types=args.types
+         artifact_types=artifact_types
       )
 
-      for artifact_type in args.types:
+      for artifact_type in artifact_types:
          items = test_data.get(artifact_type, [])
          Logger.log(f"Found {len(items)} {artifact_type}(s)")
          cnt = 1
