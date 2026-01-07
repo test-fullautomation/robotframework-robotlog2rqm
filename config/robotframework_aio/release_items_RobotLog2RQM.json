@@ -225,6 +225,27 @@ Fixed issue of missing build information when creating the testsuite result
   |                                ``--password test_pw \\``
   |                                ``--testsuite 123``
 "
+                   ],
+                   "0.14.4.;0.15.0.": [
+"
+**Update RQMTool to support encoded password and password file**
+
+* Using encoded (base64) password
+
+  | ``python -m RobotLog2RQM.rqmtool --host https://sample-rqm-host.com \\``
+  |                                ``--project ROBFW-AIO \\``
+  |                                ``--user test_user \\``
+  |                                ``--password-enc encoded_pw \\``
+  |                                ``--testsuite 123``
+
+* Using password file
+
+  | ``python -m RobotLog2RQM.rqmtool --host https://sample-rqm-host.com \\``
+  |                                ``--project ROBFW-AIO \\``
+  |                                ``--user test_user \\``
+  |                                ``--password-file path/to/password/file.txt \\``
+  |                                ``--testsuite 123``
+"
                    ]
                  }
 }
