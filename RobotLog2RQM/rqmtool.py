@@ -30,6 +30,7 @@ import argparse
 import os
 import csv
 import json
+import base64
 
 from RobotLog2RQM.CRQM import CRQMClient
 from RobotLog2RQM.logger import Logger
@@ -78,12 +79,22 @@ Process provided argument(s) from command line.
       required=True,
       help="RQM username."
    )
-   parser.add_argument(
+   # exclusive group to provide only --password, --password-enc or --password-file
+   group_password = parser.add_mutually_exclusive_group(required=True)
+   group_password.add_argument(
       "--password",
-      required=True,
       help="RQM password."
    )
-   # exclusive group to provdve only --testsuite or --testplan
+   group_password.add_argument(
+      "--password-enc",
+      help="RQM password as base64-encoded string."
+   )
+   group_password.add_argument(
+      "--password-file",
+      help="Path to a file containing the password. If the content starts with 'b64:', "
+           "the remainder is treated as base64-encoded."
+   )
+   # exclusive group to provide only --testsuite or --testplan
    group = parser.add_mutually_exclusive_group(required=True)
    group.add_argument(
       "--testplan",
@@ -125,6 +136,36 @@ Process provided argument(s) from command line.
       default="testplan_export",
       help="Base name for output files.")
    return parser.parse_args()
+
+def __resolve_password(args):
+   """
+Resolve password from --password-enc, --password-file, or --password.
+Order of precedence: password-enc > password-file > password.
+   """
+   if args.password_enc:
+      try:
+         return base64.b64decode(args.password_enc).decode("utf-8")
+      except Exception as e:
+         raise ValueError(f"Failed to decode --password-enc: {e}")
+
+   if args.password_file:
+      if not os.path.isfile(args.password_file):
+         raise FileNotFoundError(f"Password file not found: {args.password_file}")
+      with open(args.password_file, "r", encoding="utf-8") as f:
+         content = f.read().strip()
+      # If file content starts with 'b64:', decode the remainder
+      if content.startswith("b64:"):
+         enc = content[4:]
+         try:
+            return base64.b64decode(enc).decode("utf-8")
+         except Exception as e:
+            raise ValueError(f"Failed to decode base64 in password file: {e}")
+      return content
+
+   if args.password:
+      return args.password
+
+   raise ValueError("No password provided. Use --password-enc, --password-file, or --password.")
 
 def __validate_arguments(arguments):
    """
@@ -345,7 +386,14 @@ Main entry point for RQMTool CLI.
    __validate_arguments(args)
    Logger.config(dryrun=args.dryrun)
 
-   RQMClient = CRQMClient(args.user, args.password, args.project, args.host)
+   # Resolve password securely (supports base64 and file-based)
+   try:
+      resolved_password = __resolve_password(args)
+   except Exception as reason:
+      Logger.log_error(f"Could not resolve password: '{str(reason)}'.")
+      return
+
+   RQMClient = CRQMClient(args.user, resolved_password, args.project, args.host)
    try:
       bSuccess = RQMClient.login()
       RQMClient.config(stream=args.stream, baseline=args.baseline)
