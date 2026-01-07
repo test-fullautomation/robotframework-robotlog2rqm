@@ -226,7 +226,7 @@ Fixed issue of missing build information when creating the testsuite result
   |                                ``--testsuite 123``
 "
                    ],
-                   "0.15.0.": [
+                   "0.14.4.;0.15.0.": [
 "
 **Update RQMTool to support encoded password and password file**
 
