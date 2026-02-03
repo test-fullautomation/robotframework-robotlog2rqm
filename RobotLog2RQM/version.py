@@ -18,5 +18,5 @@
 #
 # Version and date of RobotLog2RQM
 #
-VERSION      = "1.7.0"
-VERSION_DATE = "07.01.2026"
+VERSION      = "1.7.1"
+VERSION_DATE = "03.02.2026"
