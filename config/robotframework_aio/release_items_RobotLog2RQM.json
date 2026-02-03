@@ -245,6 +245,10 @@ Fixed issue of missing build information when creating the testsuite result
   |                                ``--user test_user \\``
   |                                ``--password-file path/to/password/file.txt \\``
   |                                ``--testsuite 123``
+
+**Update RobotLog2RQM import tool to:**
+
+* avoid duplicate creation of test case in the given test plan/suite.
 "
                    ]
                  }

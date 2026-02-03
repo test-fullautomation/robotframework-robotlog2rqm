@@ -2125,11 +2125,21 @@ Link list of test cases to provided testplan ID.
          # use namespace mapping from root for access response XML
          root = oTree.getroot()
 
+         # Collect existing linked TC IDs to avoid duplication
+         lExistingTCIDs = []
+         NS_QM = f"{{{self.NAMESPACES['ns2']}}}"
+         for oTC in root.findall(f'{NS_QM}testcase', root.nsmap):
+            href = oTC.get('href')
+            if href:
+               sTCID = href.split('/')[-1]
+               lExistingTCIDs.append(sTCID)
+
          for sTCID in lTestcases:
-            sTestcaseURL = self.integrationURL('testcase', sTCID)
-            oTC = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/}testcase', nsmap=root.nsmap)
-            oTC.set('href', sTestcaseURL)
-            root.append(oTC)
+            if sTCID not in lExistingTCIDs:
+               sTestcaseURL = self.integrationURL('testcase', sTCID)
+               oTC = etree.Element(f'{NS_QM}testcase', nsmap=root.nsmap)
+               oTC.set('href', sTestcaseURL)
+               root.append(oTC)
 
          # Update test plan data with linked testcases and PUT to RQM
          resUpdateTestplan = self.updateResourceByID('testplan', testplanID, etree.tostring(oTree))
@@ -2190,13 +2200,26 @@ Link list of test cases to provided testsuite ID
          root = oTree.getroot()
 
          oSuiteElems  = oTree.find('ns2:suiteelements', root.nsmap)
+         # Collect existing linked TC IDs to avoid duplication
+         lExistingTCIDs = []
+         NS_QM = f"{{{self.NAMESPACES['ns2']}}}"
+         for oElem in oSuiteElems.findall(f'{NS_QM}suiteelement', root.nsmap):
+            oTC = oElem.find(f'{NS_QM}testcase', root.nsmap)
+            if oTC is not None:
+               href = oTC.get('href')
+               if href:
+                  sTCID = href.split('/')[-1]
+                  lExistingTCIDs.append(sTCID)
+
          for sTCID in lTestcases:
-            sTestcaseURL = self.integrationURL('testcase', sTCID)
-            oTC = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/}testcase', nsmap=root.nsmap)
-            oTC.set('href', sTestcaseURL)
-            oElem = etree.Element('{http://jazz.net/xmlns/alm/qm/v0.1/}suiteelement', nsmap=root.nsmap)
-            oElem.append(oTC)
-            oSuiteElems.append(oElem)
+            if sTCID not in lExistingTCIDs:
+               sTestcaseURL = self.integrationURL('testcase', sTCID)
+               oTC = etree.Element(f'{NS_QM}testcase', nsmap=root.nsmap)
+               oTC.set('href', sTestcaseURL)
+               oElem = etree.Element(f'{NS_QM}suiteelement', nsmap=root.nsmap)
+               oElem.append(oTC)
+               oSuiteElems.append(oElem)
+
          root.append(oSuiteElems)
 
          # Update test suite data with linked testcases and PUT to RQM
