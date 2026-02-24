@@ -1,6 +1,6 @@
 # **************************************************************************************************************
 #
-# Copyright 2020-2024 Robert Bosch GmbH
+# Copyright 2020-2026 Robert Bosch GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -249,6 +249,13 @@ Fixed issue of missing build information when creating the testsuite result
 **Update RobotLog2RQM import tool to:**
 
 * avoid duplicate creation of test case in the given test plan/suite.
+"
+                   ],
+                   "1.0.0.;1.1.0." : [
+"
+* Usage of **Setuptools** replaced by usage of **PIP/TOML/Setuptools**.
+
+  Details about how to install the component with PIP, can be found in the `README <https://github.com/test-fullautomation/robotframework-robotlog2rqm/blob/develop/README.rst>`__
 "
                    ]
                  }
