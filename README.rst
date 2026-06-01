@@ -1,4 +1,4 @@
-.. Copyright 2020-2024 Robert Bosch GmbH
+.. Copyright 2020-2026 Robert Bosch GmbH
 
 .. Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ How to install
 
    .. code::
 
-      pip install RobotLog2RQM
+      pip install robotframework-robotlog2rqm
 
    `RobotLog2RQM in PyPi <https://pypi.org/project/robotframework-robotlog2rqm/>`_
 
@@ -53,39 +53,57 @@ How to install
 
      `RobotLog2RQM in GitHub <https://github.com/test-fullautomation/robotframework-robotlog2rqm>`_
 
-   * Install dependencies
-
-     **RobotLog2RQM** requires some additional Python libraries. Before you install the cloned repository sources
-     you have to install the dependencies manually. The names of all related packages you can find in the file ``requirements.txt``
-     in the repository root folder. Use pip to install them:
+   * Use the following command to install **RobotLog2RQM** (executed in repository main folder):
 
      .. code::
 
-        pip install -r ./requirements.txt
+        python -m pip install .
 
-     Additionally install **LaTeX** (recommended: TeX Live). This is used to render the documentation.
-
-   * Configure dependencies
-
-     The installation of **RobotLog2RQM** includes to generate the documentation in PDF format. This is done by
-     an application called **GenPackageDoc**, that is part of the installation dependencies (see ``requirements.txt``).
-
-     **GenPackageDoc** uses **LaTeX** to generate the documentation in PDF format. Therefore **GenPackageDoc** needs to know where to find
-     **LaTeX**. This is defined in the **GenPackageDoc** configuration file
+     Or:
 
      .. code::
 
-        packagedoc\packagedoc_config.json
+        python -m pip install --proxy <proxy> .
 
-     Before you start the installation you have to introduce the following environment variable, that is used in ``packagedoc_config.json``:
+     This command will also download and install all dependencies that are required to work with the source files in the current repository.
+     After the initial installation of **RobotLog2RQM** is done, you have the following two possibilities:
 
-     - ``GENDOC_LATEXPATH`` : path to ``pdflatex`` executable
+     1. *Clean the previous installation*:
 
-   * Use the following command to install **RobotLog2RQM**:
+        .. code::
+
+           python "./cleanup_installation.py"
+
+        ``cleanup_installation.py`` explicitly deletes all files and folders within the component installation folder under
+        ``site-packages`` and also deletes local build artefacts.
+
+     2. *Render the component documentation*:
+
+        .. code::
+
+           python "./genpackagedoc.py"
+
+        This would e.g. be required in case of changes in the interface of **RobotLog2RQM**.
+
+        The documentation is rendered by a separate application called **GenPackageDoc**, that is part
+        of the build dependencies and runtime dependencies of **RobotLog2RQM**.
+
+        **GenPackageDoc** needs to be configured. Details about how to do this, can be found in the
+        `README.rst <https://github.com/test-fullautomation/python-genpackagedoc/blob/develop/README.rst>`_
+        (sections *Install dependencies* and *Configure dependencies*).
+
+   * Use the following command to build **RobotLog2RQM** (executed in repository main folder):
 
      .. code::
 
-        python setup.py install
+        python -m build .
+
+     Or:
+
+     .. code::
+
+        python -m pip config set global.proxy <proxy>
+        python -m build .
 
 After succesful installation, the executable file **RobotLog2RQM**
 will be available (under *Scripts* folder of Python on Windows
@@ -293,7 +311,7 @@ Contributors
 License
 -------
 
-Copyright 2020-2024 Robert Bosch GmbH
+Copyright 2020-2026 Robert Bosch GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
