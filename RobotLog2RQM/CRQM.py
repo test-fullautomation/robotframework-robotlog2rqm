@@ -2077,6 +2077,116 @@ Update data of provided resource and ID by PUT method.
       res = self.session.put(self.integrationURL(resourceType, id), allow_redirects=True, verify=False, data=content)
       return res
 
+   def linkListTestcase2Resource(self, resource_type, resource_id, lTestcases=None):
+      """
+Link list of test cases to a given resource (testplan or testsuite).
+
+**Arguments:**
+
+*  ``resource_type``
+
+   / *Condition*: required / *Type*: str /
+
+   Type of resource: 'testplan' or 'testsuite'
+
+*  ``resource_id``
+
+   / *Condition*: required / *Type*: str /
+
+   ID of the target resource
+
+* ``lTestcases``
+
+   / *Condition*: optional / *Type*: list / *Default*: None /
+
+   List of testcase IDs. If None, use self.lTestcaseIDs
+
+**Returns:**
+
+*  ``returnObj``
+
+   / *Type*: dict /
+
+   Response dictionary which contains status and error message.
+
+   Example:
+
+   .. code:: python
+
+      {
+         'success' : False,
+         'message': ''
+      }
+      """
+      returnObj = {'success': False, 'message': ''}
+
+      if lTestcases is None:
+         lTestcases = self.lTestcaseIDs
+
+      if not lTestcases:
+         returnObj['message'] = "No testcase for linking."
+         return returnObj
+
+      # Load resource
+      resData = self.getResourceByID(resource_type, resource_id)
+      oTree = get_xml_tree(BytesIO(str(resData.text).encode()), bdtd_validation=False)
+      root = oTree.getroot()
+
+      NS_QM = f"{{{self.NAMESPACES['ns2']}}}"
+
+      # Collect existing testcases
+      lExistingTCIDs = []
+
+      if resource_type == 'testplan':
+         for oTC in root.findall(f'{NS_QM}testcase', root.nsmap):
+            href = oTC.get('href')
+            if href:
+               lExistingTCIDs.append(
+                  self.webIDfromGeneratedID('testcase', href.split('/')[-1].split(':')[-1])
+               )
+      elif resource_type == 'testsuite':
+         oSuiteElems = oTree.find('ns2:suiteelements', root.nsmap)
+         for oElem in oSuiteElems.findall(f'{NS_QM}suiteelement', root.nsmap):
+            oTC = oElem.find(f'{NS_QM}testcase', root.nsmap)
+            if oTC is not None:
+               href = oTC.get('href')
+               if href:
+                  lExistingTCIDs.append(
+                     self.webIDfromGeneratedID('testcase', href.split('/')[-1].split(':')[-1])
+                  )
+      else:
+         returnObj['message'] = f"Unsupported resource_type: {resource_type}"
+         return returnObj
+
+
+      # Link new testcases
+      for sTCID in lTestcases:
+         if sTCID not in lExistingTCIDs:
+            sTestcaseURL = self.integrationURL('testcase', sTCID)
+            oTC = etree.Element(f'{NS_QM}testcase', nsmap=root.nsmap)
+            oTC.set('href', sTestcaseURL)
+
+            if resource_type == 'testplan':
+               root.append(oTC)
+
+            elif resource_type == 'testsuite':
+               oElem = etree.Element(f'{NS_QM}suiteelement', nsmap=root.nsmap)
+               oElem.append(oTC)
+               oSuiteElems.append(oElem)
+
+      if resource_type == 'testsuite':
+         root.append(oSuiteElems)
+
+      # Update back
+      resUpdate = self.updateResourceByID(resource_type, resource_id, etree.tostring(oTree))
+
+      if resUpdate.status_code == 200:
+         returnObj['success'] = True
+      else:
+         returnObj['message'] = str(resUpdate.reason)
+
+      return returnObj
+
    def linkListTestcase2Testplan(self, testplanID, lTestcases=None):
       """
 Link list of test cases to provided testplan ID.
@@ -2115,41 +2225,7 @@ Link list of test cases to provided testplan ID.
       }
 
       """
-      returnObj = {'success' : False, 'message': ''}
-      if lTestcases == None:
-         lTestcases = self.lTestcaseIDs
-      if len(lTestcases):
-         resTestplanData = self.getResourceByID('testplan', testplanID)
-         oTree = get_xml_tree(BytesIO(str(resTestplanData.text).encode()),bdtd_validation=False)
-         # RQM XML response using namespace for nodes
-         # use namespace mapping from root for access response XML
-         root = oTree.getroot()
-
-         # Collect existing linked TC IDs to avoid duplication
-         lExistingTCIDs = []
-         NS_QM = f"{{{self.NAMESPACES['ns2']}}}"
-         for oTC in root.findall(f'{NS_QM}testcase', root.nsmap):
-            href = oTC.get('href')
-            if href:
-               sTCID = href.split('/')[-1]
-               lExistingTCIDs.append(sTCID)
-
-         for sTCID in lTestcases:
-            if sTCID not in lExistingTCIDs:
-               sTestcaseURL = self.integrationURL('testcase', sTCID)
-               oTC = etree.Element(f'{NS_QM}testcase', nsmap=root.nsmap)
-               oTC.set('href', sTestcaseURL)
-               root.append(oTC)
-
-         # Update test plan data with linked testcases and PUT to RQM
-         resUpdateTestplan = self.updateResourceByID('testplan', testplanID, etree.tostring(oTree))
-         if resUpdateTestplan.status_code == 200:
-            returnObj['success'] = True
-         else:
-            returnObj['message'] = str(resUpdateTestplan.reason)
-      else:
-         returnObj['message'] = "No testcase for linking."
-      return returnObj
+      return self.linkListTestcase2Resource('testplan', testplanID, lTestcases)
 
    def linkListTestcase2Testsuite(self, testsuiteID, lTestcases=None):
       """
@@ -2189,48 +2265,7 @@ Link list of test cases to provided testsuite ID
       }
 
       """
-      returnObj = {'success' : False, 'message': ''}
-      if lTestcases == None:
-         lTestcases = self.lTestcaseIDs
-      if len(lTestcases):
-         resTestsuiteData = self.getResourceByID('testsuite', testsuiteID)
-         oTree=get_xml_tree(BytesIO(str(resTestsuiteData.text).encode()),bdtd_validation=False)
-         # RQM XML response using namespace for nodes
-         # use namespace mapping from root for access response XML
-         root = oTree.getroot()
-
-         oSuiteElems  = oTree.find('ns2:suiteelements', root.nsmap)
-         # Collect existing linked TC IDs to avoid duplication
-         lExistingTCIDs = []
-         NS_QM = f"{{{self.NAMESPACES['ns2']}}}"
-         for oElem in oSuiteElems.findall(f'{NS_QM}suiteelement', root.nsmap):
-            oTC = oElem.find(f'{NS_QM}testcase', root.nsmap)
-            if oTC is not None:
-               href = oTC.get('href')
-               if href:
-                  sTCID = href.split('/')[-1]
-                  lExistingTCIDs.append(sTCID)
-
-         for sTCID in lTestcases:
-            if sTCID not in lExistingTCIDs:
-               sTestcaseURL = self.integrationURL('testcase', sTCID)
-               oTC = etree.Element(f'{NS_QM}testcase', nsmap=root.nsmap)
-               oTC.set('href', sTestcaseURL)
-               oElem = etree.Element(f'{NS_QM}suiteelement', nsmap=root.nsmap)
-               oElem.append(oTC)
-               oSuiteElems.append(oElem)
-
-         root.append(oSuiteElems)
-
-         # Update test suite data with linked testcases and PUT to RQM
-         resUpdateTestsuite = self.updateResourceByID('testsuite', testsuiteID, etree.tostring(oTree))
-         if resUpdateTestsuite.status_code == 200:
-            returnObj['success'] = True
-         else:
-            returnObj['message'] = str(resUpdateTestsuite.reason)
-      else:
-         returnObj['message'] = "No testcase for linking."
-      return returnObj
+      return self.linkListTestcase2Resource('testsuite', testsuiteID, lTestcases)
 
    def addTestsuite2Testplan(self, testplanID, testsuiteID=None):
       """
